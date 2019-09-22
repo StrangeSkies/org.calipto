@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Topiello - Self-modifying AST for Early-like parsers and deparsers
+
+    Copyright © 2018 Strange Skies (elias@vasylenko.uk)
+        __   _______  ____           _       __     _      __       __
+      ,`_ `,|__   __||  _ `.        / \     |  \   | |  ,-`__`¬  ,-`__`¬
+     ( (_`-'   | |   | | ) |       / . \    | . \  | | / .`  `' / .`  `'
+      `._ `.   | |   | |-. L      / / \ \   | |\ \ | || |    _ | '-~.
+     _   `. \  | |   | |  `.`.   / /   \ \  | | \ \| || |   | || +~-'
+    \ \__.' /  | |   | |    \ \ / /     \ \ | |  \ ` | \ `._' | \ `.__,.
+     `.__.-`   |_|   |_|    |_|/_/       \_\|_|   \__|  `-.__.J  `-.__.J
+                     __    _         _      __      __
+                   ,`_ `, | |  _    | |  ,-`__`¬  ,`_ `,
+                  ( (_`-' | | ) |   | | / .`  `' ( (_`-'
+                   `._ `. | L-' L   | || '-~.     `._ `.
+                  _   `. \| ,.-^.`. | || +~-'    _   `. \
+                 \ \__.' /| |    \ \| | \ `.__,.\ \__.' /
+                  `.__.-` |_|    |_||_|  `-.__.J `.__.-`
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.strum</groupId>
+	<artifactId>strum</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Strum</name>
+	<description>Implementation of the Strum programming lannguage</description>
+
+	<licenses>
+		<license>
+			<name>LGPL</name>
+			<url>http://www.gnu.org/licenses/</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<inceptionYear>2018</inceptionYear>
+
+	<organization>
+		<name>Strange Skies</name>
+		<url>https://strangeskies.co.uk</url>
+	</organization>
+
+	<developers>
+		<developer>
+			<id>eliasvasylenko</id>
+			<name>Elias N Vasylenko</name>
+			<email>elias@vasylenko.uk</email>
+		</developer>
+	</developers>
+
+	<url>https://github.com/StrangeSkies/org.strum</url>
+	<scm>
+		<url>https://github.com/StrangeSkies/org.strum</url>
+	</scm>
+
+	<properties>
+		<maven.compiler.source>12</maven.compiler.source>
+		<maven.compiler.target>12</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<bnd.version>4.2.0</bnd.version>
+	</properties>
+
+	<modules>
+		<module>nodes</module>
+	</modules>
+
+	<repositories>
+		<repository>
+			<id>Apache Snapshots</id>
+			<url>https://repository.apache.org/content/groups/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>Sonatype OSS</id>
+			<url>https://oss.sonatype.org/content/groups/public</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>Bnd Snapshots</id>
+			<name>Bnd Latest build</name>
+			<url>https://bndtools.ci.cloudbees.com/job/bnd.master/lastSuccessfulBuild/artifact/dist/bundles/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- Workspace -->
+
+			<dependency>
+				<groupId>org.topiello</groupId>
+				<artifactId>nodes</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.topiello</groupId>
+				<artifactId>types</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			
+			<!-- Graal/Truffle -->
+
+			<dependency>
+				<groupId>org.graalvm.truffle</groupId>
+				<artifactId>truffle-api</artifactId>
+				<version>19.2.0.1</version>
+			</dependency>
+			
+			<!-- OSGi -->
+
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.cmpn</artifactId>
+				<version>7.0.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.core</artifactId>
+				<version>7.0.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.annotation</artifactId>
+				<version>7.0.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.log</artifactId>
+				<version>1.4.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.event</artifactId>
+				<version>1.4.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.useradmin</artifactId>
+				<version>1.1.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.wireadmin</artifactId>
+				<version>1.0.1</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.metatype</artifactId>
+				<version>1.4.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.function</artifactId>
+				<version>1.1.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.promise</artifactId>
+				<version>1.1.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.pushstream</artifactId>
+				<version>1.0.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.converter</artifactId>
+				<version>1.0.0</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- Testing -->
+
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>5.4.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>5.4.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-params</artifactId>
+				<version>5.4.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-commons</artifactId>
+				<version>1.4.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-launcher</artifactId>
+				<version>1.4.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-engine</artifactId>
+				<version>1.4.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>2.23.4</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>2.23.4</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>2.23.4</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>java-hamcrest</artifactId>
+				<version>2.0.0.0</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-commons</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-engine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>java-hamcrest</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!-- Use the bnd-maven-plugin and assemble the symbolic names -->
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<configuration>
+						<bnd><![CDATA[
+							Bundle-SymbolicName: ${project.groupId}.${replace;${project.artifactId};-;.}
+							-sources: true
+							-contract: *
+						]]></bnd>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>bnd-process</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<!-- Required to make the maven-jar-plugin pick up the bnd generated 
+					manifest. Also avoid packaging empty Jars -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.0.2</version>
+					<configuration>
+						<archive>
+							<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+						</archive>
+						<skipIfEmpty>true</skipIfEmpty>
+					</configuration>
+				</plugin>
+
+				<!-- Setup the indexer for running and testing -->
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-indexer-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<configuration>
+						<localURLs>REQUIRED</localURLs>
+						<attach>false</attach>
+					</configuration>
+					<executions>
+						<execution>
+							<id>index</id>
+							<goals>
+								<goal>index</goal>
+							</goals>
+							<configuration>
+								<indexName>${project.artifactId}</indexName>
+							</configuration>
+						</execution>
+						<execution>
+							<id>test-index</id>
+							<goals>
+								<goal>index</goal>
+							</goals>
+							<configuration>
+								<indexName>${project.artifactId}</indexName>
+								<outputFile>${project.build.directory}/test-index.xml</outputFile>
+								<scopes>
+									<scope>test</scope>
+								</scopes>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- Define the version of the resolver plugin we use -->
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-resolver-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<configuration>
+						<failOnChanges>false</failOnChanges>
+						<bndruns>
+						</bndruns>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>resolve</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- Define the version of the export plugin we use -->
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-export-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<configuration>
+						<resolve>true</resolve>
+						<failOnChanges>true</failOnChanges>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>export</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- Define the version of the testing plugin that we use -->
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-testing-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>testing</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- Define the version of the baseline plugin we use and avoid failing 
+					when no baseline jar exists. (for example before the first release) -->
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-baseline-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<configuration>
+						<failOnMissing>false</failOnMissing>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>baseline</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>3.0</version>
+					<configuration>
+						<header>COPYRIGHT</header>
+						<properties>
+							<owner>Strange Skies</owner>
+							<email>elias@vasylenko.uk</email>
+						</properties>
+						<excludes>
+							<exclude>**/README</exclude>
+							<exclude>src/test/resources/**</exclude>
+							<exclude>src/main/resources/**</exclude>
+						</excludes>
+						<mapping>
+							<java>SLASHSTAR_STYLE</java>
+						</mapping>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>
