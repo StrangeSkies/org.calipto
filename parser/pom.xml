@@ -44,23 +44,15 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>types</artifactId>
+	<artifactId>parser</artifactId>
 
-	<name>Strum Types</name>
-	<description>The Strum types</description>
+	<name>Strum Parser</name>
+	<description>The Strum parser</description>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.graalvm.truffle</groupId>
 			<artifactId>truffle-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.graalvm.truffle</groupId>
-			<artifactId>truffle-dsl-processor</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.graalvm.truffle</groupId>
-			<artifactId>truffle-tck</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>

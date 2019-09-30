@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Topiello - Self-modifying AST for Early-like parsers and deparsers
+    Strum - Implementation of the Strum programming lannguage
 
     Copyright © 2018 Strange Skies (elias@vasylenko.uk)
         __   _______  ____           _       __     _      __       __
@@ -38,13 +38,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.strum</groupId>
-	<artifactId>strum</artifactId>
+	<groupId>org.astrum</groupId>
+	<artifactId>astrum</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Strum</name>
-	<description>Implementation of the Strum programming lannguage</description>
+	<name>Astrum</name>
+	<description>Implementation of the Astrum programming lannguage</description>
 
 	<licenses>
 		<license>
@@ -79,10 +79,14 @@
 		<maven.compiler.target>12</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<bnd.version>4.2.0</bnd.version>
+		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
+		<graalvm.version>19.2.0.1</graalvm.version>
 	</properties>
 
 	<modules>
 		<module>nodes</module>
+		<module>parser</module>
+		<module>types</module>
 	</modules>
 
 	<repositories>
@@ -128,12 +132,17 @@
 			<!-- Workspace -->
 
 			<dependency>
-				<groupId>org.topiello</groupId>
+				<groupId>org.strum</groupId>
 				<artifactId>nodes</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
-				<groupId>org.topiello</groupId>
+				<groupId>org.strum</groupId>
+				<artifactId>parser</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>org.strum</groupId>
 				<artifactId>types</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
 			</dependency>
@@ -142,10 +151,32 @@
 
 			<dependency>
 				<groupId>org.graalvm.truffle</groupId>
-				<artifactId>truffle-api</artifactId>
-				<version>19.2.0.1</version>
+				<artifactId>truffle-dsl-processor</artifactId>
+				<version>${graalvm.version}</version>
 			</dependency>
-			
+			<dependency>
+				<groupId>org.graalvm.truffle</groupId>
+				<artifactId>truffle-tck</artifactId>
+				<version>${graalvm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.graalvm.truffle</groupId>
+				<artifactId>truffle-api</artifactId>
+				<version>${graalvm.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.graalvm.truffle</groupId>
+				<artifactId>truffle-dsl-processor</artifactId>
+				<version>${graalvm.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.graalvm.truffle</groupId>
+				<artifactId>truffle-tck</artifactId>
+				<version>${graalvm.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
 			<!-- OSGi -->
 
 			<dependency>
