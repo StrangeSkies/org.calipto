@@ -51,7 +51,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.strum</groupId>
+			<groupId>org.astrum</groupId>
 			<artifactId>types</artifactId>
 		</dependency>
 		<dependency>
