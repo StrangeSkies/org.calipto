@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.strum.reader.StrumFactory;
+import org.strum.reader.StrumBuilder;
 import org.strum.reader.StrumParser;
 import org.strum.source.StrumFileDetector;
 
@@ -111,7 +111,7 @@ public class StrumLanguage extends TruffleLanguage<StrumContext> {
     return Truffle.getRuntime().createCallTarget(evalMain);
   }
 
-  private StrumFactory getFactory() {
+  private StrumBuilder getFactory() {
     // TODO Auto-generated method stub
     return null;
   }

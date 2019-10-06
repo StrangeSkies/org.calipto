@@ -1,11 +1,11 @@
 package org.strum.reader;
 
 public interface StrumFactory {
-  Object cons(Object car, Object cdr);
+  StrumBuilder cons(StrumExpression car, StrumExpression cdr);
 
-  Object symbol(String namespace, String name);
+  StrumBuilder symbol(String namespace, String name);
 
-  Object symbol(String name);
+  StrumBuilder symbol(String name);
 
-  Object nil();
+  StrumBuilder nil();
 }

@@ -9,8 +9,6 @@ import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.interop.UnsupportedTypeException;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.Node.Child;
-import com.oracle.truffle.api.nodes.Node.Children;
 
 public abstract class InvokeNode extends StrumNode {
   @Child

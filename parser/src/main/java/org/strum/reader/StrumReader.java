@@ -13,23 +13,23 @@ public class StrumReader {
   private final StrumFactory factory;
   private final Scanner scanner;
 
-  private final Object keywordSymbol;
-  private final Object quoteSymbol;
+  private final StrumExpression keywordSymbol;
+  private final StrumExpression quoteSymbol;
 
   public StrumReader(StrumFactory factory, Scanner scanner) {
     this.factory = factory;
     this.scanner = scanner;
 
-    this.keywordSymbol = factory.symbol(KEYWORD);
-    this.quoteSymbol = factory.symbol(QUOTE);
+    this.keywordSymbol = factory.symbol(KEYWORD).synthetic();
+    this.quoteSymbol = factory.symbol(QUOTE).synthetic();
   }
 
   /*
    * Read the next item following the current source position
    */
-  public Optional<Object> read() {
+  public Optional<StrumExpression> read() {
     skipWhitespace();
-    return scanNext();
+    return scan();
   }
 
   private void skipWhitespace() {
@@ -37,30 +37,38 @@ public class StrumReader {
     scanner.discardBuffer();
   }
 
-  private Optional<Object> scanNext() {
-    return scanner.peekInput().mapCodePoint(codePoint -> {
+  private StrumExpression scanNext() {
+    return scan().orElseThrow(() -> new StrumReaderException("Unexpected end of input"));
+  }
 
+  private Optional<StrumExpression> scan() {
+    return scanner.peekInput().mapCodePoint(codePoint -> {
+      long startPosition = scanner.inputPosition();
+
+      StrumBuilder builder;
       if (Character.isAlphabetic(codePoint)) {
-        return scanSymbol();
+        builder = scanSymbol();
 
       } else if (codePoint == codePointOf("(")) {
-        return scanList();
+        builder = scanList();
 
       } else if (codePoint == codePointOf(":")) {
-        return scanKeyword();
+        builder = scanKeyword();
 
       } else if (codePoint == codePointOf("'")) {
-        return scanQuote();
+        builder = scanQuote();
 
+      } else {
+        throw new UnsupportedOperationException(
+            "Custom reader macros are not yet supported. Unexpected character: "
+                + Character.toString(codePoint));
       }
 
-      throw new UnsupportedOperationException(
-          "Custom reader macros are not yet supported. Unexpected character: "
-              + Character.toString(codePoint));
+      return builder.between(startPosition, scanner.inputPosition());
     });
   }
 
-  private Object scanSymbol() {
+  private StrumBuilder scanSymbol() {
     String firstPart = scanName();
 
     if (scanner.peekInput().codePointMatches(c -> c == codePointOf("/"))) {
@@ -81,10 +89,14 @@ public class StrumReader {
     return scanner.takeBuffer();
   }
 
-  private Object scanList() {
+  private StrumBuilder scanList() {
     scanner.advanceInput();
     skipWhitespace();
 
+    return scanListStart();
+  }
+
+  private StrumBuilder scanListStart() {
     if (scanner.peekInput().codePointMatches(c -> c == codePointOf(")"))) {
       scanner.advanceInput();
       scanner.discardBuffer();
@@ -95,32 +107,28 @@ public class StrumReader {
     }
   }
 
-  private Object scanListTail() {
+  private StrumExpression scanListTail() {
     skipWhitespace();
 
-    if (scanner.peekInput().codePointMatches(c -> c == codePointOf(")"))) {
-      scanner.advanceInput();
-      scanner.discardBuffer();
-      return factory.nil();
-
-    } else if (scanner.peekInput().codePointMatches(c -> c == codePointOf("."))) {
+    if (scanner.peekInput().codePointMatches(c -> c == codePointOf("."))) {
       scanner.advanceInput();
       scanner.discardBuffer();
       return scanNext();
 
     } else {
-      return factory.cons(scanNext(), scanListTail());
+      long startPosition = scanner.inputPosition();
+      return scanListStart().between(startPosition, scanner.inputPosition());
     }
   }
 
-  private Object scanKeyword() {
+  private StrumBuilder scanKeyword() {
     scanner.advanceInput();
     scanner.discardBuffer();
 
     return factory.cons(keywordSymbol, read().get());
   }
 
-  private Object scanQuote() {
+  private StrumBuilder scanQuote() {
     scanner.advanceInput();
     scanner.discardBuffer();
 
