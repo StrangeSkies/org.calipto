@@ -32,16 +32,80 @@
  */
 package org.strum.node;
 
-import java.util.Arrays;
-
 import org.strum.StrumLanguage;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.RootNode;
+import com.oracle.truffle.api.source.SourceSection;
 
-public class StrumRootNode extends RootNode {}
+@NodeInfo(language = "Strum", description = "The root of all execution trees")
+public class StrumRootNode extends RootNode {
+  @Children
+  private StrumNode[] bodyNodes;
+
+  private final String name;
+
+  @CompilationFinal
+  private boolean cloningAllowed;
+
+  private final SourceSection sourceSection;
+
+  public StrumRootNode(
+      StrumLanguage language,
+      FrameDescriptor frameDescriptor,
+      StrumNode[] bodyNodes,
+      SourceSection sourceSection,
+      String name) {
+    super(language, frameDescriptor);
+
+    this.bodyNodes = bodyNodes;
+    this.sourceSection = sourceSection;
+    this.name = name;
+  }
+
+  @Override
+  public SourceSection getSourceSection() {
+    return sourceSection;
+  }
+
+  @Override
+  @ExplodeLoop
+  public Object execute(VirtualFrame frame) {
+    assert lookupContextReference(StrumLanguage.class).get() != null;
+
+    int last = this.bodyNodes.length - 1;
+    CompilerAsserts.compilationConstant(last);
+    for (int i = 0; i < last; i++) {
+      this.bodyNodes[i].executeGeneric(frame);
+    }
+    return this.bodyNodes[last].executeGeneric(frame);
+  }
+
+  public StrumNode[] getBodyNodes() {
+    return bodyNodes.clone();
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  public void setCloningAllowed(boolean cloningAllowed) {
+    this.cloningAllowed = cloningAllowed;
+  }
+
+  @Override
+  public boolean isCloningAllowed() {
+    return cloningAllowed;
+  }
+
+  @Override
+  public String toString() {
+    return name;
+  }
+}

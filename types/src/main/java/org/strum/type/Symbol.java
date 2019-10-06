@@ -34,8 +34,13 @@ package org.strum.type;
 
 import java.util.Objects;
 
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.ExportLibrary;
+
 // TODO value type
-public final class Symbol {
+@ExportLibrary(InteropLibrary.class)
+public final class Symbol implements TruffleObject {
   private final Namespace namespace;
   private final Name name;
 

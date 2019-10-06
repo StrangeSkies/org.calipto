@@ -9,16 +9,18 @@ import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.interop.UnsupportedTypeException;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.Node.Child;
+import com.oracle.truffle.api.nodes.Node.Children;
 
-public abstract class InvokeNode extends ExpressionNode {
+public abstract class InvokeNode extends StrumNode {
   @Child
-  private ExpressionNode functionNode;
+  private StrumNode functionNode;
   @Children
-  private final ExpressionNode[] argumentNodes;
+  private final StrumNode[] argumentNodes;
   @Child
   private InteropLibrary library;
 
-  public InvokeNode(ExpressionNode functionNode, ExpressionNode[] argumentNodes) {
+  public InvokeNode(StrumNode functionNode, StrumNode[] argumentNodes) {
     this.functionNode = functionNode;
     this.argumentNodes = argumentNodes;
     this.library = InteropLibrary.getFactory().createDispatched(3);
@@ -39,7 +41,7 @@ public abstract class InvokeNode extends ExpressionNode {
     try {
       return library.execute(function, argumentValues);
     } catch (ArityException | UnsupportedTypeException | UnsupportedMessageException e) {
-      // throw 
+      // throw
     }
   }
 

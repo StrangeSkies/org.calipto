@@ -32,14 +32,17 @@
  */
 package org.strum.type.cells;
 
-import org.strum.type.CellLibrary;
+import org.strum.type.ConsLibrary;
 import org.strum.type.Symbol;
 
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-@ExportLibrary(CellLibrary.class)
-final class ConsCell {
+@ExportLibrary(ConsLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+final class ConsCell implements TruffleObject {
   private final Object car;
   private final Object cdr;
 
@@ -61,5 +64,10 @@ final class ConsCell {
   @ExportMessage
   Object cons(Symbol symbol) {
     return new ConsCell(symbol, this);
+  }
+
+  @ExportMessage
+  boolean isCons() {
+    return true;
   }
 }

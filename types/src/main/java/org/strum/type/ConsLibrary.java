@@ -36,7 +36,11 @@ import com.oracle.truffle.api.library.GenerateLibrary;
 import com.oracle.truffle.api.library.Library;
 
 @GenerateLibrary
-public abstract class CellLibrary extends Library {
+public abstract class ConsLibrary extends Library {
+  public boolean isCons(Object receiver) {
+    return false;
+  }
+
   public abstract Object car(Object receiver);
 
   public abstract Object cdr(Object receiver);
