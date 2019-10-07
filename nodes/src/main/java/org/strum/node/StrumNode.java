@@ -60,6 +60,7 @@ public abstract class StrumNode extends Node implements InstrumentableNode {
   private int sourceCharIndex = NO_SOURCE;
   private int sourceLength;
 
+  private boolean hasExpressionTag;
   private boolean hasStatementTag;
   private boolean hasRootTag;
 
@@ -202,8 +203,6 @@ public abstract class StrumNode extends Node implements InstrumentableNode {
       return String.format("%s:%d%s", sourceName, startLine, estimated ? "~" : "");
     }
   }
-
-  private boolean hasExpressionTag;
 
   /**
    * The execute method when no specialization is possible. This is the most

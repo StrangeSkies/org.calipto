@@ -39,7 +39,7 @@ public abstract class InvokeNode extends StrumNode {
     try {
       return library.execute(function, argumentValues);
     } catch (ArityException | UnsupportedTypeException | UnsupportedMessageException e) {
-      // throw
+      throw new StrumException(e);
     }
   }
 

@@ -33,7 +33,7 @@ import com.oracle.truffle.api.source.SourceSection;
 
 @TruffleLanguage.Registration(
     id = StrumLanguage.ID,
-    name = "SL",
+    name = "Strum",
     defaultMimeType = StrumFileDetector.MIME_TYPE,
     characterMimeTypes = StrumFileDetector.MIME_TYPE,
     contextPolicy = ContextPolicy.SHARED,

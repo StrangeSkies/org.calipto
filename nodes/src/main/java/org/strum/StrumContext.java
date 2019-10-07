@@ -24,7 +24,6 @@ import com.oracle.truffle.api.object.Shape;
 import com.oracle.truffle.api.source.Source;
 
 public class StrumContext {
-
   private static final Source BUILTIN_SOURCE = Source
       .newBuilder(StrumLanguage.ID, "", "SL builtin")
       .build();

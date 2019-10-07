@@ -32,9 +32,9 @@ public class SourceScanner implements Scanner {
 
     public SourcePosition getAdvanced(int codePoint) {
       if (Character.isSupplementaryCodePoint(codePoint)) {
-        return new SourcePosition(chars + 2, codePoints + 1);
+        return new SourcePosition(chars() + 2, codePoints() + 1);
       } else {
-        return new SourcePosition(chars + 1, codePoints + 1);
+        return new SourcePosition(chars() + 1, codePoints() + 1);
       }
     }
   }
@@ -49,62 +49,59 @@ public class SourceScanner implements Scanner {
 
   @Override
   public long inputPosition() {
-    return inputPosition.codePoints;
+    return inputPosition.codePoints();
   }
 
   @Override
   public long bufferPosition() {
-    return bufferPosition.codePoints;
+    return bufferPosition.codePoints();
   }
 
   @Override
   public Cursor peekInput() {
-    if (inputPosition.chars < characters.length()) {
+    if (inputPosition.chars() < characters.length()) {
       return new Cursor();
     } else {
-      return new Cursor(Character.codePointAt(characters, inputPosition.chars));
+      return new Cursor(Character.codePointAt(characters, inputPosition.chars()));
     }
   }
 
   @Override
   public Cursor advanceInput() {
-    if (inputPosition.chars < characters.length()) {
-      return new Cursor();
-    } else {
-      int codePoint = Character.codePointAt(characters, inputPosition.chars);
+    if (inputPosition.chars() < characters.length()) {
+      int codePoint = Character.codePointAt(characters, inputPosition.chars());
       inputPosition = inputPosition.getAdvanced(codePoint);
       return new Cursor(codePoint);
     }
+    return new Cursor();
   }
 
   @Override
   public Cursor advanceInputWhile(IntPredicate condition) {
-    // TODO Auto-generated method stub
-    return null;
+    while (inputPosition.chars() < characters.length()) {
+      int codePoint = Character.codePointAt(characters, inputPosition.chars());
+      if (!condition.test(codePoint)) {
+        break;
+      }
+      inputPosition = inputPosition.getAdvanced(codePoint);
+    }
+    return new Cursor();
   }
 
   @Override
   public String takeBufferTo(long position) {
-    checkBufferIndex(position);
-
-    var fullBuffer = characters.subSequence(bufferPosition.chars, inputPosition.chars);
-
-    var charCount = offsetByCodePoints(fullBuffer, 0, (int) position - bufferPosition.codePoints);
-
-    bufferPosition = new SourcePosition(bufferPosition.chars + charCount, (int) position);
-
-    return fullBuffer.subSequence(0, charCount).toString();
+    int from = bufferPosition.chars();
+    discardBufferTo(position);
+    return characters.subSequence(from, bufferPosition.chars()).toString();
   }
 
   @Override
   public void discardBufferTo(long position) {
     checkBufferIndex(position);
 
-    var fullBuffer = characters.subSequence(bufferPosition.chars, inputPosition.chars);
-
-    var charCount = offsetByCodePoints(fullBuffer, 0, (int) position - bufferPosition.codePoints);
-
-    bufferPosition = new SourcePosition(bufferPosition.chars + charCount, (int) position);
+    var fullBuffer = characters.subSequence(bufferPosition.chars(), inputPosition.chars());
+    var charCount = offsetByCodePoints(fullBuffer, 0, (int) position - bufferPosition.codePoints());
+    bufferPosition = new SourcePosition(bufferPosition.chars() + charCount, (int) position);
   }
 
   private void checkBufferIndex(long position) {
