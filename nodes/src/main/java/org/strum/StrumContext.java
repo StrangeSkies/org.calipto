@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
+import org.strum.node.StrumNode;
+
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -27,12 +29,11 @@ public class StrumContext {
   private static final Source BUILTIN_SOURCE = Source
       .newBuilder(StrumLanguage.ID, "", "SL builtin")
       .build();
-  static final Layout LAYOUT = Layout.createLayout();
 
   private final Env env;
   private final BufferedReader input;
   private final PrintWriter output;
-  private final StrumFunctionRegistry functionRegistry;
+  private final StrumDefinitionRegistry functionRegistry;
   private final Shape emptyShape;
   private final StrumLanguage language;
   private final AllocationReporter allocationReporter;
@@ -47,10 +48,10 @@ public class StrumContext {
     this.output = new PrintWriter(env.out(), true);
     this.language = language;
     this.allocationReporter = env.lookup(AllocationReporter.class);
-    this.functionRegistry = new SLFunctionRegistry(language);
+    this.functionRegistry = new StrumDefinitionRegistry(language);
     this.topScopes = Collections
         .singleton(Scope.newBuilder("global", functionRegistry.getFunctionsObject()).build());
-    installBuiltins();
+    installIntrinsics();
     for (NodeFactory<? extends StrumBuiltinNode> builtin : externalBuiltins) {
       installBuiltin(builtin);
     }
@@ -92,10 +93,15 @@ public class StrumContext {
   }
 
   /**
-   * Adds all builtin functions to the {@link SLFunctionRegistry}. This method
-   * lists all {@link SLBuiltinNode builtin implementation classes}.
+   * Add all our intrinsic function implementations to the root scope. Note that
+   * there are very few "built-in" functions so to speak; almost all functions
+   * have in-language implementations. But for performance reasons some core
+   * functionality does need to be transparently lifted into intrinsics.
+   * <P>
+   * This is also important for bootstrapping macro facilities, since the
+   * implementation does not aim to be meta-circulat/self-hosting.
    */
-  private void installBuiltins() {
+  private void installIntrinsics() {
     installBuiltin(SLReadlnBuiltinFactory.getInstance());
     installBuiltin(SLPrintlnBuiltinFactory.getInstance());
     installBuiltin(SLNanoTimeBuiltinFactory.getInstance());
@@ -121,7 +127,7 @@ public class StrumContext {
      * methods in the builtin classes.
      */
     int argumentCount = factory.getExecutionSignature().size();
-    SLExpressionNode[] argumentNodes = new SLExpressionNode[argumentCount];
+    StrumNode[] argumentNodes = new StrumNode[argumentCount];
     /*
      * Builtin functions are like normal functions, i.e., the arguments are passed
      * in as an Object[] array encapsulated in SLArguments. A SLReadArgumentNode
@@ -187,14 +193,14 @@ public class StrumContext {
     return object;
   }
 
-  public static boolean isSLObject(Object value) {
+  public static boolean isStrumObject(Object value) {
     /*
      * LAYOUT.getType() returns a concrete implementation class, i.e., a class that
      * is more precise than the base class DynamicObject. This makes the type check
      * faster.
      */
     return LAYOUT.getType().isInstance(value)
-        && LAYOUT.getType().cast(value).getShape().getObjectType() == SLObjectType.SINGLETON;
+        && LAYOUT.getType().cast(value).getShape().getObjectType() == StrumObjectType.SINGLETON;
   }
 
   /*
@@ -202,8 +208,7 @@ public class StrumContext {
    */
 
   public static Object fromForeignValue(Object a) {
-    if (a instanceof Long || a instanceof SLBigNumber || a instanceof String
-        || a instanceof Boolean) {
+    if (a instanceof Long || a instanceof String || a instanceof Boolean) {
       return a;
     } else if (a instanceof Character) {
       return String.valueOf(a);
@@ -211,7 +216,7 @@ public class StrumContext {
       return fromForeignNumber(a);
     } else if (a instanceof TruffleObject) {
       return a;
-    } else if (a instanceof SLContext) {
+    } else if (a instanceof StrumContext) {
       return a;
     }
     CompilerDirectives.transferToInterpreter();
