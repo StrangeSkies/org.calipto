@@ -1,12 +1,18 @@
 package org.strum.node;
 
+import com.oracle.truffle.api.dsl.GenerateNodeFactory;
+import com.oracle.truffle.api.dsl.NodeChild;
+import com.oracle.truffle.api.dsl.UnsupportedSpecializationException;
+import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.nodes.UnexpectedResultException;
+
 /**
  * An intrinsic function. Intrinsics can only override standard library
  * functions, and
  */
-@NodeChild(value = "arguments", type = SLExpressionNode[].class)
+@NodeChild(value = "arguments", type = StrumNode[].class)
 @GenerateNodeFactory
-public class StrumIntrinsicNode extends StrumNode {
+public class IntrinsicNode extends StrumNode {
 
   @Override
   public final Object executeGeneric(VirtualFrame frame) {

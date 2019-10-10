@@ -8,8 +8,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.strum.reader.StrumBuilder;
+import org.strum.reader.StrumFactory;
 import org.strum.reader.StrumParser;
+import org.strum.reader.StrumReader;
+import org.strum.source.SourceScanner;
 import org.strum.source.StrumFileDetector;
+import org.strum.type.ConsLibrary;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -62,33 +66,7 @@ public class StrumLanguage extends TruffleLanguage<StrumContext> {
   @Override
   protected CallTarget parse(ParsingRequest request) throws Exception {
     Source source = request.getSource();
-    Map<String, RootCallTarget> functions;
-    /*
-     * Parse the provided source. At this point, we do not have a StrumContext yet.
-     * Registration of the functions with the StrumContext happens lazily in
-     * SLEvalRootNode.
-     */
-    if (request.getArgumentNames().isEmpty()) {
-      functions = StrumParser.parseStrum(getFactory(), source);
-    } else {
-      Source requestedSource = request.getSource();
-      StringBuilder sb = new StringBuilder();
-      sb.append("function main(");
-      String sep = "";
-      for (String argumentName : request.getArgumentNames()) {
-        sb.append(sep);
-        sb.append(argumentName);
-        sep = ",";
-      }
-      sb.append(") { return ");
-      sb.append(request.getSource().getCharacters());
-      sb.append(";}");
-      String language = requestedSource.getLanguage() == null ? ID : requestedSource.getLanguage();
-      Source decoratedSource = Source
-          .newBuilder(language, sb.toString(), request.getSource().getName())
-          .build();
-      functions = StrumParser.parseStrum(getFactory(), decoratedSource);
-    }
+    StrumReader reader = new StrumReader(getFactory(), new SourceScanner(source));
 
     RootCallTarget main = functions.get("main");
     RootNode evalMain;
@@ -111,7 +89,7 @@ public class StrumLanguage extends TruffleLanguage<StrumContext> {
     return Truffle.getRuntime().createCallTarget(evalMain);
   }
 
-  private StrumBuilder getFactory() {
+  private StrumFactory getFactory() {
     // TODO Auto-generated method stub
     return null;
   }
@@ -141,7 +119,7 @@ public class StrumLanguage extends TruffleLanguage<StrumContext> {
     } else if (object instanceof SLBigNumber || object instanceof SLFunction
         || object instanceof SLNull) {
       return true;
-    } else if (StrumContext.isSLObject(object)) {
+    } else if (ConsLibrary.getFactory().getUncached().isCons(object)) {
       return true;
     } else {
       return false;

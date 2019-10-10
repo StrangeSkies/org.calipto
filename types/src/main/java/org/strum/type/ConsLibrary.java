@@ -34,6 +34,7 @@ package org.strum.type;
 
 import com.oracle.truffle.api.library.GenerateLibrary;
 import com.oracle.truffle.api.library.Library;
+import com.oracle.truffle.api.library.LibraryFactory;
 
 @GenerateLibrary
 public abstract class ConsLibrary extends Library {
@@ -46,4 +47,8 @@ public abstract class ConsLibrary extends Library {
   public abstract Object cdr(Object receiver);
 
   public abstract Object cons(Object receiver, Symbol symbol);
+
+  public static LibraryFactory<ConsLibrary> getFactory() {
+    return LibraryFactory.resolve(ConsLibrary.class);
+  }
 }
