@@ -1,5 +1,6 @@
-package org.strum.node;
+package org.strum.node.io;
 
+import org.strum.node.StrumNode;
 import org.strum.type.Symbol;
 
 import com.oracle.truffle.api.dsl.GenerateNodeFactory;

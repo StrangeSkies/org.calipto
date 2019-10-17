@@ -9,10 +9,10 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import org.strum.node.IONode;
-import org.strum.node.IntrinsicNode;
 import org.strum.node.SideEffectNode;
 import org.strum.node.StrumNode;
+import org.strum.node.intrinsic.IntrinsicNode;
+import org.strum.node.io.IONode;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -107,20 +107,7 @@ public class StrumContext {
   private Stream<NodeFactory<? extends IntrinsicNode>> getIntrinsics() {
     Stream
         .of(
-            SLReadlnBuiltinFactory.getInstance(),
-            SLPrintlnBuiltinFactory.getInstance(),
-            SLNanoTimeBuiltinFactory.getInstance(),
-            SLDefineFunctionBuiltinFactory.getInstance(),
-            SLStackTraceBuiltinFactory.getInstance(),
-            SLHelloEqualsWorldBuiltinFactory.getInstance(),
-            SLNewObjectBuiltinFactory.getInstance(),
-            SLEvalBuiltinFactory.getInstance(),
-            SLImportBuiltinFactory.getInstance(),
-            SLGetSizeBuiltinFactory.getInstance(),
-            SLHasSizeBuiltinFactory.getInstance(),
-            SLIsExecutableBuiltinFactory.getInstance(),
-            SLIsNullBuiltinFactory.getInstance(),
-            SLWrapPrimitiveBuiltinFactory.getInstance());
+            IntrinsicAdd.getInstance());
   }
 
   public void installIntrinsic(NodeFactory<? extends IntrinsicNode> factory) {

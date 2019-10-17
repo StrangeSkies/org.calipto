@@ -1,5 +1,6 @@
-package org.strum.node;
+package org.strum.node.intrinsic;
 
+import org.strum.node.StrumNode;
 import org.strum.type.ConsLibrary;
 
 import com.oracle.truffle.api.dsl.NodeChild;
@@ -7,9 +8,9 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.library.CachedLibrary;
 
 @NodeChild
-abstract class CarNode extends StrumNode {
+abstract class CdrNode extends StrumNode {
   @Specialization(guards = "conses.isCons(cons)", limit = "3")
   Object doDefault(Object cons, @CachedLibrary("cons") ConsLibrary conses) {
-    return conses.car(cons);
+    return conses.cdr(cons);
   }
 }
