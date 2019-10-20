@@ -1,4 +1,4 @@
-package org.strum.node.io;
+package org.strum.node.builtin;
 
 import org.strum.StrumTypeException;
 import org.strum.node.StrumNode;
@@ -14,7 +14,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
  */
 @NodeChild(value = "arguments", type = StrumNode[].class)
 @GenerateNodeFactory
-public abstract class IONode extends StrumNode {
+public abstract class BuiltinNode extends StrumNode {
   @Override
   public final Object executeGeneric(VirtualFrame frame) {
     try {

@@ -10,12 +10,12 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import org.strum.node.StrumNode;
+import org.strum.node.builtin.BuiltinNode;
 import org.strum.node.intrinsic.CarNode;
 import org.strum.node.intrinsic.CarNodeFactory;
 import org.strum.node.intrinsic.CdrNode;
 import org.strum.node.intrinsic.CdrNodeFactory;
 import org.strum.node.intrinsic.IntrinsicNode;
-import org.strum.node.io.IONode;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -49,7 +49,7 @@ public class StrumContext {
       StrumLanguage language,
       TruffleLanguage.Env env,
       Collection<? extends NodeFactory<? extends IntrinsicNode>> externalIntrinsics,
-      Collection<? extends NodeFactory<? extends IONode>> externalSideEffects) {
+      Collection<? extends NodeFactory<? extends BuiltinNode>> externalSideEffects) {
     this.env = env;
     this.input = new BufferedReader(new InputStreamReader(env.in()));
     this.output = new PrintWriter(env.out(), true);
@@ -154,11 +154,11 @@ public class StrumContext {
     getFunctionRegistry().register(name, Truffle.getRuntime().createCallTarget(rootNode));
   }
 
-  private Stream<NodeFactory<? extends IONode>> getSideEffects() {
+  private Stream<NodeFactory<? extends BuiltinNode>> getSideEffects() {
     return Stream.of();
   }
 
-  public void installSideEffect(NodeFactory<? extends IONode> factory) {
+  public void installSideEffect(NodeFactory<? extends BuiltinNode> factory) {
     // TODO
     throw new UnsupportedOperationException();
   }
