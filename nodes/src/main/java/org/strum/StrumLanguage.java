@@ -201,7 +201,7 @@ public class StrumLanguage extends TruffleLanguage<StrumContext> {
 
   @Override
   public Iterable<Scope> findLocalScopes(StrumContext context, Node node, Frame frame) {
-    final SLLexicalScope scope = SLLexicalScope.createScope(node);
+    final StrumLexicalScope scope = StrumLexicalScope.createScope(node);
     return new Iterable<Scope>() {
       @Override
       public Iterator<Scope> iterator() {

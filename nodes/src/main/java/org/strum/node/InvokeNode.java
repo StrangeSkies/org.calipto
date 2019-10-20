@@ -1,5 +1,7 @@
 package org.strum.node;
 
+import org.strum.StrumException;
+
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.StandardTags;

@@ -59,8 +59,7 @@ public class StrumRootNode extends RootNode {
       StrumLanguage language,
       FrameDescriptor frameDescriptor,
       StrumNode[] bodyNodes,
-      SourceSection sourceSection,
-      String name) {
+      SourceSection sourceSection) {
     super(language, frameDescriptor);
 
     this.bodyNodes = bodyNodes;
