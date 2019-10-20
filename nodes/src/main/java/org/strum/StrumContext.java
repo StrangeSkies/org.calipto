@@ -9,8 +9,11 @@ import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import org.strum.node.SideEffectNode;
 import org.strum.node.StrumNode;
+import org.strum.node.intrinsic.CarNode;
+import org.strum.node.intrinsic.CarNodeFactory;
+import org.strum.node.intrinsic.CdrNode;
+import org.strum.node.intrinsic.CdrNodeFactory;
 import org.strum.node.intrinsic.IntrinsicNode;
 import org.strum.node.io.IONode;
 
@@ -27,7 +30,6 @@ import com.oracle.truffle.api.instrumentation.AllocationReporter;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.object.DynamicObject;
-import com.oracle.truffle.api.object.Shape;
 import com.oracle.truffle.api.source.Source;
 
 public class StrumContext {
@@ -101,13 +103,12 @@ public class StrumContext {
    * have in-language implementations. But for performance reasons some core
    * functionality does need to be transparently lifted into intrinsics.
    * <P>
-   * This is also important for bootstrapping macro facilities, since the
-   * implementation does not aim to be meta-circulat/self-hosting.
+   * This is also important for bootstrapping macro facilities, since using
+   * Truffle means that this particular implementation can't aim to be
+   * meta-circular/self-hosting.
    */
   private Stream<NodeFactory<? extends IntrinsicNode>> getIntrinsics() {
-    Stream
-        .of(
-            IntrinsicAdd.getInstance());
+    return Stream.of(CarNodeFactory.getInstance(), CdrNodeFactory.getInstance());
   }
 
   public void installIntrinsic(NodeFactory<? extends IntrinsicNode> factory) {
@@ -126,10 +127,10 @@ public class StrumContext {
      * extracts a parameter from this array.
      */
     for (int i = 0; i < argumentCount; i++) {
-      argumentNodes[i] = new SLReadArgumentNode(i);
+      argumentNodes[i] = new StrumReadArgumentNode(i);
     }
     /* Instantiate the builtin node. This node performs the actual functionality. */
-    SLBuiltinNode builtinBodyNode = factory.createNode((Object) argumentNodes);
+    IntrinsicNode builtinBodyNode = factory.createNode((Object) argumentNodes);
     builtinBodyNode.addRootTag();
     /*
      * The name of the builtin function is specified via an annotation on the node
@@ -154,8 +155,7 @@ public class StrumContext {
   }
 
   private Stream<NodeFactory<? extends IONode>> getSideEffects() {
-    // TODO
-    throw new UnsupportedOperationException();
+    return Stream.of();
   }
 
   public void installSideEffect(NodeFactory<? extends IONode> factory) {
