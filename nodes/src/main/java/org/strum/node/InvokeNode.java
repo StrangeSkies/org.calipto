@@ -1,6 +1,5 @@
 package org.strum.node;
 
-import org.strum.StrumException;
 import org.strum.StrumTypeException;
 
 import com.oracle.truffle.api.CompilerAsserts;

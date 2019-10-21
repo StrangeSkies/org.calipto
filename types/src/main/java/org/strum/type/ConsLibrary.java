@@ -38,6 +38,10 @@ import com.oracle.truffle.api.library.LibraryFactory;
 
 @GenerateLibrary
 public abstract class ConsLibrary extends Library {
+  public static LibraryFactory<ConsLibrary> getFactory() {
+    return LibraryFactory.resolve(ConsLibrary.class);
+  }
+
   public boolean isCons(Object receiver) {
     return false;
   }
@@ -46,9 +50,14 @@ public abstract class ConsLibrary extends Library {
 
   public abstract Object cdr(Object receiver);
 
-  public abstract Object cons(Object receiver, Symbol symbol);
-
-  public static LibraryFactory<ConsLibrary> getFactory() {
-    return LibraryFactory.resolve(ConsLibrary.class);
-  }
+  /**
+   * Cons the receiver onto the given value.
+   * 
+   * @param receiver
+   *          the receiver, which will be the new car in the resulting cons cell
+   * @param value
+   *          the value to be the new cdr in the resulting cons cell
+   * @return the cons of the receiver and the value
+   */
+  public abstract Object cons(Object receiver, Object value);
 }

@@ -21,12 +21,15 @@ import com.oracle.truffle.api.source.SourceSection;
 import com.oracle.truffle.api.utilities.CyclicAssumption;
 
 /**
- * Represents a SL function. On the Truffle level, a callable element is
- * represented by a {@link RootCallTarget call target}. This class encapsulates
- * a call target, and adds version support: functions in SL can be redefined,
- * i.e. changed at run time. When a function is redefined, the call target
- * managed by this function object is changed (and {@link #callTarget} is
- * therefore not a final field).
+ * Represents a Strum function. In the language a function is just a value of a
+ * particular shape, so a 
+ * 
+ * On the Truffle level, a callable element is represented by a
+ * {@link RootCallTarget call target}. This class encapsulates a call target,
+ * and adds version support: functions in SL can be redefined, i.e. changed at
+ * run time. When a function is redefined, the call target managed by this
+ * function object is changed (and {@link #callTarget} is therefore not a final
+ * field).
  * <p>
  * Function redefinition is expected to be rare, therefore optimized call nodes
  * want to speculate that the call target is stable. This is possible with the
