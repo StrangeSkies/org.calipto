@@ -1,6 +1,5 @@
 package org.strum.node;
 
-import org.strum.StrumException;
 import org.strum.StrumTypeException;
 
 import com.oracle.truffle.api.CompilerAsserts;
@@ -13,7 +12,7 @@ import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.interop.UnsupportedTypeException;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 
-public abstract class InvokeNode extends StrumNode {
+public abstract class DynamicEvaluationNode extends StrumNode {
   @Child
   private StrumNode targetNode;
   @Children
@@ -21,7 +20,7 @@ public abstract class InvokeNode extends StrumNode {
   @Child
   private InteropLibrary library;
 
-  public InvokeNode(StrumNode targetNode, StrumNode[] argumentNodes) {
+  public DynamicEvaluationNode(StrumNode targetNode, StrumNode[] argumentNodes) {
     this.targetNode = targetNode;
     this.argumentNodes = argumentNodes;
     this.library = InteropLibrary.getFactory().createDispatched(3);
