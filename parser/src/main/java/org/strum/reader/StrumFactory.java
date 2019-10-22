@@ -6,6 +6,4 @@ public interface StrumFactory {
   StrumBuilder symbol(String namespace, String name);
 
   StrumBuilder symbol(String name);
-
-  StrumBuilder nil();
 }

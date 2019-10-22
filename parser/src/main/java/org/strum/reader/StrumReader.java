@@ -9,6 +9,7 @@ import org.strum.scanner.Scanner;
 public class StrumReader {
   private static final String KEYWORD = "keyword";
   private static final String QUOTE = "quote";
+  private static final String NIL = "nil";
 
   private final StrumFactory factory;
   private final Scanner scanner;
@@ -100,7 +101,7 @@ public class StrumReader {
     if (scanner.peekInput().codePointMatches(c -> c == codePointOf(")"))) {
       scanner.advanceInput();
       scanner.discardBuffer();
-      return factory.nil();
+      return factory.symbol(NIL);
 
     } else {
       return factory.cons(scanNext(), scanListTail());
