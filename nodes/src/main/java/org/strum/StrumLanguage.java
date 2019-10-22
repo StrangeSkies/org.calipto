@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.strum.reader.StrumBuilder;
-import org.strum.reader.StrumFactory;
+import org.strum.reader.StrumDataFactory;
 import org.strum.reader.StrumParser;
 import org.strum.reader.StrumReader;
 import org.strum.source.SourceScanner;
@@ -89,7 +89,7 @@ public class StrumLanguage extends TruffleLanguage<StrumContext> {
     return Truffle.getRuntime().createCallTarget(evalMain);
   }
 
-  private StrumFactory getFactory() {
+  private StrumDataFactory getFactory() {
     // TODO Auto-generated method stub
     return null;
   }

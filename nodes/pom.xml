@@ -52,11 +52,15 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.astrum</groupId>
-			<artifactId>types</artifactId>
+			<artifactId>compiler</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.astrum</groupId>
 			<artifactId>parser</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.astrum</groupId>
+			<artifactId>types</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.graalvm.truffle</groupId>

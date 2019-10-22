@@ -84,6 +84,7 @@
 	</properties>
 
 	<modules>
+		<module>compiler</module>
 		<module>nodes</module>
 		<module>parser</module>
 		<module>types</module>
@@ -131,6 +132,11 @@
 
 			<!-- Workspace -->
 
+			<dependency>
+				<groupId>org.astrum</groupId>
+				<artifactId>compiler</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
 			<dependency>
 				<groupId>org.astrum</groupId>
 				<artifactId>nodes</artifactId>

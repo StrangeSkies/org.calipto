@@ -1,5 +1,4 @@
 <factorypath>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/strum/types/0.0.1-SNAPSHOT/types-0.0.1-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/graalvm/truffle/truffle-dsl-processor/19.2.0.1/truffle-dsl-processor-19.2.0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/graalvm/truffle/truffle-tck/19.2.0.1/truffle-tck-19.2.0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/graalvm/sdk/polyglot-tck/19.2.0.1/polyglot-tck-19.2.0.1.jar" enabled="true" runInBatchMode="false"/>

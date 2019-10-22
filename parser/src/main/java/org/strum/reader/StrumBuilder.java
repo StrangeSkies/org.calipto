@@ -1,7 +1,7 @@
 package org.strum.reader;
 
 public interface StrumBuilder {
-  StrumExpression between(long startPosition, long endPosition);
+  StrumData between(long startPosition, long endPosition);
 
-  StrumExpression synthetic();
+  StrumData synthetic();
 }
