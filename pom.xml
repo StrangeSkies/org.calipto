@@ -84,9 +84,9 @@
 	</properties>
 
 	<modules>
-		<module>compiler</module>
+		<module>evaluator</module>
 		<module>nodes</module>
-		<module>parser</module>
+		<module>reader</module>
 		<module>types</module>
 	</modules>
 
@@ -134,7 +134,7 @@
 
 			<dependency>
 				<groupId>org.astrum</groupId>
-				<artifactId>compiler</artifactId>
+				<artifactId>evaluator</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
@@ -144,7 +144,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.astrum</groupId>
-				<artifactId>parser</artifactId>
+				<artifactId>reader</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>

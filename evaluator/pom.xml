@@ -44,10 +44,10 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>compiler</artifactId>
+	<artifactId>evaluator</artifactId>
 
-	<name>Strum Compiler</name>
-	<description>The Strum compiler</description>
+	<name>Strum Evaluator</name>
+	<description>The Strum evaluator</description>
 
 	<dependencies>
 		<dependency>

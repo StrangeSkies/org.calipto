@@ -44,10 +44,10 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>parser</artifactId>
+	<artifactId>reader</artifactId>
 
-	<name>Strum Parser</name>
-	<description>The Strum parser</description>
+	<name>Strum Reader</name>
+	<description>The Strum reader</description>
 
 	<dependencies>
 		<dependency>

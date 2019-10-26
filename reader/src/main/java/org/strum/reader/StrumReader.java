@@ -23,8 +23,8 @@ public class StrumReader {
     this.factory = factory;
     this.scanner = scanner;
 
-    this.keywordSymbol = factory.symbol(CORE_NAMESPACE, KEYWORD).synthetic();
-    this.quoteSymbol = factory.symbol(CORE_NAMESPACE, QUOTE).synthetic();
+    this.keywordSymbol = factory.symbol(CORE_NAMESPACE, KEYWORD);
+    this.quoteSymbol = factory.symbol(CORE_NAMESPACE, QUOTE);
   }
 
   /*
@@ -48,18 +48,18 @@ public class StrumReader {
     return scanner.peekInput().mapCodePoint(codePoint -> {
       long startPosition = scanner.inputPosition();
 
-      StrumBuilder builder;
+      StrumData data;
       if (Character.isAlphabetic(codePoint)) {
-        builder = scanSymbol();
+        data = scanSymbol();
 
       } else if (codePoint == codePointOf("(")) {
-        builder = scanList();
+        data = scanList();
 
       } else if (codePoint == codePointOf(":")) {
-        builder = scanKeyword();
+        data = scanKeyword();
 
       } else if (codePoint == codePointOf("'")) {
-        builder = scanQuote();
+        data = scanQuote();
 
       } else {
         throw new UnsupportedOperationException(
@@ -67,11 +67,21 @@ public class StrumReader {
                 + Character.toString(codePoint));
       }
 
-      return builder.between(startPosition, scanner.inputPosition());
+      recordSourceLocation(startPosition, scanner.inputPosition());
+
+      return data;
     });
   }
 
-  private StrumBuilder scanSymbol() {
+  private void recordSyntheticExpression() {
+    // TODO implement as a side effect
+  }
+
+  private void recordSourceLocation(long startPosition, long inputPosition) {
+    // TODO implement as a side effect
+  }
+
+  private StrumData scanSymbol() {
     String firstPart = scanName();
 
     if (scanner.peekInput().codePointMatches(c -> c == codePointOf("/"))) {
@@ -92,17 +102,18 @@ public class StrumReader {
     return scanner.takeBuffer();
   }
 
-  private StrumBuilder scanList() {
+  private StrumData scanList() {
     scanner.advanceInput();
     skipWhitespace();
 
     return scanListStart();
   }
 
-  private StrumBuilder scanListStart() {
+  private StrumData scanListStart() {
     if (scanner.peekInput().codePointMatches(c -> c == codePointOf(")"))) {
       scanner.advanceInput();
       scanner.discardBuffer();
+
       return factory.symbol(CORE_NAMESPACE, NIL);
 
     } else {
@@ -120,20 +131,27 @@ public class StrumReader {
 
     } else {
       long startPosition = scanner.inputPosition();
-      return scanListStart().between(startPosition, scanner.inputPosition());
+
+      recordSourceLocation(startPosition, scanner.inputPosition());
+
+      return scanListStart();
     }
   }
 
-  private StrumBuilder scanKeyword() {
+  private StrumData scanKeyword() {
     scanner.advanceInput();
     scanner.discardBuffer();
+
+    recordSyntheticExpression();
 
     return factory.cons(keywordSymbol, read().get());
   }
 
-  private StrumBuilder scanQuote() {
+  private StrumData scanQuote() {
     scanner.advanceInput();
     scanner.discardBuffer();
+
+    recordSyntheticExpression();
 
     return factory.cons(quoteSymbol, read().get());
   }
