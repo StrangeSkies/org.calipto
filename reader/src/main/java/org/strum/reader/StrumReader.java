@@ -13,18 +13,18 @@ public class StrumReader {
   private static final String QUOTE = "quote";
   private static final String NIL = "nil";
 
-  private final StrumDataFactory factory;
+  private final ReadingContext context;
   private final Scanner scanner;
 
   private final StrumData keywordSymbol;
   private final StrumData quoteSymbol;
 
-  public StrumReader(StrumDataFactory factory, Scanner scanner) {
-    this.factory = factory;
+  public StrumReader(ReadingContext context, Scanner scanner) {
+    this.context = context;
     this.scanner = scanner;
 
-    this.keywordSymbol = factory.symbol(CORE_NAMESPACE, KEYWORD);
-    this.quoteSymbol = factory.symbol(CORE_NAMESPACE, QUOTE);
+    this.keywordSymbol = context.makeSymbol(CORE_NAMESPACE, KEYWORD);
+    this.quoteSymbol = context.makeSymbol(CORE_NAMESPACE, QUOTE);
   }
 
   /*
@@ -89,10 +89,10 @@ public class StrumReader {
       scanner.discardBuffer();
       String secondPart = scanName();
 
-      return factory.symbol(firstPart, secondPart);
+      return context.makeSymbol(firstPart, secondPart);
     }
 
-    return factory.symbol(CORE_NAMESPACE, firstPart);
+    return context.makeSymbol(CORE_NAMESPACE, firstPart);
   }
 
   private String scanName() {
@@ -114,10 +114,10 @@ public class StrumReader {
       scanner.advanceInput();
       scanner.discardBuffer();
 
-      return factory.symbol(CORE_NAMESPACE, NIL);
+      return context.makeSymbol(CORE_NAMESPACE, NIL);
 
     } else {
-      return factory.cons(scanNext(), scanListTail());
+      return context.makeCons(scanNext(), scanListTail());
     }
   }
 
@@ -144,7 +144,7 @@ public class StrumReader {
 
     recordSyntheticExpression();
 
-    return factory.cons(keywordSymbol, read().get());
+    return context.makeCons(keywordSymbol, read().get());
   }
 
   private StrumData scanQuote() {
@@ -153,6 +153,6 @@ public class StrumReader {
 
     recordSyntheticExpression();
 
-    return factory.cons(quoteSymbol, read().get());
+    return context.makeCons(quoteSymbol, read().get());
   }
 }
