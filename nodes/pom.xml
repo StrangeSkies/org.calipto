@@ -52,11 +52,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.astrum</groupId>
-			<artifactId>compiler</artifactId>
+			<artifactId>evaluator</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.astrum</groupId>
-			<artifactId>parser</artifactId>
+			<artifactId>reader</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.astrum</groupId>

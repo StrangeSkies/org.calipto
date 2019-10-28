@@ -10,12 +10,12 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import org.strum.node.StrumNode;
+import org.strum.node.StrumRootNode;
 import org.strum.node.builtin.BuiltinNode;
-import org.strum.node.intrinsic.CarNode;
 import org.strum.node.intrinsic.CarNodeFactory;
-import org.strum.node.intrinsic.CdrNode;
 import org.strum.node.intrinsic.CdrNodeFactory;
 import org.strum.node.intrinsic.IntrinsicNode;
+import org.strum.type.ConsLibrary;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -89,7 +89,7 @@ public class StrumContext {
   /**
    * Returns the registry of all functions that are currently defined.
    */
-  public SLFunctionRegistry getFunctionRegistry() {
+  public StrumDefinitionRegistry getFunctionRegistry() {
     return functionRegistry;
   }
 
@@ -143,7 +143,7 @@ public class StrumContext {
      * Wrap the builtin in a RootNode. Truffle requires all AST to start with a
      * RootNode.
      */
-    SLRootNode rootNode = new SLRootNode(
+    StrumRootNode rootNode = new StrumRootNode(
         language,
         new FrameDescriptor(),
         builtinBodyNode,
@@ -182,35 +182,8 @@ public class StrumContext {
     return allocationReporter;
   }
 
-  /**
-   * Allocate an empty object. All new objects initially have no properties.
-   * Properties are added when they are first stored, i.e., the store triggers a
-   * shape change of the object.
-   */
-  public DynamicObject createObject(AllocationReporter reporter) {
-    DynamicObject object = null;
-    reporter.onEnter(null, 0, AllocationReporter.SIZE_UNKNOWN);
-    object = emptyShape.newInstance();
-    reporter.onReturnValue(object, 0, AllocationReporter.SIZE_UNKNOWN);
-    return object;
-  }
-
   public static boolean isStrumObject(Object value) {
-    /*
-     * 
-     * 
-     * TODO for strum do we need to have some kind of warmed up ConsLibrary here?
-     * 
-     * 
-     * 
-     * 
-     * 
-     * LAYOUT.getType() returns a concrete implementation class, i.e., a class that
-     * is more precise than the base class DynamicObject. This makes the type check
-     * faster.
-     */
-    return LAYOUT.getType().isInstance(value)
-        && LAYOUT.getType().cast(value).getShape().getObjectType() == StrumObjectType.SINGLETON;
+    return ConsLibrary.getFactory().getUncached().isCons(value);
   }
 
   /*

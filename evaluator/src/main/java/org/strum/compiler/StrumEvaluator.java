@@ -35,9 +35,6 @@ public class StrumEvaluator {
   }
 
   StrumNode compileList(Object car, Object cdr) {
-    List<StrumNode> list = new ArrayList<>();
-    compilerStack.push(list);
-
     if (context.isSymbol(car)) {
       String namespace = context.getNamespace(car);
       String name = context.getName(car);
