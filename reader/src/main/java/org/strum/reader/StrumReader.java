@@ -16,12 +16,16 @@ public class StrumReader {
   private final ReadingContext context;
   private final Scanner scanner;
 
+  private LexicalScope scope;
+
   private final StrumData keywordSymbol;
   private final StrumData quoteSymbol;
 
   public StrumReader(ReadingContext context, Scanner scanner) {
     this.context = context;
     this.scanner = scanner;
+
+    this.scope = new LexicalScope();
 
     this.keywordSymbol = context.makeSymbol(CORE_NAMESPACE, KEYWORD);
     this.quoteSymbol = context.makeSymbol(CORE_NAMESPACE, QUOTE);
@@ -62,9 +66,14 @@ public class StrumReader {
         data = scanQuote();
 
       } else {
-        throw new UnsupportedOperationException(
-            "Custom reader macros are not yet supported. Unexpected character: "
-                + Character.toString(codePoint));
+        var macro = scope
+            .findMacro(codePoint)
+            .orElseThrow(
+                () -> new UnsupportedOperationException(
+                    "Custom reader macros are not yet supported. Unexpected character: "
+                        + Character.toString(codePoint)));
+
+        data = macro.call();
       }
 
       recordSourceLocation(startPosition, scanner.inputPosition());
