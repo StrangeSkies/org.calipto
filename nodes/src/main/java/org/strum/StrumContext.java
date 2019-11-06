@@ -45,6 +45,8 @@ public class StrumContext {
   private final AllocationReporter allocationReporter;
   private final Iterable<Scope> topScopes; // Cache the top scopes
 
+  
+  
   public StrumContext(
       StrumLanguage language,
       TruffleLanguage.Env env,

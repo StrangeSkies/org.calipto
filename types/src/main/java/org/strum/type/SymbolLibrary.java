@@ -32,25 +32,36 @@
  */
 package org.strum.type;
 
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
-public class SymbolIndex {
-  private final Map<String, Reference<Symbol>> symbols = new HashMap<>();
+import com.oracle.truffle.api.library.GenerateLibrary;
+import com.oracle.truffle.api.library.Library;
+import com.oracle.truffle.api.library.LibraryFactory;
 
-  public Symbol getSymbol(String string) {
-    var reference = symbols.get(string);
-    if (reference != null) {
-      var symbol = reference.get();
-      if (symbol != null) {
-        return symbol;
-      }
+@GenerateLibrary
+public abstract class SymbolLibrary extends Library {
+  public static LibraryFactory<SymbolLibrary> getFactory() {
+    return LibraryFactory.resolve(SymbolLibrary.class);
+  }
+
+  public boolean isSymbol(Object receiver) {
+    return false;
+  }
+
+  public abstract String namespace(Object receiver);
+
+  public abstract String name(Object receiver);
+
+  public String toString(Object receiver) {
+    return namespace(receiver) + "/" + name(receiver);
+  }
+
+  public boolean equals(Object first, Object second) {
+    if (!isSymbol(first) || !isSymbol(second)) {
+      return false;
     }
-    var symbol = new Symbol(namespace, name);
-    reference = new WeakReference<>(symbol)
-    return symbol;
+
+    return Objects.equals(name(first), name(second))
+        && Objects.equals(namespace(first), namespace(second));
   }
 }

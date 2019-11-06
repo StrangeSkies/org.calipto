@@ -30,27 +30,52 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type;
+package org.strum.type.cells;
 
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
+import org.strum.type.ConsLibrary;
+import org.strum.type.symbols.Bool;
 
-public class SymbolIndex {
-  private final Map<String, Reference<Symbol>> symbols = new HashMap<>();
+import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.CachedLibrary;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
 
-  public Symbol getSymbol(String string) {
-    var reference = symbols.get(string);
-    if (reference != null) {
-      var symbol = reference.get();
-      if (symbol != null) {
-        return symbol;
-      }
+@ExportLibrary(value = ConsLibrary.class)
+@ExportLibrary(value = InteropLibrary.class)
+final class Int32 implements TruffleObject {
+  private final int value;
+
+  public Int32(int value) {
+    this.value = value;
+  }
+
+  @ExportMessage
+  Bool car() {
+    return car;
+  }
+
+  @ExportMessage
+  Object cdr() {
+    return new IntTo32(value, 31);
+  }
+
+  @ExportMessage
+  abstract static class Cons {
+    @Specialization(guards = "conses.isCons(cdr)", limit = "3")
+    static Object doDefault(Int32 car, Object cdr, @CachedLibrary("cdr") ConsLibrary conses) {
+      return null;
     }
-    var symbol = new Symbol(namespace, name);
-    reference = new WeakReference<>(symbol)
-    return symbol;
+
+    @Specialization(replaces = "doDefault")
+    static Object doBoolean(Int32 car, boolean cdr) {
+      return null;
+    }
+  }
+
+  @ExportMessage
+  boolean isCons() {
+    return true;
   }
 }

@@ -2,7 +2,7 @@ package org.strum.node;
 
 import org.strum.StrumTypeException;
 import org.strum.type.ConsLibrary;
-import org.strum.type.Symbol;
+import org.strum.type.SymbolLibrary;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.GenerateNodeFactory;

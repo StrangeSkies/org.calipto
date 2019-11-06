@@ -30,27 +30,47 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type;
+package org.strum.type.symbols;
 
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
+import org.strum.type.SymbolLibrary;
 
-public class SymbolIndex {
-  private final Map<String, Reference<Symbol>> symbols = new HashMap<>();
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
 
-  public Symbol getSymbol(String string) {
-    var reference = symbols.get(string);
-    if (reference != null) {
-      var symbol = reference.get();
-      if (symbol != null) {
-        return symbol;
-      }
-    }
-    var symbol = new Symbol(namespace, name);
-    reference = new WeakReference<>(symbol)
-    return symbol;
+// TODO value type
+@ExportLibrary(SymbolLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+public final class Nil implements TruffleObject {
+  public final Nil NIL = new Nil();
+
+  private Nil() {}
+
+  @ExportMessage
+  public String namespace() {
+    return "";
+  }
+
+  @ExportMessage
+  public String name() {
+    return "nil";
+  }
+
+  @Override
+  @ExportMessage
+  public String toString() {
+    return "/nil";
+  }
+
+  @Override
+  @ExportMessage
+  public boolean equals(Object obj) {
+    return obj == this;
+  }
+
+  @ExportMessage
+  boolean isNull() {
+    return true;
   }
 }

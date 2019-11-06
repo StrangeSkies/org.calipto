@@ -34,7 +34,7 @@ package org.strum.type;
 
 import com.oracle.truffle.api.dsl.TypeSystem;
 
-@TypeSystem({ Symbol.class })
+@TypeSystem({ SymbolLibrary.class })
 public class StrumTypes {
 
 }

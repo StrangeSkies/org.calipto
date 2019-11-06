@@ -30,27 +30,43 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type;
+package org.strum.type.cells;
 
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
+import org.strum.type.ConsLibrary;
 
-public class SymbolIndex {
-  private final Map<String, Reference<Symbol>> symbols = new HashMap<>();
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
 
-  public Symbol getSymbol(String string) {
-    var reference = symbols.get(string);
-    if (reference != null) {
-      var symbol = reference.get();
-      if (symbol != null) {
-        return symbol;
-      }
-    }
-    var symbol = new Symbol(namespace, name);
-    reference = new WeakReference<>(symbol)
-    return symbol;
+@ExportLibrary(ConsLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+final class Cons implements TruffleObject {
+  private final Object car;
+  private final Object cdr;
+
+  public Cons(Object car, Object cdr) {
+    this.car = car;
+    this.cdr = cdr;
+  }
+
+  @ExportMessage
+  Object car() {
+    return car;
+  }
+
+  @ExportMessage
+  Object cdr() {
+    return cdr;
+  }
+
+  @ExportMessage
+  Object cons(Object car) {
+    return new Cons(car, this);
+  }
+
+  @ExportMessage
+  boolean isCons() {
+    return true;
   }
 }

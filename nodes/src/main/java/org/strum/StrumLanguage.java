@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.strum.reader.StrumBuilder;
+import org.strum.node.StrumReplNode;
 import org.strum.reader.StrumDataFactory;
-import org.strum.reader.StrumParser;
 import org.strum.reader.StrumReader;
 import org.strum.source.SourceScanner;
 import org.strum.source.StrumFileDetector;
@@ -78,14 +76,15 @@ public class StrumLanguage extends TruffleLanguage<StrumContext> {
        * function. Instead, we create a new SLEvalRootNode that does everything we
        * need.
        */
-      evalMain = new StrumEvalRootNode(this, main, functions);
+      evalMain = new StrumReplNode(this, main, functions);
     } else {
       /*
        * Even without a main function, "evaluating" the parsed source needs to
        * register the functions into the StrumContext.
        */
-      evalMain = new SLEvalRootNode(this, null, functions);
+      evalMain = new StrumReplNode(this, null, functions);
     }
+
     return Truffle.getRuntime().createCallTarget(evalMain);
   }
 
@@ -193,8 +192,8 @@ public class StrumLanguage extends TruffleLanguage<StrumContext> {
 
   @Override
   protected SourceSection findSourceLocation(StrumContext context, Object value) {
-    if (value instanceof SLFunction) {
-      return ((SLFunction) value).getDeclaredLocation();
+    if (value instanceof StrumFunction) {
+      return ((StrumFunction) value).getDeclaredLocation();
     }
     return null;
   }
@@ -245,10 +244,10 @@ public class StrumLanguage extends TruffleLanguage<StrumContext> {
     return getCurrentContext(StrumLanguage.class);
   }
 
-  private static final List<NodeFactory<? extends SLBuiltinNode>> EXTERNAL_BUILTINS = Collections
+  private static final List<NodeFactory<? extends StrumBuiltinNode>> EXTERNAL_BUILTINS = Collections
       .synchronizedList(new ArrayList<>());
 
-  public static void installBuiltin(NodeFactory<? extends SLBuiltinNode> builtin) {
+  public static void installBuiltin(NodeFactory<? extends StrumBuiltinNode> builtin) {
     EXTERNAL_BUILTINS.add(builtin);
   }
 }

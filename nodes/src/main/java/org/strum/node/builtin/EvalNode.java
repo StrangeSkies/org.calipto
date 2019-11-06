@@ -4,7 +4,7 @@ import org.strum.compiler.EvaluationContext;
 import org.strum.compiler.StrumEvaluator;
 import org.strum.node.intrinsic.IntrinsicNode;
 import org.strum.type.ConsLibrary;
-import org.strum.type.Symbol;
+import org.strum.type.SymbolLibrary;
 
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.library.CachedLibrary;
@@ -24,7 +24,7 @@ public abstract class EvalNode extends IntrinsicNode {
   }
 
   @Specialization
-  Object doDefault(Symbol symbol) {
+  Object doDefault(SymbolLibrary symbol) {
     return evaluator.eval(symbol);
   }
 }

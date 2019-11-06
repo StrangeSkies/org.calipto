@@ -30,43 +30,55 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type.cells;
+package org.strum.type.symbols;
 
-import org.strum.type.ConsLibrary;
+import java.util.Objects;
+
+import org.strum.type.SymbolLibrary;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-@ExportLibrary(ConsLibrary.class)
+// TODO value type
+@ExportLibrary(SymbolLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class ConsCell implements TruffleObject {
-  private final Object car;
-  private final Object cdr;
+public final class Symbol implements TruffleObject {
+  private final String symbol;
+  private final String namespace;
+  private final String name;
 
-  public ConsCell(Object car, Object cdr) {
-    this.car = car;
-    this.cdr = cdr;
+  public Symbol(Namespace namespace, Name name) {
+    this.namespace = namespace;
+    this.name = name;
   }
 
   @ExportMessage
-  Object car() {
-    return car;
+  public String namespace() {
+    return namespace;
   }
 
   @ExportMessage
-  Object cdr() {
-    return cdr;
+  public String name() {
+    return name;
   }
 
+  @Override
   @ExportMessage
-  Object cons(Object car) {
-    return new ConsCell(car, this);
+  public String toString() {
+    return symbol;
   }
 
+  @Override
   @ExportMessage
-  boolean isCons() {
-    return true;
+  public boolean equals(Object obj) {
+    if (obj == null || obj.getClass() != getClass()) {
+      return false;
+    }
+
+    Symbol that = (Symbol) obj;
+
+    return Objects.equals(this.name, that.name) && Objects.equals(this.namespace, that.namespace);
   }
 }

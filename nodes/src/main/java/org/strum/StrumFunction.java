@@ -2,7 +2,7 @@ package org.strum;
 
 import java.util.logging.Level;
 
-import org.strum.type.Symbol;
+import org.strum.type.SymbolLibrary;
 
 import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.CallTarget;
@@ -50,7 +50,7 @@ public final class StrumFunction implements TruffleObject {
   private static final TruffleLogger LOG = TruffleLogger
       .getLogger(StrumLanguage.ID, StrumFunction.class);
 
-  private final Symbol name;
+  private final SymbolLibrary name;
 
   /** The current implementation of this function. */
   private RootCallTarget callTarget;
@@ -62,7 +62,7 @@ public final class StrumFunction implements TruffleObject {
    */
   private final CyclicAssumption callTargetStable;
 
-  protected StrumFunction(StrumLanguage language, Symbol name) {
+  protected StrumFunction(StrumLanguage language, SymbolLibrary name) {
     this.name = name;
     this.callTarget = Truffle
         .getRuntime()
@@ -70,7 +70,7 @@ public final class StrumFunction implements TruffleObject {
     this.callTargetStable = new CyclicAssumption(name.toString());
   }
 
-  public Symbol getName() {
+  public SymbolLibrary getName() {
     return name;
   }
 
