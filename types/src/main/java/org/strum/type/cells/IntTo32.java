@@ -35,43 +35,30 @@ package org.strum.type.cells;
 import org.strum.type.ConsLibrary;
 import org.strum.type.symbols.Bool;
 
-import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
-import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
 @ExportLibrary(value = ConsLibrary.class)
 @ExportLibrary(value = InteropLibrary.class)
-final class IntTo32 implements TruffleObject {
+public final class IntTo32 implements TruffleObject {
   private final int value;
+  private final int bits;
 
-  public IntTo32(int value) {
+  public IntTo32(int value, int bits) {
     this.value = value;
+    this.bits = bits;
   }
 
   @ExportMessage
   Bool car() {
-    return car;
+    return value >> (bits - 1) > 0 ? Bool.TRUE : Bool.FALSE;
   }
 
   @ExportMessage
   Object cdr() {
-    return cdr;
-  }
-
-  @ExportMessage
-  abstract static class Cons {
-    @Specialization(guards = "conses.isCons(cdr)", limit = "3")
-    static Object doDefault(IntTo32 car, Object cdr, @CachedLibrary("cdr") ConsLibrary conses) {
-      return null;
-    }
-
-    @Specialization(replaces = "doDefault")
-    static Object doBoolean(IntTo32 car, boolean cdr) {
-      return null;
-    }
+    return new IntTo32(value, bits - 1);
   }
 
   @ExportMessage

@@ -30,53 +30,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type;
+package org.strum.type.symbols;
 
-import java.util.Objects;
+import org.strum.type.ConsLibrary;
 
-import org.strum.type.cells.Cons;
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
 
-import com.oracle.truffle.api.library.GenerateLibrary;
-import com.oracle.truffle.api.library.Library;
-import com.oracle.truffle.api.library.LibraryFactory;
+// TODO value type
+@ExportLibrary(ConsLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+public final class Singleton implements TruffleObject {
+  private final Object value;
 
-@GenerateLibrary
-public abstract class SymbolLibrary extends Library {
-  public static LibraryFactory<SymbolLibrary> getFactory() {
-    return LibraryFactory.resolve(SymbolLibrary.class);
+  public Singleton(Object value) {
+    this.value = value;
   }
 
-  public boolean isSymbol(Object receiver) {
-    return false;
+  @ExportMessage
+  Object car() {
+    return value;
   }
 
-  public abstract String namespace(Object receiver);
-
-  public abstract String name(Object receiver);
-
-  public String toString(Object receiver) {
-    return namespace(receiver) + "/" + name(receiver);
-  }
-
-  public boolean equals(Object first, Object second) {
-    if (!isSymbol(first) || !isSymbol(second)) {
-      return false;
-    }
-
-    return Objects.equals(name(first), name(second))
-        && Objects.equals(namespace(first), namespace(second));
-  }
-
-  /**
-   * Cons the receiver onto the given value.
-   * 
-   * @param receiver
-   *          the receiver, which will be the new car in the resulting cons cell
-   * @param value
-   *          the value to be the new cdr in the resulting cons cell
-   * @return the cons of the receiver onto the value
-   */
-  public Object cons(Object receiver, Object value) {
-    return new Cons(receiver, value);
+  @ExportMessage
+  Nil cdr() {
+    return Nil.NIL;
   }
 }

@@ -38,13 +38,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.astrum</groupId>
-	<artifactId>astrum</artifactId>
+	<groupId>org.preste</groupId>
+	<artifactId>preste</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Astrum</name>
-	<description>Implementation of the Astrum programming lannguage</description>
+	<name>Preste</name>
+	<description>Implementation of the Preste programming lannguage</description>
 
 	<licenses>
 		<license>

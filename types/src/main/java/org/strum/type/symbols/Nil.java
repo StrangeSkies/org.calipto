@@ -43,7 +43,7 @@ import com.oracle.truffle.api.library.ExportMessage;
 @ExportLibrary(SymbolLibrary.class)
 @ExportLibrary(InteropLibrary.class)
 public final class Nil implements TruffleObject {
-  public final Nil NIL = new Nil();
+  public static final Nil NIL = new Nil();
 
   private Nil() {}
 

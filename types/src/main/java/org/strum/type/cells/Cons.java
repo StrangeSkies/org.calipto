@@ -41,7 +41,7 @@ import com.oracle.truffle.api.library.ExportMessage;
 
 @ExportLibrary(ConsLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class Cons implements TruffleObject {
+public final class Cons implements TruffleObject {
   private final Object car;
   private final Object cdr;
 
@@ -58,11 +58,6 @@ final class Cons implements TruffleObject {
   @ExportMessage
   Object cdr() {
     return cdr;
-  }
-
-  @ExportMessage
-  Object cons(Object car) {
-    return new Cons(car, this);
   }
 
   @ExportMessage

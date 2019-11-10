@@ -39,8 +39,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.astrum</groupId>
-		<artifactId>astrum</artifactId>
+		<groupId>org.preste</groupId>
+		<artifactId>preste</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 

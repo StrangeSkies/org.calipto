@@ -32,6 +32,8 @@
  */
 package org.strum.type;
 
+import org.strum.type.cells.Cons;
+
 import com.oracle.truffle.api.library.GenerateLibrary;
 import com.oracle.truffle.api.library.Library;
 import com.oracle.truffle.api.library.LibraryFactory;
@@ -51,13 +53,15 @@ public abstract class ConsLibrary extends Library {
   public abstract Object cdr(Object receiver);
 
   /**
-   * Cons the given value onto the receiver.
+   * Cons the receiver onto the given value.
    * 
    * @param receiver
-   *          the receiver, which will be the new cdr in the resulting cons cell
+   *          the receiver, which will be the new car in the resulting cons cell
    * @param value
-   *          the value to be the new car in the resulting cons cell
-   * @return the cons of the value onto the receiver
+   *          the value to be the new cdr in the resulting cons cell
+   * @return the cons of the receiver onto the value
    */
-  public abstract Object cons(Object receiver, Object value);
+  public Object cons(Object receiver, Object value) {
+    return new Cons(receiver, value);
+  }
 }

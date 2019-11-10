@@ -32,10 +32,15 @@
  */
 package org.strum.type.symbols;
 
+import org.strum.type.ConsLibrary;
 import org.strum.type.SymbolLibrary;
+import org.strum.type.cells.Cons;
+import org.strum.type.cells.IntTo32;
 
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
@@ -43,8 +48,8 @@ import com.oracle.truffle.api.library.ExportMessage;
 @ExportLibrary(SymbolLibrary.class)
 @ExportLibrary(InteropLibrary.class)
 public final class Bool implements TruffleObject {
-  public final Bool TRUE = new Bool(true);
-  public final Bool FALSE = new Bool(false);
+  public static final Bool TRUE = new Bool(true);
+  public static final Bool FALSE = new Bool(false);
 
   private final boolean value;
 
@@ -66,6 +71,24 @@ public final class Bool implements TruffleObject {
   @ExportMessage
   public String toString() {
     return "/" + name();
+  }
+
+  @ExportMessage
+  abstract static class Cons {
+    @Specialization(guards = "conses.isCons(cdr)", limit = "3")
+    static Object doCons(Bool car, Object cdr, @CachedLibrary("cdr") ConsLibrary conses) {
+      return new org.strum.type.cells.Cons(car, cdr);
+    }
+
+    @Specialization(guards = "symbols.isSymbol(cdr)", limit = "3")
+    static Object doCons(Bool car, Object cdr, @CachedLibrary("cdr") SymbolLibrary symbols) {
+      return new org.strum.type.cells.Cons(car, cdr);
+    }
+
+    @Specialization(replaces = "doCons")
+    static Object doIntTo(Bool car, IntTo32 cdr) {
+      return null;
+    }
   }
 
   @Override
