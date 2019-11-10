@@ -32,25 +32,14 @@
  */
 package org.strum.type.symbol;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class SymbolIndex {
-  private final Map<String, Reference<Symbol>> symbols = new IdentityHashMap<>();
+  private final Map<String, Symbol> symbols = new IdentityHashMap<>();
 
   public Symbol getSymbol(String string) {
     string = string.intern();
-    var reference = symbols.get(string);
-    if (reference != null) {
-      var symbol = reference.get();
-      if (symbol != null) {
-        return symbol;
-      }
-    }
-    var symbol = new Symbol(string);
-    reference = new WeakReference<>(symbol);
-    return symbol;
+    return symbols.computeIfAbsent(string, Symbol::new);
   }
 }

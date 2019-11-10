@@ -197,6 +197,10 @@ public class StrumContext {
       return a;
     } else if (a instanceof Symbol) {
     	
+      throw new UnsupportedOperationException();
+      // TODO intern symbol to context
+      
+      
     } else if (a instanceof Character) {
       return String.valueOf(a);
     } else if (a instanceof Number) {
