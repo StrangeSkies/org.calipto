@@ -30,13 +30,53 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type;
+package org.strum.type.symbol;
 
-import org.strum.type.symbol.SymbolLibrary;
+import java.util.Objects;
 
-import com.oracle.truffle.api.dsl.TypeSystem;
+import org.strum.type.cons.Cons;
 
-@TypeSystem({ SymbolLibrary.class })
-public class StrumTypes {
+import com.oracle.truffle.api.library.GenerateLibrary;
+import com.oracle.truffle.api.library.Library;
+import com.oracle.truffle.api.library.LibraryFactory;
 
+@GenerateLibrary
+public abstract class SymbolLibrary extends Library {
+  public static LibraryFactory<SymbolLibrary> getFactory() {
+    return LibraryFactory.resolve(SymbolLibrary.class);
+  }
+
+  public boolean isSymbol(Object receiver) {
+    return false;
+  }
+
+  public abstract String namespace(Object receiver);
+
+  public abstract String name(Object receiver);
+
+  public String toString(Object receiver) {
+    return namespace(receiver) + "/" + name(receiver);
+  }
+
+  public boolean equals(Object first, Object second) {
+    if (!isSymbol(first) || !isSymbol(second)) {
+      return false;
+    }
+
+    return Objects.equals(name(first), name(second))
+        && Objects.equals(namespace(first), namespace(second));
+  }
+
+  /**
+   * Cons the receiver onto the given value.
+   * 
+   * @param receiver
+   *          the receiver, which will be the new car in the resulting cons cell
+   * @param value
+   *          the value to be the new cdr in the resulting cons cell
+   * @return the cons of the receiver onto the value
+   */
+  public Object cons(Object receiver, Object value) {
+    return new Cons(receiver, value);
+  }
 }

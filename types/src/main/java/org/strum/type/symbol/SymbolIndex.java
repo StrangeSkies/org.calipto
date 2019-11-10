@@ -30,17 +30,27 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type;
+package org.strum.type.symbol;
 
-// TODO value type
-public class Name {
-  private final String value;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
-  public Name(String value) {
-    this.value = value;
-  }
+public class SymbolIndex {
+  private final Map<String, Reference<Symbol>> symbols = new IdentityHashMap<>();
 
-  public String toString() {
-    return value;
+  public Symbol getSymbol(String string) {
+    string = string.intern();
+    var reference = symbols.get(string);
+    if (reference != null) {
+      var symbol = reference.get();
+      if (symbol != null) {
+        return symbol;
+      }
+    }
+    var symbol = new Symbol(string);
+    reference = new WeakReference<>(symbol);
+    return symbol;
   }
 }

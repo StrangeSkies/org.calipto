@@ -30,27 +30,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type;
+package org.strum.type.symbol;
 
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
+// TODO value type
+public class Namespace {
+  private final String value;
 
-public class SymbolIndex {
-  private final Map<String, Reference<Symbol>> symbols = new HashMap<>();
+  public Namespace(String value) {
+    this.value = value;
+  }
 
-  public Symbol getSymbol(String string) {
-    var reference = symbols.get(string);
-    if (reference != null) {
-      var symbol = reference.get();
-      if (symbol != null) {
-        return symbol;
-      }
-    }
-    var symbol = new Symbol(namespace, name);
-    reference = new WeakReference<>(symbol)
-    return symbol;
+  public String toString() {
+    return value;
   }
 }

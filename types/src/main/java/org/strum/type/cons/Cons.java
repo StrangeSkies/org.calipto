@@ -30,47 +30,36 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type.symbols;
-
-import org.strum.type.SymbolLibrary;
+package org.strum.type.cons;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-// TODO value type
-@ExportLibrary(SymbolLibrary.class)
+@ExportLibrary(ConsLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-public final class Nil implements TruffleObject {
-  public static final Nil NIL = new Nil();
+public final class Cons implements TruffleObject {
+  private final Object car;
+  private final Object cdr;
 
-  private Nil() {}
-
-  @ExportMessage
-  public String namespace() {
-    return "";
+  public Cons(Object car, Object cdr) {
+    this.car = car;
+    this.cdr = cdr;
   }
 
   @ExportMessage
-  public String name() {
-    return "nil";
-  }
-
-  @Override
-  @ExportMessage
-  public String toString() {
-    return "/nil";
-  }
-
-  @Override
-  @ExportMessage
-  public boolean equals(Object obj) {
-    return obj == this;
+  Object car() {
+    return car;
   }
 
   @ExportMessage
-  boolean isNull() {
+  Object cdr() {
+    return cdr;
+  }
+
+  @ExportMessage
+  boolean isCons() {
     return true;
   }
 }

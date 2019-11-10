@@ -30,55 +30,36 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type.symbols;
+package org.strum.type.cons;
 
-import java.util.Objects;
+import com.oracle.truffle.api.library.GenerateLibrary;
+import com.oracle.truffle.api.library.Library;
+import com.oracle.truffle.api.library.LibraryFactory;
 
-import org.strum.type.SymbolLibrary;
-
-import com.oracle.truffle.api.interop.InteropLibrary;
-import com.oracle.truffle.api.interop.TruffleObject;
-import com.oracle.truffle.api.library.ExportLibrary;
-import com.oracle.truffle.api.library.ExportMessage;
-
-// TODO value type
-@ExportLibrary(SymbolLibrary.class)
-@ExportLibrary(InteropLibrary.class)
-public final class Symbol implements TruffleObject {
-  private final String symbol;
-  private final String namespace;
-  private final String name;
-
-  public Symbol(Namespace namespace, Name name) {
-    this.namespace = namespace;
-    this.name = name;
+@GenerateLibrary
+public abstract class ConsLibrary extends Library {
+  public static LibraryFactory<ConsLibrary> getFactory() {
+    return LibraryFactory.resolve(ConsLibrary.class);
   }
 
-  @ExportMessage
-  public String namespace() {
-    return namespace;
+  public boolean isCons(Object receiver) {
+    return false;
   }
 
-  @ExportMessage
-  public String name() {
-    return name;
-  }
+  public abstract Object car(Object receiver);
 
-  @Override
-  @ExportMessage
-  public String toString() {
-    return symbol;
-  }
+  public abstract Object cdr(Object receiver);
 
-  @Override
-  @ExportMessage
-  public boolean equals(Object obj) {
-    if (obj == null || obj.getClass() != getClass()) {
-      return false;
-    }
-
-    Symbol that = (Symbol) obj;
-
-    return Objects.equals(this.name, that.name) && Objects.equals(this.namespace, that.namespace);
+  /**
+   * Cons the receiver onto the given value.
+   * 
+   * @param receiver
+   *          the receiver, which will be the new car in the resulting cons cell
+   * @param value
+   *          the value to be the new cdr in the resulting cons cell
+   * @return the cons of the receiver onto the value
+   */
+  public Object cons(Object receiver, Object value) {
+    return new Cons(receiver, value);
   }
 }

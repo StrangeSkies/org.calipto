@@ -195,6 +195,8 @@ public class StrumContext {
   public static Object fromForeignValue(Object a) {
     if (a instanceof Long || a instanceof String || a instanceof Boolean) {
       return a;
+    } else if (a instanceof Symbol) {
+    	
     } else if (a instanceof Character) {
       return String.valueOf(a);
     } else if (a instanceof Number) {

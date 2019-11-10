@@ -30,39 +30,45 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type.cells;
-
-import org.strum.type.ConsLibrary;
-import org.strum.type.symbols.Bool;
+package org.strum.type.symbol;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-@ExportLibrary(value = ConsLibrary.class)
-@ExportLibrary(value = InteropLibrary.class)
-public final class IntTo32 implements TruffleObject {
-  private final int value;
-  private final int bits;
+// TODO value type
+@ExportLibrary(SymbolLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+public final class Nil implements TruffleObject {
+  public static final Nil NIL = new Nil();
 
-  public IntTo32(int value, int bits) {
-    this.value = value;
-    this.bits = bits;
+  private Nil() {}
+
+  @ExportMessage
+  public String namespace() {
+    return "";
   }
 
   @ExportMessage
-  Bool car() {
-    return value >> (bits - 1) > 0 ? Bool.TRUE : Bool.FALSE;
+  public String name() {
+    return "nil";
+  }
+
+  @Override
+  @ExportMessage
+  public String toString() {
+    return "/nil";
+  }
+
+  @Override
+  @ExportMessage
+  public boolean equals(Object obj) {
+    return obj == this;
   }
 
   @ExportMessage
-  Object cdr() {
-    return new IntTo32(value, bits - 1);
-  }
-
-  @ExportMessage
-  boolean isCons() {
+  boolean isNull() {
     return true;
   }
 }

@@ -30,38 +30,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type;
+package org.strum.type.symbol;
 
-import org.strum.type.cells.Cons;
+import org.strum.type.cons.ConsLibrary;
 
-import com.oracle.truffle.api.library.GenerateLibrary;
-import com.oracle.truffle.api.library.Library;
-import com.oracle.truffle.api.library.LibraryFactory;
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
 
-@GenerateLibrary
-public abstract class ConsLibrary extends Library {
-  public static LibraryFactory<ConsLibrary> getFactory() {
-    return LibraryFactory.resolve(ConsLibrary.class);
+// TODO value type
+@ExportLibrary(ConsLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+public final class Singleton implements TruffleObject {
+  private final Object value;
+
+  public Singleton(Object value) {
+    this.value = value;
   }
 
-  public boolean isCons(Object receiver) {
-    return false;
+  @ExportMessage
+  Object car() {
+    return value;
   }
 
-  public abstract Object car(Object receiver);
-
-  public abstract Object cdr(Object receiver);
-
-  /**
-   * Cons the receiver onto the given value.
-   * 
-   * @param receiver
-   *          the receiver, which will be the new car in the resulting cons cell
-   * @param value
-   *          the value to be the new cdr in the resulting cons cell
-   * @return the cons of the receiver onto the value
-   */
-  public Object cons(Object receiver, Object value) {
-    return new Cons(receiver, value);
+  @ExportMessage
+  Nil cdr() {
+    return Nil.NIL;
   }
 }

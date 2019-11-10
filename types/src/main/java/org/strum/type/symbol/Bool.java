@@ -30,37 +30,77 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type.cells;
+package org.strum.type.symbol;
 
-import org.strum.type.ConsLibrary;
-import org.strum.type.symbols.Bool;
+import org.strum.type.cons.ConsLibrary;
+import org.strum.type.cons.IntTo32;
 
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-@ExportLibrary(value = ConsLibrary.class)
-@ExportLibrary(value = InteropLibrary.class)
-public final class Int32 implements TruffleObject {
-  private final int value;
+// TODO value type
+@ExportLibrary(SymbolLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+public final class Bool implements TruffleObject {
+  public static final Bool TRUE = new Bool(true);
+  public static final Bool FALSE = new Bool(false);
 
-  public Int32(int value) {
+  private final boolean value;
+
+  private Bool(boolean value) {
     this.value = value;
   }
 
   @ExportMessage
-  Bool car() {
-    return value >> 31 > 0 ? Bool.TRUE : Bool.FALSE;
+  public String namespace() {
+    return "";
   }
 
   @ExportMessage
-  Object cdr() {
-    return new IntTo32(value, 31);
+  public String name() {
+    return Boolean.toString(value);
+  }
+
+  @Override
+  @ExportMessage
+  public String toString() {
+    return "/" + name();
   }
 
   @ExportMessage
-  boolean isCons() {
+  abstract static class Cons {
+    @Specialization(guards = "conses.isCons(cdr)", limit = "3")
+    static Object doCons(Bool car, Object cdr, @CachedLibrary("cdr") ConsLibrary conses) {
+      return new org.strum.type.cons.Cons(car, cdr);
+    }
+
+    @Specialization(guards = "symbols.isSymbol(cdr)", limit = "3")
+    static Object doSymbol(Bool car, Object cdr, @CachedLibrary("cdr") SymbolLibrary symbols) {
+      return new org.strum.type.cons.Cons(car, cdr);
+    }
+
+    @Specialization(replaces = "doCons")
+    static Object doIntTo(Bool car, IntTo32 cdr) {
+      return null;
+    }
+  }
+
+  @Override
+  @ExportMessage
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Bool)) {
+      return false;
+    }
+    Bool that = (Bool) obj;
+    return this.value == that.value;
+  }
+
+  @ExportMessage
+  boolean isNull() {
     return true;
   }
 }
