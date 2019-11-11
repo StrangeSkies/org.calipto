@@ -1,4 +1,5 @@
-# Preste
+Preste
+======
 
 Preste is a predicatively-typed, purely-functional Lisp dialect with the following goals.
 
