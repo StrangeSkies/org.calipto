@@ -1,6 +1,6 @@
 package org.strum.node.intrinsic;
 
-import org.strum.type.ConsLibrary;
+import org.strum.type.cons.ConsLibrary;
 
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.library.CachedLibrary;

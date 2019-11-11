@@ -44,6 +44,7 @@ import java.util.Map;
 
 import org.strum.StrumContext;
 import org.strum.StrumLanguage;
+import org.strum.type.symbol.Nil;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
@@ -52,8 +53,6 @@ import com.oracle.truffle.api.TruffleLanguage.ContextReference;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.RootNode;
-import com.oracle.truffle.sl.runtime.SLContext;
-import com.oracle.truffle.sl.runtime.SLNull;
 
 /**
  * A Strum source file cannot be read in one go and then separately parsed.
@@ -112,12 +111,12 @@ public final class StrumReplNode extends RootNode {
 
     if (mainCallNode == null) {
       /* The source code did not have a "main" function, so nothing to execute. */
-      return nilSymbol();
+      return Nil.NIL;
     } else {
       /* Conversion of arguments to types understood by SL. */
       Object[] arguments = frame.getArguments();
       for (int i = 0; i < arguments.length; i++) {
-        arguments[i] = StrumContext.fromForeignValue(arguments[i]);
+        arguments[i] = reference.get().fromForeignValue(arguments[i]);
       }
       return mainCallNode.call(arguments);
     }

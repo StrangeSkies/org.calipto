@@ -1,8 +1,6 @@
 package org.strum.node;
 
 import org.strum.StrumTypeException;
-import org.strum.type.ConsLibrary;
-import org.strum.type.SymbolLibrary;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.GenerateNodeFactory;
@@ -15,8 +13,6 @@ import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.interop.UnsupportedTypeException;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.Node.Child;
-import com.oracle.truffle.api.nodes.Node.Children;
 
 /**
  * A node for built-in side effects. This represents the enclosing context which

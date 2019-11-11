@@ -7,4 +7,4 @@ import com.oracle.truffle.api.dsl.GenerateNodeFactory;
  * continuation it was yielded from.
  */
 @GenerateNodeFactory
-public class ContinueNode extends StrumNode {}
+public abstract class ContinueNode extends StrumNode {}

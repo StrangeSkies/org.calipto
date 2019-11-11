@@ -103,4 +103,14 @@ public final class Bool implements TruffleObject {
   boolean isNull() {
     return true;
   }
+
+  @ExportMessage
+  boolean isBoolean() {
+    return true;
+  }
+
+  @ExportMessage
+  boolean asBoolean() {
+    return value;
+  }
 }

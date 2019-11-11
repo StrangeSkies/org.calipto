@@ -68,15 +68,15 @@ public abstract class SymbolLibrary extends Library {
   }
 
   /**
-   * Cons the receiver onto the given value.
+   * Cons the given value onto the receiver.
    * 
    * @param receiver
-   *          the receiver, which will be the new car in the resulting cons cell
+   *          the receiver, which will be the new cdr in the resulting cons cell
    * @param value
-   *          the value to be the new cdr in the resulting cons cell
-   * @return the cons of the receiver onto the value
+   *          the value to be the new car in the resulting cons cell
+   * @return the cons of the value onto the receiver
    */
-  public Object cons(Object receiver, Object value) {
+  public Object consWith(Object receiver, Object value) {
     return new Cons(receiver, value);
   }
 }
