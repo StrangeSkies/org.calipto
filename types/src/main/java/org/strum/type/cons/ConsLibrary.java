@@ -49,17 +49,4 @@ public abstract class ConsLibrary extends Library {
   public abstract Object car(Object receiver);
 
   public abstract Object cdr(Object receiver);
-
-  /**
-   * Cons the given value onto the receiver.
-   * 
-   * @param receiver
-   *          the receiver, which will be the new cdr in the resulting cons cell
-   * @param value
-   *          the value to be the new car in the resulting cons cell
-   * @return the cons of the value onto the receiver
-   */
-  public Object consWith(Object receiver, Object value) {
-    return new Cons(receiver, value);
-  }
 }
