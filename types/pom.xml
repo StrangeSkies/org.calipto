@@ -46,8 +46,8 @@
 
 	<artifactId>types</artifactId>
 
-	<name>Strum Types</name>
-	<description>The Strum types</description>
+	<name>Preste Types</name>
+	<description>The Preste types</description>
 
 	<dependencies>
 		<dependency>

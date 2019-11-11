@@ -78,7 +78,7 @@
 		<maven.compiler.source>12</maven.compiler.source>
 		<maven.compiler.target>12</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<bnd.version>4.2.0</bnd.version>
+		<bnd.version>4.3.0</bnd.version>
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 		<graalvm.version>19.2.0.1</graalvm.version>
 	</properties>
