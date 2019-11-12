@@ -51,15 +51,15 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.astrum</groupId>
+			<groupId>org.preste</groupId>
 			<artifactId>evaluator</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.astrum</groupId>
+			<groupId>org.preste</groupId>
 			<artifactId>reader</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.astrum</groupId>
+			<groupId>org.preste</groupId>
 			<artifactId>types</artifactId>
 		</dependency>
 		<dependency>

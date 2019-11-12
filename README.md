@@ -1,9 +1,14 @@
 # Preste
 
-Preste is a Lisp dialect with a few important twists.
+Preste is a predicatively-typed, purely-functional Lisp dialect with the following goals.
 
-Firstly, it is statically typed. Preste attempts to make advanced type system features like dependent types and higher-kinded types more accessible to the average coder, without requiring any specialist knowledge of type theory. The type system in Proto is based on a single, elegant abstraction; a type is simply a predicate which tests for membership. This turns out to be an extremely powerful foundation.
 
-Furthermore, Presto is a purely functional language. But instead of isolating side effects monadically it isolates they by way of a strongly-typed effects system, or scoped continuations.
+* An innovative "predicative" [type system](https://github.com/StrangeSkies/org.preste/wiki/Types), making power-features like dependent types intuitively accessible to the average coder.
 
-Lisp is widely considered to set the bar for metaprogramming facilities. Presto aspires to build on this by providing access to the effects system during reading and compilation. This allows the programmer to establish lexical context for reading and evaluating code in which state can be maintained. In fact the type system of Proto, along with many of the compiler's optimisation capabilities, are dynamically self-hosted atop a small bootstrapped core.
+* An [effect system](https://github.com/StrangeSkies/org.preste/wiki/Effects), to realise the power of purely-functional programming within an imperative programming model.
+
+* A deterministic [concurrency model](https://github.com/StrangeSkies/org.preste/wiki/Concurrency) which can be locally reasoned about; inter-coroutine communication is mediated by a single thread in the form of an effect handler.
+
+* Lisp-like [macro metaprogramming](https://github.com/StrangeSkies/org.preste/wiki/Macros), but with the additional power of the effect system to allow nested macros to collaborate within their lexical scope.
+
+* A reference implementation supporting both native image generation and an interpreted mode with a state-of-the-art JIT compiler, via [GraalVM & Truffle](/oracle/graal).

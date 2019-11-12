@@ -2,7 +2,7 @@ package org.strum;
 
 import java.util.logging.Level;
 
-import org.strum.type.SymbolLibrary;
+import org.strum.type.symbol.SymbolLibrary;
 
 import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.CallTarget;

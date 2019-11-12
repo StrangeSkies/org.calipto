@@ -11,7 +11,7 @@ import org.strum.reader.StrumDataFactory;
 import org.strum.reader.StrumReader;
 import org.strum.source.SourceScanner;
 import org.strum.source.StrumFileDetector;
-import org.strum.type.ConsLibrary;
+import org.strum.type.cons.ConsLibrary;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;

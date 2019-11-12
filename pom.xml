@@ -75,8 +75,8 @@
 	</scm>
 
 	<properties>
-		<maven.compiler.source>12</maven.compiler.source>
-		<maven.compiler.target>12</maven.compiler.target>
+		<maven.compiler.source>13</maven.compiler.source>
+		<maven.compiler.target>13</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<bnd.version>4.3.0</bnd.version>
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>

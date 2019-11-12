@@ -32,17 +32,15 @@
  */
 package org.strum.type.symbol;
 
-import org.strum.type.cons.ConsLibrary;
-import org.strum.type.cons.IntTo32;
+import org.strum.type.ValueLibrary;
 
-import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
-import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
 // TODO value type
+@ExportLibrary(ValueLibrary.class)
 @ExportLibrary(SymbolLibrary.class)
 @ExportLibrary(InteropLibrary.class)
 public final class Bool implements TruffleObject {
@@ -71,24 +69,6 @@ public final class Bool implements TruffleObject {
     return "/" + name();
   }
 
-  @ExportMessage
-  abstract static class Cons {
-    @Specialization(guards = "conses.isCons(cdr)", limit = "3")
-    static Object doCons(Bool car, Object cdr, @CachedLibrary("cdr") ConsLibrary conses) {
-      return new org.strum.type.cons.Cons(car, cdr);
-    }
-
-    @Specialization(guards = "symbols.isSymbol(cdr)", limit = "3")
-    static Object doSymbol(Bool car, Object cdr, @CachedLibrary("cdr") SymbolLibrary symbols) {
-      return new org.strum.type.cons.Cons(car, cdr);
-    }
-
-    @Specialization(replaces = "doCons")
-    static Object doIntTo(Bool car, IntTo32 cdr) {
-      return null;
-    }
-  }
-
   @Override
   @ExportMessage
   public boolean equals(Object obj) {
@@ -102,5 +82,15 @@ public final class Bool implements TruffleObject {
   @ExportMessage
   boolean isNull() {
     return true;
+  }
+
+  @ExportMessage
+  boolean isBoolean() {
+    return true;
+  }
+
+  @ExportMessage
+  boolean asBoolean() {
+    return value;
   }
 }

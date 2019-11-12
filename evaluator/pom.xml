@@ -51,7 +51,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.astrum</groupId>
+			<groupId>org.preste</groupId>
 			<artifactId>parser</artifactId>
 		</dependency>
 		<dependency>

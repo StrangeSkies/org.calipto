@@ -15,7 +15,10 @@ import org.strum.node.builtin.BuiltinNode;
 import org.strum.node.intrinsic.CarNodeFactory;
 import org.strum.node.intrinsic.CdrNodeFactory;
 import org.strum.node.intrinsic.IntrinsicNode;
-import org.strum.type.ConsLibrary;
+import org.strum.type.cons.ConsLibrary;
+import org.strum.type.symbol.Nil;
+import org.strum.type.symbol.Symbol;
+import org.strum.type.symbol.SymbolIndex;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -29,7 +32,6 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.instrumentation.AllocationReporter;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.nodes.NodeInfo;
-import com.oracle.truffle.api.object.DynamicObject;
 import com.oracle.truffle.api.source.Source;
 
 public class StrumContext {
@@ -45,8 +47,8 @@ public class StrumContext {
   private final AllocationReporter allocationReporter;
   private final Iterable<Scope> topScopes; // Cache the top scopes
 
-  
-  
+  private final SymbolIndex symbols = new SymbolIndex();
+
   public StrumContext(
       StrumLanguage language,
       TruffleLanguage.Env env,
@@ -192,15 +194,11 @@ public class StrumContext {
    * Methods for language interoperability.
    */
 
-  public static Object fromForeignValue(Object a) {
+  public Object fromForeignValue(Object a) {
     if (a instanceof Long || a instanceof String || a instanceof Boolean) {
       return a;
     } else if (a instanceof Symbol) {
-    	
-      throw new UnsupportedOperationException();
-      // TODO intern symbol to context
-      
-      
+      return fromForeignSymbol(a);
     } else if (a instanceof Character) {
       return String.valueOf(a);
     } else if (a instanceof Number) {
@@ -209,9 +207,16 @@ public class StrumContext {
       return a;
     } else if (a instanceof StrumContext) {
       return a;
+    } else if (a == null) {
+      return Nil.NIL;
     }
     CompilerDirectives.transferToInterpreter();
     throw new IllegalStateException(a + " is not a Truffle value");
+  }
+
+  @TruffleBoundary
+  private Symbol fromForeignSymbol(Object a) {
+    return symbols.getSymbol(((Symbol) a).toString());
   }
 
   @TruffleBoundary

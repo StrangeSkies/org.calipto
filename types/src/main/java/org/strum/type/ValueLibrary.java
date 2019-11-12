@@ -30,17 +30,39 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type.symbol;
+package org.strum.type;
 
-// TODO value type
-public class Namespace {
-  private final String value;
+import org.strum.type.cons.Cons;
+import org.strum.type.cons.Singleton;
 
-  public Namespace(String value) {
-    this.value = value;
+import com.oracle.truffle.api.library.GenerateLibrary;
+import com.oracle.truffle.api.library.Library;
+import com.oracle.truffle.api.library.LibraryFactory;
+
+@GenerateLibrary
+public abstract class ValueLibrary extends Library {
+  public static LibraryFactory<ValueLibrary> getFactory() {
+    return LibraryFactory.resolve(ValueLibrary.class);
   }
 
-  public String toString() {
-    return value;
+  public boolean isValue(Object receiver) {
+    return false;
+  }
+
+  /**
+   * Cons the given value onto the receiver.
+   * 
+   * @param receiver
+   *          the receiver, which will be the new cdr in the resulting cons cell
+   * @param value
+   *          the value to be the new car in the resulting cons cell
+   * @return the cons of the value onto the receiver
+   */
+  public Object consWith(Object receiver, Object value) {
+    return new Cons(receiver, value);
+  }
+
+  public Object consOntoNil(Object receiver) {
+    return new Singleton(receiver);
   }
 }

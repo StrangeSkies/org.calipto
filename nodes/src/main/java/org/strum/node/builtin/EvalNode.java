@@ -3,8 +3,8 @@ package org.strum.node.builtin;
 import org.strum.compiler.EvaluationContext;
 import org.strum.compiler.StrumEvaluator;
 import org.strum.node.intrinsic.IntrinsicNode;
-import org.strum.type.ConsLibrary;
-import org.strum.type.SymbolLibrary;
+import org.strum.type.cons.ConsLibrary;
+import org.strum.type.symbol.SymbolLibrary;
 
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.library.CachedLibrary;

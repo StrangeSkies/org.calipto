@@ -30,17 +30,38 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.strum.type.symbol;
+package org.strum.type.cons;
 
-// TODO value type
-public class Name {
-  private final String value;
+import org.strum.type.ValueLibrary;
+import org.strum.type.symbol.Nil;
 
-  public Name(String value) {
-    this.value = value;
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
+
+@ExportLibrary(ValueLibrary.class)
+@ExportLibrary(ConsLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+public final class Singleton implements TruffleObject {
+  private final Object car;
+
+  public Singleton(Object car) {
+    this.car = car;
   }
 
-  public String toString() {
-    return value;
+  @ExportMessage
+  Object car() {
+    return car;
+  }
+
+  @ExportMessage
+  Object cdr() {
+    return Nil.NIL;
+  }
+
+  @ExportMessage
+  boolean isCons() {
+    return true;
   }
 }
