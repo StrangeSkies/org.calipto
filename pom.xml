@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Strum - Implementation of the Strum programming lannguage
+    Preste - Implementation of the Preste programming lannguage
 
     Copyright © 2018 Strange Skies (elias@vasylenko.uk)
         __   _______  ____           _       __     _      __       __
@@ -69,9 +69,9 @@
 		</developer>
 	</developers>
 
-	<url>https://github.com/StrangeSkies/org.strum</url>
+	<url>https://github.com/StrangeSkies/org.preste</url>
 	<scm>
-		<url>https://github.com/StrangeSkies/org.strum</url>
+		<url>https://github.com/StrangeSkies/org.preste</url>
 	</scm>
 
 	<properties>

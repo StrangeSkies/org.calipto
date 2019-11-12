@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Strum Nodes - The text API
+    Preste Nodes - The text API
 
     Copyright © 2018 Strange Skies (elias@vasylenko.uk)
         __   _______  ____           _       __     _      __       __
@@ -46,7 +46,7 @@
 
 	<artifactId>nodes</artifactId>
 
-	<name>Strum Nodes</name>
+	<name>Preste Nodes</name>
 	<description>The text API</description>
 
 	<dependencies>
