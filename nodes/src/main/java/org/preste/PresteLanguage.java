@@ -1,14 +1,15 @@
 package org.preste;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.preste.node.PresteReplNode;
-import org.preste.reader.PresteDataFactory;
+import org.preste.node.builtin.BuiltinNode;
+import org.preste.node.intrinsic.IntrinsicNode;
 import org.preste.reader.PresteReader;
+import org.preste.reader.ReadingContext;
 import org.preste.source.PresteFileDetector;
 import org.preste.source.SourceScanner;
 import org.preste.type.cons.ConsLibrary;
@@ -52,19 +53,30 @@ public class PresteLanguage extends TruffleLanguage<PresteContext> {
 
   public static final String ID = "preste";
 
+  private final Set<NodeFactory<? extends IntrinsicNode>> intrinsics;
+  private final Set<NodeFactory<? extends BuiltinNode>> builtins;
+
   public PresteLanguage() {
+    this(Set.of(), Set.of());
+  }
+
+  public PresteLanguage(
+      Collection<? extends NodeFactory<? extends IntrinsicNode>> intrinsics,
+      Collection<? extends NodeFactory<? extends BuiltinNode>> builtins) {
+    this.intrinsics = Set.copyOf(intrinsics);
+    this.builtins = Set.copyOf(builtins);
     counter++;
   }
 
   @Override
   protected PresteContext createContext(Env env) {
-    return new PresteContext(this, env, new ArrayList<>(EXTERNAL_BUILTINS));
+    return new PresteContext(this, env, intrinsics, builtins);
   }
 
   @Override
   protected CallTarget parse(ParsingRequest request) throws Exception {
     Source source = request.getSource();
-    PresteReader reader = new PresteReader(getFactory(), new SourceScanner(source));
+    PresteReader reader = new PresteReader(getReadingContext(), new SourceScanner(source));
 
     RootCallTarget main = functions.get("main");
     RootNode evalMain;
@@ -88,22 +100,9 @@ public class PresteLanguage extends TruffleLanguage<PresteContext> {
     return Truffle.getRuntime().createCallTarget(evalMain);
   }
 
-  private PresteDataFactory getFactory() {
+  private ReadingContext getReadingContext() {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  /*
-   * Still necessary for the old SL TCK to pass. We should remove with the old
-   * TCK. New language should not override this.
-   */
-  @SuppressWarnings("deprecation")
-  @Override
-  protected Object findExportedSymbol(
-      PresteContext context,
-      String globalName,
-      boolean onlyExplicit) {
-    return context.getFunctionRegistry().lookup(globalName, false);
   }
 
   @Override
@@ -145,15 +144,13 @@ public class PresteLanguage extends TruffleLanguage<PresteContext> {
       } else if (interop.isNull(value)) {
         return "NULL";
       } else if (interop.isExecutable(value)) {
-        if (value instanceof SLFunction) {
-          return ((SLFunction) value).getName();
+        if (value instanceof PresteFunction) {
+          return ((PresteFunction) value).getNamespace() + "/" + ((PresteFunction) value).getName();
         } else {
           return "Function";
         }
       } else if (interop.hasMembers(value)) {
         return "Object";
-      } else if (value instanceof SLBigNumber) {
-        return value.toString();
       } else {
         return "Unsupported";
       }
@@ -173,9 +170,7 @@ public class PresteLanguage extends TruffleLanguage<PresteContext> {
       return "ANY";
     }
     InteropLibrary interop = InteropLibrary.getFactory().getUncached(value);
-    if (interop.isNumber(value) || value instanceof SLBigNumber) {
-      return "Number";
-    } else if (interop.isBoolean(value)) {
+    if (interop.isBoolean(value)) {
       return "Boolean";
     } else if (interop.isString(value)) {
       return "String";
@@ -242,12 +237,5 @@ public class PresteLanguage extends TruffleLanguage<PresteContext> {
 
   public static PresteContext getCurrentContext() {
     return getCurrentContext(PresteLanguage.class);
-  }
-
-  private static final List<NodeFactory<? extends PresteBuiltinNode>> EXTERNAL_BUILTINS = Collections
-      .synchronizedList(new ArrayList<>());
-
-  public static void installBuiltin(NodeFactory<? extends PresteBuiltinNode> builtin) {
-    EXTERNAL_BUILTINS.add(builtin);
   }
 }

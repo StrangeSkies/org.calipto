@@ -50,7 +50,8 @@ public final class PresteFunction implements TruffleObject {
   private static final TruffleLogger LOG = TruffleLogger
       .getLogger(PresteLanguage.ID, PresteFunction.class);
 
-  private final SymbolLibrary name;
+  private final String namespace;
+  private final String name;
 
   /** The current implementation of this function. */
   private RootCallTarget callTarget;
@@ -62,7 +63,8 @@ public final class PresteFunction implements TruffleObject {
    */
   private final CyclicAssumption callTargetStable;
 
-  protected PresteFunction(PresteLanguage language, SymbolLibrary name) {
+  protected PresteFunction(PresteLanguage language, String namespace, String name) {
+    this.namespace = namespace;
     this.name = name;
     this.callTarget = Truffle
         .getRuntime()
@@ -70,7 +72,11 @@ public final class PresteFunction implements TruffleObject {
     this.callTargetStable = new CyclicAssumption(name.toString());
   }
 
-  public SymbolLibrary getName() {
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public String getName() {
     return name;
   }
 
@@ -162,12 +168,16 @@ public final class PresteFunction implements TruffleObject {
      * @see Cached
      * @see Specialization
      *
-     * @param function       the dynamically provided function
-     * @param cachedFunction the cached function of the specialization instance
-     * @param callNode       the {@link DirectCallNode} specifically created for the
-     *                       {@link CallTarget} in cachedFunction.
+     * @param function
+     *          the dynamically provided function
+     * @param cachedFunction
+     *          the cached function of the specialization instance
+     * @param callNode
+     *          the {@link DirectCallNode} specifically created for the
+     *          {@link CallTarget} in cachedFunction.
      */
-    @Specialization(limit = "INLINE_CACHE_SIZE", //
+    @Specialization(
+        limit = "INLINE_CACHE_SIZE", //
         guards = "function.getCallTarget() == cachedTarget", //
         assumptions = "callTargetStable")
     @SuppressWarnings("unused")

@@ -20,5 +20,5 @@ public interface EvaluationContext {
 
   String getName(Object data);
 
-  Optional<PresteExpression> getMacro(String namespace, String name);
+  Optional<Object> getDefine(String namespace, String name);
 }
