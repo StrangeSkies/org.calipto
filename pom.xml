@@ -84,7 +84,6 @@
 	</properties>
 
 	<modules>
-		<module>evaluator</module>
 		<module>nodes</module>
 		<module>reader</module>
 		<module>types</module>
@@ -132,11 +131,6 @@
 
 			<!-- Workspace -->
 
-			<dependency>
-				<groupId>org.preste</groupId>
-				<artifactId>evaluator</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
-			</dependency>
 			<dependency>
 				<groupId>org.preste</groupId>
 				<artifactId>nodes</artifactId>

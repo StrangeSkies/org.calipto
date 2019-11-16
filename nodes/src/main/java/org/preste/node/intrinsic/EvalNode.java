@@ -14,15 +14,19 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 
 @NodeField(name = "slot", type = FrameSlot.class)
 @NodeInfo(shortName = "expand")
-public abstract class ExpandNode extends IntrinsicNode {
+public abstract class EvalNode extends IntrinsicNode {
   protected abstract FrameSlot getSlot();
-  
-  public ExpandNode() {
+
+  private final ConsLibrary consLibrary = ConsLibrary.getFactory().getUncached();
+  private final SymbolLibrary symbolLibrary = ConsLibrary.getFactory().getUncached();
+
+  public EvalNode() {
     // TODO Auto-generated constructor stub
   }
 
-  @Specialization(guards = "conses.isCons(cons)", limit = "3")
-  Object doDefault(VirtualFrame frame, Object cons, @CachedLibrary("cons") ConsLibrary conses) {
+  @Specialization
+  Object doDefault(VirtualFrame frame, Object value) {
+
     var value = conses.car(cons);
 
     var macros = frame.getFrameDescriptor().findFrameSlot((Symbol) "macros");
@@ -32,10 +36,5 @@ public abstract class ExpandNode extends IntrinsicNode {
     }
 
     return FrameUtil.getObjectSafe(frame, getSlot());
-  }
-
-  @Specialization(guards = "symbols.isSymbol(symbol)", limit = "3")
-  Object doDefault(Object symbol, @CachedLibrary("symbol") SymbolLibrary symbols) {
-    return symbol;
   }
 }

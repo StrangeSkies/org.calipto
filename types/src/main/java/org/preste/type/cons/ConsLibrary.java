@@ -51,4 +51,6 @@ public abstract class ConsLibrary extends Library {
   public abstract Object car(Object receiver);
 
   public abstract Object cdr(Object receiver);
+
+  public abstract Object get(Object receiver, Object key);
 }

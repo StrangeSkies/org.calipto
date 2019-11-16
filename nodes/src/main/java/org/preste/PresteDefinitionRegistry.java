@@ -33,7 +33,7 @@ public class PresteDefinitionRegistry {
    * the old implementation is discarded.
    */
   public Object register(String name, RootCallTarget callTarget) {
-    SLFunction function = lookup(name, true);
+    PresteFunction function = (PresteFunction) lookup(name);
     function.setCallTarget(callTarget);
     return function;
   }
@@ -44,29 +44,11 @@ public class PresteDefinitionRegistry {
     }
   }
 
-  public void register(Source newFunctions) {
-    register(SimpleLanguageParser.parseSL(language, newFunctions));
-  }
-
-  public SLFunction getFunction(String name) {
-    return functionsObject.functions.get(name);
-  }
-
-  /**
-   * Returns the sorted list of all functions, for printing purposes only.
-   */
-  public List<PresteFunction> getFunctions() {
-    List<PresteFunction> result = new ArrayList<>(functionsObject.objects.values());
-    Collections.sort(result, new Comparator<PresteFunction>() {
-      public int compare(PresteFunction f1, PresteFunction f2) {
-        return f1.toString().compareTo(f2.toString());
-      }
-    });
-    return result;
+  public PresteFunction getFunction(String name) {
+    return (PresteFunction) functionsObject.objects.get(name);
   }
 
   public TruffleObject getFunctionsObject() {
     return functionsObject;
   }
-
 }

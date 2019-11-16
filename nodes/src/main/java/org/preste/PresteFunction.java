@@ -66,9 +66,7 @@ public final class PresteFunction implements TruffleObject {
   protected PresteFunction(PresteLanguage language, String namespace, String name) {
     this.namespace = namespace;
     this.name = name;
-    this.callTarget = Truffle
-        .getRuntime()
-        .createCallTarget(new PresteUndefinedFunctionRootNode(language, name));
+    this.callTarget = null;
     this.callTargetStable = new CyclicAssumption(name.toString());
   }
 

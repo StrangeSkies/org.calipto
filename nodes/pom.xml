@@ -52,10 +52,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.preste</groupId>
-			<artifactId>evaluator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.preste</groupId>
 			<artifactId>reader</artifactId>
 		</dependency>
 		<dependency>
