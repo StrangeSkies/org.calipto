@@ -32,7 +32,7 @@
  */
 package org.preste.type.cons;
 
-import org.preste.type.ValueLibrary;
+import org.preste.type.DataLibrary;
 
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
@@ -46,8 +46,7 @@ import com.oracle.truffle.api.library.ExportMessage;
  * so we can have a single Int<X> type to specialize as Int<32>,
  * Int<31>, etc.)
  */
-@ExportLibrary(value = ValueLibrary.class, receiverType = Integer.class)
-@ExportLibrary(value = ConsLibrary.class, receiverType = Integer.class)
+@ExportLibrary(value = DataLibrary.class, receiverType = Integer.class)
 public final class Int32 implements TruffleObject {
   @ExportMessage
   public static boolean car(Integer receiver) {

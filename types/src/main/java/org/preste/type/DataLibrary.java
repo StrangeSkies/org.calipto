@@ -37,29 +37,44 @@ import org.preste.type.cons.Int32;
 import org.preste.type.cons.Singleton;
 import org.preste.type.symbol.Bool;
 
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.GenerateLibrary;
+import com.oracle.truffle.api.library.GenerateLibrary.Abstract;
+import com.oracle.truffle.api.library.GenerateLibrary.DefaultExport;
 import com.oracle.truffle.api.library.Library;
 import com.oracle.truffle.api.library.LibraryFactory;
-import com.oracle.truffle.api.library.GenerateLibrary.DefaultExport;
 
 @DefaultExport(Bool.class)
 @DefaultExport(Int32.class)
 @GenerateLibrary
-public abstract class ValueLibrary extends Library {
-  public static LibraryFactory<ValueLibrary> getFactory() {
-    return LibraryFactory.resolve(ValueLibrary.class);
+public abstract class DataLibrary extends Library {
+  public static LibraryFactory<DataLibrary> getFactory() {
+    return LibraryFactory.resolve(DataLibrary.class);
   }
 
-  public boolean isValue(Object receiver) {
+  @ExportLibrary
+  public abstract InteropLibrary getInterop();
+
+  /*
+   * General messages
+   */
+
+  public boolean isData(Object receiver) {
     return false;
   }
+
+  public abstract String toString(Object receiver);
+
+  public abstract boolean equals(Object first, Object second);
 
   /**
    * Cons the given value onto the receiver.
    * 
-   * @param receiver the receiver, which will be the new cdr in the resulting cons
-   *                 cell
-   * @param value    the value to be the new car in the resulting cons cell
+   * @param receiver
+   *          the receiver, which will be the new cdr in the resulting cons cell
+   * @param value
+   *          the value to be the new car in the resulting cons cell
    * @return the cons of the value onto the receiver
    */
   public Object consWith(Object receiver, Object value) {
@@ -68,5 +83,48 @@ public abstract class ValueLibrary extends Library {
 
   public Object consOntoNil(Object receiver) {
     return new Singleton(receiver);
+  }
+
+  /*
+   * Symbol messages.
+   */
+
+  @Abstract(ifExported = { "namespace", "name" })
+  public boolean isSymbol(Object receiver) {
+    return false;
+  }
+
+  @Abstract(ifExported = { "isSymbol", "name" })
+  public String namespace(Object receiver) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Abstract(ifExported = { "isSymbol", "namespace" })
+  public String name(Object receiver) {
+    throw new UnsupportedOperationException();
+  }
+
+  /*
+   * Cons messages
+   */
+
+  @Abstract(ifExported = { "car", "cdr", "get" })
+  public boolean isCons(Object receiver) {
+    return false;
+  }
+
+  @Abstract(ifExported = { "isCons", "cdr", "get" })
+  public Object car(Object receiver) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Abstract(ifExported = { "isCons", "car", "get" })
+  public Object cdr(Object receiver) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Abstract(ifExported = { "isCons", "car", "cdr" })
+  public Object get(Object receiver, Object key) {
+    throw new UnsupportedOperationException();
   }
 }

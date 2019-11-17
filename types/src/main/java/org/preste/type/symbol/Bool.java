@@ -32,7 +32,7 @@
  */
 package org.preste.type.symbol;
 
-import org.preste.type.ValueLibrary;
+import org.preste.type.DataLibrary;
 
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
@@ -42,9 +42,13 @@ import com.oracle.truffle.api.library.ExportMessage;
  * TODO when we have value types, this should be a custom bool
  * value type implementation without an explicit receiverType.
  */
-@ExportLibrary(value = ValueLibrary.class, receiverType = Boolean.class)
-@ExportLibrary(value = SymbolLibrary.class, receiverType = Boolean.class)
+@ExportLibrary(value = DataLibrary.class, receiverType = Boolean.class)
 public final class Bool implements TruffleObject {
+  @ExportMessage
+  public static boolean isSymbol(Boolean value) {
+    return true;
+  }
+
   @ExportMessage
   public static String namespace(Boolean value) {
     return "";
