@@ -32,18 +32,30 @@
  */
 package org.preste.type.symbol;
 
+import org.preste.type.DataLibrary;
+
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
 // TODO value type
-@ExportLibrary(SymbolLibrary.class)
+@ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
 public final class Nil implements TruffleObject {
   public static final Nil NIL = new Nil();
 
   private Nil() {}
+
+  @ExportMessage
+  public boolean isData() {
+    return true;
+  }
+
+  @ExportMessage
+  public boolean isSymbol() {
+    return true;
+  }
 
   @ExportMessage
   public String namespace() {
@@ -53,12 +65,6 @@ public final class Nil implements TruffleObject {
   @ExportMessage
   public String name() {
     return "nil";
-  }
-
-  @Override
-  @ExportMessage
-  public String toString() {
-    return "/nil";
   }
 
   @Override

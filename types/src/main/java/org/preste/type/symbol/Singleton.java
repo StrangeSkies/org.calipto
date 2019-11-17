@@ -32,7 +32,7 @@
  */
 package org.preste.type.symbol;
 
-import org.preste.type.cons.ConsLibrary;
+import org.preste.type.DataLibrary;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -40,7 +40,7 @@ import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
 // TODO value type
-@ExportLibrary(ConsLibrary.class)
+@ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
 public final class Singleton implements TruffleObject {
   private final Object value;

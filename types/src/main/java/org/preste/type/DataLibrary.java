@@ -37,8 +37,6 @@ import org.preste.type.cons.Int32;
 import org.preste.type.cons.Singleton;
 import org.preste.type.symbol.Bool;
 
-import com.oracle.truffle.api.interop.InteropLibrary;
-import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.GenerateLibrary;
 import com.oracle.truffle.api.library.GenerateLibrary.Abstract;
 import com.oracle.truffle.api.library.GenerateLibrary.DefaultExport;
@@ -53,18 +51,14 @@ public abstract class DataLibrary extends Library {
     return LibraryFactory.resolve(DataLibrary.class);
   }
 
-  @ExportLibrary
-  public abstract InteropLibrary getInterop();
-
   /*
    * General messages
    */
 
+  @Abstract(ifExported = { "isSymbol", "isCons" })
   public boolean isData(Object receiver) {
     return false;
   }
-
-  public abstract String toString(Object receiver);
 
   public abstract boolean equals(Object first, Object second);
 
@@ -94,12 +88,12 @@ public abstract class DataLibrary extends Library {
     return false;
   }
 
-  @Abstract(ifExported = { "isSymbol", "name" })
+  @Abstract(ifExported = { "isSymbol" })
   public String namespace(Object receiver) {
     throw new UnsupportedOperationException();
   }
 
-  @Abstract(ifExported = { "isSymbol", "namespace" })
+  @Abstract(ifExported = { "isSymbol" })
   public String name(Object receiver) {
     throw new UnsupportedOperationException();
   }
@@ -113,18 +107,31 @@ public abstract class DataLibrary extends Library {
     return false;
   }
 
-  @Abstract(ifExported = { "isCons", "cdr", "get" })
+  @Abstract(ifExported = { "isCons" })
   public Object car(Object receiver) {
     throw new UnsupportedOperationException();
   }
 
-  @Abstract(ifExported = { "isCons", "car", "get" })
+  @Abstract(ifExported = { "isCons" })
   public Object cdr(Object receiver) {
     throw new UnsupportedOperationException();
   }
 
-  @Abstract(ifExported = { "isCons", "car", "cdr" })
   public Object get(Object receiver, Object key) {
+    var entry = car(receiver);
+    var tail = cdr(receiver);
+
+    var library = getFactory().getUncached();
+    while (true) {
+      if (library.isCons(entry) && library.equals(library.car(entry), key)) {
+        return library.cdr(entry);
+      }
+      if (!library.isCons(tail)) {
+        break;
+      }
+      entry = library.car(tail);
+      tail = library.cdr(tail);
+    }
     throw new UnsupportedOperationException();
   }
 }

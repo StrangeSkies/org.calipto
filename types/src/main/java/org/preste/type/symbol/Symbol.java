@@ -32,7 +32,7 @@
  */
 package org.preste.type.symbol;
 
-import java.util.Objects;
+import org.preste.type.DataLibrary;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -64,10 +64,14 @@ public final class Symbol implements TruffleObject {
     return name;
   }
 
-  @Override
   @ExportMessage
-  public String toString() {
-    return symbol;
+  public boolean isSymbol() {
+    return true;
+  }
+
+  @ExportMessage
+  public boolean isData() {
+    return true;
   }
 
   @Override
@@ -79,6 +83,6 @@ public final class Symbol implements TruffleObject {
 
     Symbol that = (Symbol) obj;
 
-    return Objects.equals(this.name, that.name) && Objects.equals(this.namespace, that.namespace);
+    return this.symbol == that.symbol;
   }
 }

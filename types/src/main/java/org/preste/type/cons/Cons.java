@@ -32,12 +32,17 @@
  */
 package org.preste.type.cons;
 
+import org.preste.type.DataLibrary;
+
+import com.oracle.truffle.api.dsl.Fallback;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-@ExportLibrary(ConsLibrary.class)
+@ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
 public final class Cons implements TruffleObject {
   private final Object car;
@@ -46,6 +51,35 @@ public final class Cons implements TruffleObject {
   public Cons(Object car, Object cdr) {
     this.car = car;
     this.cdr = cdr;
+  }
+
+  @ExportMessage
+  static class Equals {
+    @Fallback
+    public static boolean doFallback(Cons receiver, Object other) {
+      return false;
+    }
+
+    @Specialization
+    public static boolean doCons(
+        Cons receiver,
+        Cons other,
+        @CachedLibrary(limit = "3") DataLibrary carData,
+        @CachedLibrary(limit = "3") DataLibrary cdrData) {
+      return carData.equals(receiver.car(), other.car())
+          && cdrData.equals(receiver.cdr(), other.cdr());
+    }
+
+    @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doCons")
+    public static boolean doDefault(
+        Cons receiver,
+        Object other,
+        @CachedLibrary("other") DataLibrary otherData,
+        @CachedLibrary(limit = "3") DataLibrary carData,
+        @CachedLibrary(limit = "3") DataLibrary cdrData) {
+      return carData.equals(receiver.car(), otherData.car(other))
+          && cdrData.equals(receiver.cdr(), otherData.cdr(other));
+    }
   }
 
   @ExportMessage
@@ -60,6 +94,11 @@ public final class Cons implements TruffleObject {
 
   @ExportMessage
   boolean isCons() {
+    return true;
+  }
+
+  @ExportMessage
+  boolean isData() {
     return true;
   }
 }

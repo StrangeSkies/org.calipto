@@ -45,6 +45,11 @@ import com.oracle.truffle.api.library.ExportMessage;
 @ExportLibrary(value = DataLibrary.class, receiverType = Boolean.class)
 public final class Bool implements TruffleObject {
   @ExportMessage
+  public static boolean isData(Boolean value) {
+    return true;
+  }
+
+  @ExportMessage
   public static boolean isSymbol(Boolean value) {
     return true;
   }
@@ -57,11 +62,6 @@ public final class Bool implements TruffleObject {
   @ExportMessage
   public static String name(Boolean receiver) {
     return Boolean.toString(receiver);
-  }
-
-  @ExportMessage
-  public static String toString(Boolean receiver) {
-    return "/" + name(receiver);
   }
 
   @ExportMessage
