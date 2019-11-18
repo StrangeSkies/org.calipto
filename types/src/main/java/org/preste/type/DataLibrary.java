@@ -32,9 +32,7 @@
  */
 package org.preste.type;
 
-import org.preste.type.cons.Cons;
 import org.preste.type.cons.Int32;
-import org.preste.type.cons.Singleton;
 import org.preste.type.symbol.Bool;
 
 import com.oracle.truffle.api.library.GenerateLibrary;
@@ -65,19 +63,14 @@ public abstract class DataLibrary extends Library {
   /**
    * Cons the given value onto the receiver.
    * 
-   * @param receiver
-   *          the receiver, which will be the new cdr in the resulting cons cell
-   * @param value
-   *          the value to be the new car in the resulting cons cell
+   * @param receiver the receiver, which will be the new cdr in the resulting cons
+   *                 cell
+   * @param value    the value to be the new car in the resulting cons cell
    * @return the cons of the value onto the receiver
    */
-  public Object consWith(Object receiver, Object value) {
-    return new Cons(receiver, value);
-  }
+  public abstract Object consWith(Object receiver, Object value);
 
-  public Object consOntoNil(Object receiver) {
-    return new Singleton(receiver);
-  }
+  public abstract Object consOntoNil(Object receiver);
 
   /*
    * Symbol messages.

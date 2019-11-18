@@ -42,7 +42,7 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-public final class Symbol implements TruffleObject {
+final class Symbol implements TruffleObject {
   private final String symbol;
   private final String namespace;
   private final String name;

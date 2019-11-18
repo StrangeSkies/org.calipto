@@ -34,7 +34,10 @@ package org.preste.type.cons;
 
 import org.preste.type.DataLibrary;
 
+import com.oracle.truffle.api.dsl.Fallback;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
@@ -54,12 +57,46 @@ public final class Int32 implements TruffleObject {
   }
 
   @ExportMessage
+  static class Equals {
+    @Specialization
+    public static boolean doCons(
+        ConsPair receiver,
+        ConsPair other,
+        @CachedLibrary(limit = "3") DataLibrary carData,
+        @CachedLibrary(limit = "3") DataLibrary cdrData) {
+      return carData.equals(receiver.car(), other.car())
+          && cdrData.equals(receiver.cdr(), other.cdr());
+    }
+
+    @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doCons")
+    public static boolean doDefault(
+        ConsPair receiver,
+        Object other,
+        @CachedLibrary("other") DataLibrary otherData,
+        @CachedLibrary(limit = "3") DataLibrary carData,
+        @CachedLibrary(limit = "3") DataLibrary cdrData) {
+      return carData.equals(receiver.car(), otherData.car(other))
+          && cdrData.equals(receiver.cdr(), otherData.cdr(other));
+    }
+
+    @Fallback
+    public static boolean doFallback(ConsPair receiver, Object other) {
+      return false;
+    }
+  }
+
+  @ExportMessage
   public static Object cdr(Integer receiver) {
     return new IntTo32(receiver, 31);
   }
 
   @ExportMessage
   public static boolean isCons(Integer receiver) {
+    return true;
+  }
+
+  @ExportMessage
+  public static boolean isData(Integer receiver) {
     return true;
   }
 }

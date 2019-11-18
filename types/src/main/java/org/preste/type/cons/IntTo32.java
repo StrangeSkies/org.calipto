@@ -32,12 +32,14 @@
  */
 package org.preste.type.cons;
 
+import org.preste.type.DataLibrary;
+
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-@ExportLibrary(value = ConsLibrary.class)
+@ExportLibrary(value = DataLibrary.class)
 @ExportLibrary(value = InteropLibrary.class)
 public final class IntTo32 implements TruffleObject {
   private final int value;

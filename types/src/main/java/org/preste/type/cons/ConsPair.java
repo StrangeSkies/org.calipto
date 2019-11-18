@@ -44,35 +44,29 @@ import com.oracle.truffle.api.library.ExportMessage;
 
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-public final class Cons implements TruffleObject {
+public final class ConsPair implements TruffleObject {
   private final Object car;
   private final Object cdr;
 
-  public Cons(Object car, Object cdr) {
+  public ConsPair(Object car, Object cdr) {
     this.car = car;
     this.cdr = cdr;
   }
 
   @ExportMessage
   static class Equals {
-    @Fallback
-    public static boolean doFallback(Cons receiver, Object other) {
-      return false;
-    }
-
     @Specialization
-    public static boolean doCons(
-        Cons receiver,
-        Cons other,
+    static boolean doPair(
+        ConsPair receiver,
+        ConsPair other,
         @CachedLibrary(limit = "3") DataLibrary carData,
         @CachedLibrary(limit = "3") DataLibrary cdrData) {
-      return carData.equals(receiver.car(), other.car())
-          && cdrData.equals(receiver.cdr(), other.cdr());
+      return carData.equals(receiver.car, other.car) && cdrData.equals(receiver.cdr, other.cdr);
     }
 
-    @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doCons")
-    public static boolean doDefault(
-        Cons receiver,
+    @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doPair")
+    static boolean doDefault(
+        ConsPair receiver,
         Object other,
         @CachedLibrary("other") DataLibrary otherData,
         @CachedLibrary(limit = "3") DataLibrary carData,
@@ -80,6 +74,21 @@ public final class Cons implements TruffleObject {
       return carData.equals(receiver.car(), otherData.car(other))
           && cdrData.equals(receiver.cdr(), otherData.cdr(other));
     }
+
+    @Fallback
+    static boolean doFallback(ConsPair receiver, Object other) {
+      return false;
+    }
+  }
+
+  @ExportMessage
+  Object consWith(Object car) {
+    return new ConsPair(car, this);
+  }
+
+  @ExportMessage
+  Object consOntoNil() {
+    return new Singleton(this);
   }
 
   @ExportMessage

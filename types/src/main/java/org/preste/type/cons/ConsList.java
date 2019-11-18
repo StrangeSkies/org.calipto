@@ -33,7 +33,6 @@
 package org.preste.type.cons;
 
 import org.preste.type.DataLibrary;
-import org.preste.type.symbol.Nil;
 
 import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -45,21 +44,86 @@ import com.oracle.truffle.api.library.ExportMessage;
 
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-public final class Singleton implements TruffleObject {
-  private final Object car;
+public final class ConsList implements TruffleObject {
+  private final Object[] elements;
+  private final int size;
+  private volatile int consCounter;
 
-  public Singleton(Object car) {
-    this.car = car;
+  private ConsList(Object[] elements, int size) {
+    this.elements = elements;
+    this.size = size;
+    this.consCounter = (elements.length == size) ? 1 : 0;
+  }
+
+  @ExportMessage
+  static class Equals {
+    @Specialization
+    static boolean doList(
+        ConsList receiver,
+        ConsList other,
+        @CachedLibrary(limit = "3") DataLibrary elementData) {
+      if (receiver.size != other.size) {
+        return false;
+      }
+      for (int i = 0; i < receiver.size; i++) {
+        if (!elementData.equals(receiver.elements[i], other.elements[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doList")
+    static boolean doDefault(
+        ConsList receiver,
+        Object other,
+        @CachedLibrary("other") DataLibrary otherData,
+        @CachedLibrary(limit = "3") DataLibrary elementData) {
+      for (int i = 0; i < receiver.size; i++) {
+        if (!elementData.equals(receiver.elements[i], other.elements[i])) {
+          return false;
+        }
+      }
+      return true;
+
+    @Fallback
+    static boolean doFallback(ConsList receiver, Object other) {
+      return false;
+    }
+  }
+
+  @ExportMessage
+  Object consWith(Object car) {
+    Object[] newElements;
+    int newSize = size + 1;
+
+    consCounter++;
+    if (consCounter == 1) { // at most one parallel call can pass this
+      newElements = elements;
+    } else {
+      consCounter--; // TODO not sure if this is safe
+      int newLength = (newSize <= elements.length) ? newSize : (int) (newSize * 1.3) + 1;
+      newElements = new Object[newLength];
+      System.arraycopy(elements, 0, newElements, 0, size);
+    }
+
+    newElements[size] = car;
+    return new ConsList(newElements, newSize);
+  }
+
+  @ExportMessage
+  Object consOntoNil() {
+    return new Singleton(this);
   }
 
   @ExportMessage
   Object car() {
-    return car;
+    return elements[size - 1];
   }
 
   @ExportMessage
   Object cdr() {
-    return Nil.NIL;
+    return new ConsList(elements, size - 1);
   }
 
   @ExportMessage
@@ -70,21 +134,5 @@ public final class Singleton implements TruffleObject {
   @ExportMessage
   boolean isData() {
     return true;
-  }
-
-  @ExportMessage
-  static class Equals {
-    @Fallback
-    public static boolean doFallback(Singleton receiver, Object other) {
-      return false;
-    }
-
-    @Specialization
-    public static boolean doCons(
-        Singleton receiver,
-        Singleton other,
-        @CachedLibrary(limit = "3") DataLibrary carData) {
-      return carData.equals(receiver.car(), other.car());
-    }
   }
 }
