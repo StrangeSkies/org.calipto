@@ -64,4 +64,9 @@ public final class IntTo32 implements TruffleObject {
   boolean isCons() {
     return true;
   }
+
+  @ExportMessage
+  boolean isData() {
+    return true;
+  }
 }

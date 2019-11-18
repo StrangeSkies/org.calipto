@@ -30,58 +30,86 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.preste.type.symbol;
+package org.preste.type.cons;
 
 import org.preste.type.DataLibrary;
-import org.preste.type.cons.ConsPair;
-import org.preste.type.cons.IntTo8;
 
+import com.oracle.truffle.api.dsl.Fallback;
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
 /*
- * TODO when we have value types, this should be a custom bool
+ * TODO when we have value types, this should be a custom int32
  * value type implementation without an explicit receiverType.
+ * 
+ * (hopefully we will be able to specialize generics over values,
+ * so we can have a single Int<X> type to specialize as Int<32>,
+ * Int<31>, etc.)
  */
-@ExportLibrary(value = DataLibrary.class, receiverType = Boolean.class)
-public final class Bool implements TruffleObject {
+@ExportLibrary(value = DataLibrary.class, receiverType = Short.class)
+public final class Int16 implements TruffleObject {
   @ExportMessage
-  public static boolean isData(Boolean value) {
-    return true;
-  }
+  static class Equals {
+    @Specialization
+    static boolean doInt16(Short receiver, Short other) {
+      return receiver.equals(other);
+    }
 
-  @ExportMessage
-  public static boolean isSymbol(Boolean value) {
-    return true;
-  }
+    @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doInt16")
+    static boolean doDefault(
+        Short receiver,
+        Object other,
+        @CachedLibrary("other") DataLibrary otherData,
+        @CachedLibrary(limit = "3") DataLibrary carData,
+        @CachedLibrary(limit = "3") DataLibrary cdrData) {
+      return carData.equals(car(receiver), otherData.car(other))
+          && cdrData.equals(cdr(receiver), otherData.cdr(other));
+    }
 
-  @ExportMessage
-  public static String namespace(Boolean value) {
-    return "";
-  }
-
-  @ExportMessage
-  public static String name(Boolean receiver) {
-    return Boolean.toString(receiver);
-  }
-
-  @ExportMessage
-  public static boolean equals(Boolean receiver, Object obj) {
-    if (!(obj instanceof Bool)) {
+    @Fallback
+    static boolean doFallback(Short receiver, Object other) {
       return false;
     }
-    Boolean that = (Boolean) obj;
-    return receiver == that;
   }
 
   @ExportMessage
-  static IntTo8 consOntoNil(Boolean receiver) {
-    return new IntTo8(receiver ? (byte) -1 : (byte) 0, (byte) 1);
+  static class ConsWith {
+    @Specialization
+    static Object doBoolean(Short receiver, Boolean car) {
+      return new IntTo32(receiver.intValue() | ((car ? 1 : 0) << 16), 17);
+    }
+
+    @Fallback
+    static Object doFallback(Short receiver, Object car) {
+      return new ConsPair(car, receiver);
+    }
   }
 
   @ExportMessage
-  static Object consWith(Boolean receiver, Object car) {
-    return new ConsPair(car, receiver);
+  static Object consOntoNil(Short receiver) {
+    return new Singleton(receiver);
+  }
+
+  @ExportMessage
+  static boolean car(Short receiver) {
+    return receiver >> 15 > 0;
+  }
+
+  @ExportMessage
+  static Object cdr(Short receiver) {
+    return new IntTo16(receiver, (short) 15);
+  }
+
+  @ExportMessage
+  static boolean isCons(Short receiver) {
+    return true;
+  }
+
+  @ExportMessage
+  static boolean isData(Short receiver) {
+    return true;
   }
 }

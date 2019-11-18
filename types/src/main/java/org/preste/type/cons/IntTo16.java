@@ -30,58 +30,43 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.preste.type.symbol;
+package org.preste.type.cons;
 
 import org.preste.type.DataLibrary;
-import org.preste.type.cons.ConsPair;
-import org.preste.type.cons.IntTo8;
 
+import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-/*
- * TODO when we have value types, this should be a custom bool
- * value type implementation without an explicit receiverType.
- */
-@ExportLibrary(value = DataLibrary.class, receiverType = Boolean.class)
-public final class Bool implements TruffleObject {
+@ExportLibrary(value = DataLibrary.class)
+@ExportLibrary(value = InteropLibrary.class)
+public final class IntTo16 implements TruffleObject {
+  private final short value;
+  private final short bits;
+
+  public IntTo16(short value, short bits) {
+    this.value = value;
+    this.bits = bits;
+  }
+
   @ExportMessage
-  public static boolean isData(Boolean value) {
+  boolean car() {
+    return value >> (bits - 1) > 0;
+  }
+
+  @ExportMessage
+  Object cdr() {
+    return new IntTo16(value, (short) (bits - 1));
+  }
+
+  @ExportMessage
+  boolean isCons() {
     return true;
   }
 
   @ExportMessage
-  public static boolean isSymbol(Boolean value) {
+  boolean isData() {
     return true;
-  }
-
-  @ExportMessage
-  public static String namespace(Boolean value) {
-    return "";
-  }
-
-  @ExportMessage
-  public static String name(Boolean receiver) {
-    return Boolean.toString(receiver);
-  }
-
-  @ExportMessage
-  public static boolean equals(Boolean receiver, Object obj) {
-    if (!(obj instanceof Bool)) {
-      return false;
-    }
-    Boolean that = (Boolean) obj;
-    return receiver == that;
-  }
-
-  @ExportMessage
-  static IntTo8 consOntoNil(Boolean receiver) {
-    return new IntTo8(receiver ? (byte) -1 : (byte) 0, (byte) 1);
-  }
-
-  @ExportMessage
-  static Object consWith(Boolean receiver, Object car) {
-    return new ConsPair(car, receiver);
   }
 }

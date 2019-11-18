@@ -85,6 +85,7 @@ public final class ConsList implements TruffleObject {
         }
       }
       return true;
+    }
 
     @Fallback
     static boolean doFallback(ConsList receiver, Object other) {

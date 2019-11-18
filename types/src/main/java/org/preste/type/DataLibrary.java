@@ -32,7 +32,10 @@
  */
 package org.preste.type;
 
+import org.preste.type.cons.Int16;
 import org.preste.type.cons.Int32;
+import org.preste.type.cons.Int64;
+import org.preste.type.cons.Int8;
 import org.preste.type.symbol.Bool;
 
 import com.oracle.truffle.api.library.GenerateLibrary;
@@ -42,7 +45,10 @@ import com.oracle.truffle.api.library.Library;
 import com.oracle.truffle.api.library.LibraryFactory;
 
 @DefaultExport(Bool.class)
+@DefaultExport(Int8.class)
+@DefaultExport(Int16.class)
 @DefaultExport(Int32.class)
+@DefaultExport(Int64.class)
 @GenerateLibrary
 public abstract class DataLibrary extends Library {
   public static LibraryFactory<DataLibrary> getFactory() {

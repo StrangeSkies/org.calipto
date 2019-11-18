@@ -52,51 +52,64 @@ import com.oracle.truffle.api.library.ExportMessage;
 @ExportLibrary(value = DataLibrary.class, receiverType = Integer.class)
 public final class Int32 implements TruffleObject {
   @ExportMessage
-  public static boolean car(Integer receiver) {
-    return receiver >> 31 > 0;
-  }
-
-  @ExportMessage
   static class Equals {
     @Specialization
-    public static boolean doCons(
-        ConsPair receiver,
-        ConsPair other,
-        @CachedLibrary(limit = "3") DataLibrary carData,
-        @CachedLibrary(limit = "3") DataLibrary cdrData) {
-      return carData.equals(receiver.car(), other.car())
-          && cdrData.equals(receiver.cdr(), other.cdr());
+    static boolean doInt32(Integer receiver, Integer other) {
+      return receiver.equals(other);
     }
 
-    @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doCons")
-    public static boolean doDefault(
-        ConsPair receiver,
+    @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doInt32")
+    static boolean doDefault(
+        Integer receiver,
         Object other,
         @CachedLibrary("other") DataLibrary otherData,
         @CachedLibrary(limit = "3") DataLibrary carData,
         @CachedLibrary(limit = "3") DataLibrary cdrData) {
-      return carData.equals(receiver.car(), otherData.car(other))
-          && cdrData.equals(receiver.cdr(), otherData.cdr(other));
+      return carData.equals(car(receiver), otherData.car(other))
+          && cdrData.equals(cdr(receiver), otherData.cdr(other));
     }
 
     @Fallback
-    public static boolean doFallback(ConsPair receiver, Object other) {
+    static boolean doFallback(Integer receiver, Object other) {
       return false;
     }
   }
 
   @ExportMessage
-  public static Object cdr(Integer receiver) {
+  static class ConsWith {
+    @Specialization
+    static Object doBoolean(Integer receiver, Boolean car) {
+      return new IntTo64(receiver.longValue() | ((car ? 1l : 0l) << 32), 33);
+    }
+
+    @Fallback
+    static Object doFallback(Integer receiver, Object car) {
+      return new ConsPair(car, receiver);
+    }
+  }
+
+  @ExportMessage
+  static Object consOntoNil(Integer receiver) {
+    return new Singleton(receiver);
+  }
+
+  @ExportMessage
+  static boolean car(Integer receiver) {
+    return receiver >> 31 > 0;
+  }
+
+  @ExportMessage
+  static Object cdr(Integer receiver) {
     return new IntTo32(receiver, 31);
   }
 
   @ExportMessage
-  public static boolean isCons(Integer receiver) {
+  static boolean isCons(Integer receiver) {
     return true;
   }
 
   @ExportMessage
-  public static boolean isData(Integer receiver) {
+  static boolean isData(Integer receiver) {
     return true;
   }
 }
