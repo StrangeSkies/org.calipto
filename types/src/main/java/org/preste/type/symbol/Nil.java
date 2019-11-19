@@ -33,6 +33,8 @@
 package org.preste.type.symbol;
 
 import org.preste.type.DataLibrary;
+import org.preste.type.cons.ConsPair;
+import org.preste.type.cons.Singleton;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -65,6 +67,16 @@ public final class Nil implements TruffleObject {
   @ExportMessage
   public String name() {
     return "nil";
+  }
+
+  @ExportMessage
+  Object consOntoNil() {
+    return new Singleton(this);
+  }
+
+  @ExportMessage
+  Object consWith(Object car) {
+    return new ConsPair(car, this);
   }
 
   @Override

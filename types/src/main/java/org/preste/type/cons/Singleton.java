@@ -35,7 +35,6 @@ package org.preste.type.cons;
 import org.preste.type.DataLibrary;
 import org.preste.type.symbol.Nil;
 
-import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -73,18 +72,32 @@ public final class Singleton implements TruffleObject {
   }
 
   @ExportMessage
-  static class Equals {
-    @Fallback
-    public static boolean doFallback(Singleton receiver, Object other) {
-      return false;
-    }
+  Object consOntoNil() {
+    return new Singleton(this);
+  }
 
+  @ExportMessage
+  Object consWith(Object car) {
+    return new ConsPair(car, this);
+  }
+
+  @ExportMessage
+  static class Equals {
     @Specialization
-    public static boolean doCons(
+    public static boolean doSingleton(
         Singleton receiver,
         Singleton other,
         @CachedLibrary(limit = "3") DataLibrary carData) {
       return carData.equals(receiver.car(), other.car());
+    }
+
+    @Specialization(replaces = "doSingleton")
+    public static boolean doFallback(
+        Singleton receiver,
+        Object other,
+        @CachedLibrary(limit = "3") DataLibrary otherData) {
+      return otherData.equals(receiver.car(), otherData.car(other))
+          && otherData.cdr(other) == Nil.NIL;
     }
   }
 }

@@ -35,11 +35,22 @@ package org.preste.type.symbol;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.preste.type.DataLibrary;
+
 public class SymbolIndex {
+  private final DataLibrary symbolLibrary = DataLibrary.getFactory().createDispatched(5);
   private final Map<String, Symbol> symbols = new IdentityHashMap<>();
 
-  public Symbol getSymbol(String string) {
+  public Object internSymbol(String string) {
     string = string.intern();
     return symbols.computeIfAbsent(string, Symbol::new);
+  }
+
+  public Object internSymbol(Object symbol) {
+    return internSymbol(symbolLibrary.qualifiedName(symbol));
+  }
+
+  public boolean isSymbol(Object symbol) {
+    return symbolLibrary.isSymbol(symbol);
   }
 }

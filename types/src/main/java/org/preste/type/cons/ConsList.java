@@ -32,7 +32,9 @@
  */
 package org.preste.type.cons;
 
+import org.preste.type.DataIterator;
 import org.preste.type.DataLibrary;
+import org.preste.type.symbol.Nil;
 
 import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.Specialization;
@@ -73,16 +75,22 @@ public final class ConsList implements TruffleObject {
       return true;
     }
 
-    @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doList")
+    @Specialization(guards = "elementData.isCons(other)", replaces = "doList")
     static boolean doDefault(
         ConsList receiver,
         Object other,
-        @CachedLibrary("other") DataLibrary otherData,
         @CachedLibrary(limit = "3") DataLibrary elementData) {
+      DataIterator otherIterator = elementData.iterator(other);
       for (int i = 0; i < receiver.size; i++) {
-        if (!elementData.equals(receiver.elements[i], other.elements[i])) {
+        if (!otherIterator.hasNext()) {
           return false;
         }
+        if (!elementData.equals(receiver.elements[i], otherIterator.next())) {
+          return false;
+        }
+      }
+      if (otherIterator.hasNext() || otherIterator.terminal() != Nil.NIL) {
+        return false;
       }
       return true;
     }

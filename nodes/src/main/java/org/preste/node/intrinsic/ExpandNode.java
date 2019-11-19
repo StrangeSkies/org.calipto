@@ -1,9 +1,10 @@
 package org.preste.node.intrinsic;
 
-import org.preste.type.cons.ConsLibrary;
-import org.preste.type.symbol.Symbol;
-import org.preste.type.symbol.SymbolLibrary;
+import org.preste.PresteContext;
+import org.preste.PresteLanguage;
+import org.preste.type.DataLibrary;
 
+import com.oracle.truffle.api.dsl.CachedContext;
 import com.oracle.truffle.api.dsl.NodeField;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameSlot;
@@ -16,16 +17,20 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 @NodeInfo(shortName = "expand")
 public abstract class ExpandNode extends IntrinsicNode {
   protected abstract FrameSlot getSlot();
-  
+
   public ExpandNode() {
     // TODO Auto-generated constructor stub
   }
 
   @Specialization(guards = "conses.isCons(cons)", limit = "3")
-  Object doDefault(VirtualFrame frame, Object cons, @CachedLibrary("cons") ConsLibrary conses) {
+  Object doDefault(
+      VirtualFrame frame,
+      Object cons,
+      @CachedLibrary("cons") DataLibrary conses,
+      @CachedContext(PresteLanguage.class) PresteContext context) {
     var value = conses.car(cons);
 
-    var macros = frame.getFrameDescriptor().findFrameSlot((Symbol) "macros");
+    var macros = frame.getObject(frame.getFrameDescriptor().findFrameSlot("(macros)"));
 
     if (setContains(macros, value)) {
       frame.getFrameDescriptor().findFrameSlot(value);
@@ -35,7 +40,7 @@ public abstract class ExpandNode extends IntrinsicNode {
   }
 
   @Specialization(guards = "symbols.isSymbol(symbol)", limit = "3")
-  Object doDefault(Object symbol, @CachedLibrary("symbol") SymbolLibrary symbols) {
+  Object doDefault(Object symbol, @CachedLibrary("symbol") DataLibrary symbols) {
     return symbol;
   }
 }

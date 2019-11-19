@@ -33,9 +33,12 @@
 package org.preste.type.cons;
 
 import org.preste.type.DataLibrary;
+import org.preste.type.symbol.Nil;
 
+import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
@@ -58,6 +61,52 @@ public final class IntTo64 implements TruffleObject {
   @ExportMessage
   Object cdr() {
     return new IntTo64(value, bits - 1);
+  }
+
+  @ExportMessage
+  static class Equals {
+    @Specialization
+    public static boolean doSingleton(
+        IntTo64 receiver,
+        IntTo64 other,
+        @CachedLibrary(limit = "3") DataLibrary carData) {
+      return receiver.value == other.value;
+    }
+
+    @Specialization(replaces = "doSingleton")
+    public static boolean doFallback(
+        IntTo64 receiver,
+        Object other,
+        @CachedLibrary(limit = "3") DataLibrary otherData) {
+      var otherIterator = otherData.iterator(other);
+      for (int i = 0; i < receiver.bits; i++) {
+        if (!otherIterator.hasNext()) {
+          return false;
+        }
+        var next = otherIterator.next();
+        if (!(next instanceof Boolean)) {
+          return false;
+        }
+        boolean nextBoolean = ((boolean) next);
+        if (!((receiver.value >> i & 1) > 0) != nextBoolean) {
+          return false;
+        }
+      }
+      if (otherIterator.hasNext() || otherIterator.terminal() != Nil.NIL) {
+        return false;
+      }
+      return true;
+    }
+  }
+
+  @ExportMessage
+  Object consOntoNil() {
+    return new Singleton(this);
+  }
+
+  @ExportMessage
+  Object consWith(Object car) {
+    return new ConsPair(car, this);
   }
 
   @ExportMessage

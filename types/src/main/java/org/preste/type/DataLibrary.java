@@ -32,13 +32,12 @@
  */
 package org.preste.type;
 
-import java.util.Iterator;
-
 import org.preste.type.cons.Int16;
 import org.preste.type.cons.Int32;
 import org.preste.type.cons.Int64;
 import org.preste.type.cons.Int8;
 import org.preste.type.symbol.Bool;
+import org.preste.type.symbol.Nil;
 
 import com.oracle.truffle.api.library.GenerateLibrary;
 import com.oracle.truffle.api.library.GenerateLibrary.Abstract;
@@ -71,16 +70,63 @@ public abstract class DataLibrary extends Library {
   /**
    * Cons the given value onto the receiver.
    * 
-   * @param receiver
-   *          the receiver, which will be the new cdr in the resulting cons cell
-   * @param value
-   *          the value to be the new car in the resulting cons cell
+   * @param receiver the receiver, which will be the new cdr in the resulting cons
+   *                 cell
+   * @param value    the value to be the new car in the resulting cons cell
    * @return the cons of the value onto the receiver
    */
   public abstract Object consWith(Object receiver, Object value);
 
   public abstract Object consOntoNil(Object receiver);
 
+  public DataIterator iterator(Object receiver) {
+    return new DataIterator() {
+      private DataLibrary tailLibrary = DataLibrary.this;
+      private Object tail = receiver;
+
+      @Override
+      public Object next() {
+        if (!hasNext()) {
+          throw new IndexOutOfBoundsException();
+        }
+
+        Object car = tailLibrary.car(tail);
+        tail = tailLibrary.cdr(tail);
+
+        if (tailLibrary == DataLibrary.this && !tailLibrary.accepts(tail)) {
+          tailLibrary = getFactory().createDispatched(3);
+        }
+
+        return car;
+      }
+
+      @Override
+      public boolean hasNext() {
+        return tailLibrary.isCons(tail);
+      }
+
+      @Override
+      public Object terminal() {
+        if (hasNext()) {
+          throw new IllegalStateException();
+        }
+        return tail;
+      }
+
+      @Override
+      public boolean isTerminalKnown() {
+        return !hasNext();
+      }
+
+      @Override
+      public boolean isProper() {
+        if (hasNext()) {
+          throw new IllegalStateException();
+        }
+        return tail == Nil.NIL;
+      }
+    };
+  }
   /*
    * Symbol messages.
    */
@@ -100,6 +146,10 @@ public abstract class DataLibrary extends Library {
     throw new UnsupportedOperationException();
   }
 
+  public String qualifiedName(Object receiver) {
+    return namespace(receiver) + "/" + name(receiver);
+  }
+
   /*
    * Cons messages
    */
@@ -117,50 +167,6 @@ public abstract class DataLibrary extends Library {
   @Abstract(ifExported = { "isCons" })
   public Object cdr(Object receiver) {
     throw new UnsupportedOperationException();
-  }
-
-  public ConsIterator iterator(Object receiver) {
-    return new ConsIterator() {
-      private DataLibrary cdrLibrary;
-      private Object tail = receiver;
-      
-      @Override
-      public Object next() {
-        if (cdrLibrary == null) {
-          cdrLibrary = getFactory().createDispatched(3);
-          Object car = car(tail);
-          tail = cdr(tail);
-          return car;
-        }
-        
-        // TODO Auto-generated method stub
-        return null;
-      }
-      
-      @Override
-      public boolean hasNext() {
-        // TODO Auto-generated method stub
-        return false;
-      }
-      
-      @Override
-      public Object terminal() {
-        // TODO Auto-generated method stub
-        return null;
-      }
-      
-      @Override
-      public boolean isTerminalKnown() {
-        // TODO Auto-generated method stub
-        return false;
-      }
-      
-      @Override
-      public boolean isProper() {
-        // TODO Auto-generated method stub
-        return false;
-      }
-    };
   }
 
   public Object get(Object receiver, Object key) {

@@ -2,26 +2,23 @@ package org.preste.node.intrinsic;
 
 import java.util.function.IntPredicate;
 
-import org.preste.node.InvokeNode;
 import org.preste.node.PresteNode;
+import org.preste.node.intrinsic.EvalNodeFactory.EvalNodeGen;
 import org.preste.reader.PresteData;
 import org.preste.reader.PresteReader;
 import org.preste.reader.ReaderMacro;
 import org.preste.reader.ReadingContext;
 import org.preste.scanner.Cursor;
 import org.preste.scanner.Scanner;
-import org.preste.type.ValueLibrary;
+import org.preste.type.DataLibrary;
 import org.preste.type.cons.ConsLibrary;
-import org.preste.type.symbol.SymbolLibrary;
 
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotTypeException;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.interop.InteropLibrary;
-import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
-@NodeInfo(shortName = "car")
+@NodeInfo(shortName = "read")
 public abstract class ReadNode extends IntrinsicNode {
   private static class PresteDataWrapper implements PresteData {
     private final Object data;
@@ -35,21 +32,14 @@ public abstract class ReadNode extends IntrinsicNode {
     }
   }
 
-  private static final ValueLibrary valueLibrary = ValueLibrary.getFactory().getUncached();
-  private static final ConsLibrary consLibrary = ConsLibrary.getFactory().getUncached();
-  private static final SymbolLibrary symbolLibrary = SymbolLibrary.getFactory().getUncached();
+  private static final DataLibrary dataLibrary = DataLibrary.getFactory().createDispatched(5);
 
   private final FrameSlot dynamicScopeSlot;
   private final FrameSlot readTableSlot;
 
-  @Child
-  private final PresteNode expandMacro;
-
   public ReadNode(FrameSlot dynamicScopeSlot, FrameSlot readTableSlot) {
     this.dynamicScopeSlot = dynamicScopeSlot;
     this.readTableSlot = readTableSlot;
-    
-    expandMacro = InvokeNodeGen();
   }
 
   @Override

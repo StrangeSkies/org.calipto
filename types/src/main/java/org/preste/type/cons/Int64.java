@@ -59,7 +59,7 @@ public final class Int64 implements TruffleObject {
     }
 
     @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doInt64")
-    static boolean doDefault(
+    static boolean doGeneral(
         Long receiver,
         Object other,
         @CachedLibrary("other") DataLibrary otherData,
@@ -69,7 +69,7 @@ public final class Int64 implements TruffleObject {
           && cdrData.equals(cdr(receiver), otherData.cdr(other));
     }
 
-    @Fallback
+    @Specialization(replaces = "doGeneral")
     static boolean doFallback(Long receiver, Object other) {
       return false;
     }

@@ -16,9 +16,8 @@ import org.preste.node.builtin.BuiltinNode;
 import org.preste.node.intrinsic.CarNodeFactory;
 import org.preste.node.intrinsic.CdrNodeFactory;
 import org.preste.node.intrinsic.IntrinsicNode;
-import org.preste.type.cons.ConsLibrary;
+import org.preste.type.DataLibrary;
 import org.preste.type.symbol.Nil;
-import org.preste.type.symbol.Symbol;
 import org.preste.type.symbol.SymbolIndex;
 
 import com.oracle.truffle.api.CallTarget;
@@ -184,7 +183,7 @@ public class PresteContext {
   }
 
   public static boolean isPresteObject(Object value) {
-    return ConsLibrary.getFactory().getUncached().isCons(value);
+    return DataLibrary.getFactory().getUncached().isData(value);
   }
 
   /*
@@ -194,7 +193,7 @@ public class PresteContext {
   public Object fromForeignValue(Object a) {
     if (a instanceof Long || a instanceof String || a instanceof Boolean) {
       return a;
-    } else if (a instanceof Symbol) {
+    } else if (symbols.isSymbol(a)) {
       return fromForeignSymbol(a);
     } else if (a instanceof Character) {
       return String.valueOf(a);
@@ -212,8 +211,8 @@ public class PresteContext {
   }
 
   @TruffleBoundary
-  private Symbol fromForeignSymbol(Object a) {
-    return symbols.getSymbol(((Symbol) a).toString());
+  private Object fromForeignSymbol(Object a) {
+    return symbols.internSymbol(a);
   }
 
   @TruffleBoundary
