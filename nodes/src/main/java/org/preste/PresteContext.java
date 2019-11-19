@@ -3,9 +3,6 @@ package org.preste;
 import static java.util.Collections.singleton;
 import static java.util.stream.Stream.concat;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -40,8 +37,6 @@ public class PresteContext {
       .build();
 
   private final Env env;
-  private final BufferedReader input;
-  private final PrintWriter output;
   private final PresteDefinitionRegistry functionRegistry;
   private final PresteLanguage language;
   private final AllocationReporter allocationReporter;
@@ -55,8 +50,6 @@ public class PresteContext {
       Collection<? extends NodeFactory<? extends IntrinsicNode>> externalIntrinsics,
       Collection<? extends NodeFactory<? extends BuiltinNode>> externalSideEffects) {
     this.env = env;
-    this.input = new BufferedReader(new InputStreamReader(env.in()));
-    this.output = new PrintWriter(env.out(), true);
     this.language = language;
     this.allocationReporter = env.lookup(AllocationReporter.class);
     this.functionRegistry = new PresteDefinitionRegistry(language);
@@ -72,22 +65,6 @@ public class PresteContext {
    */
   public Env getEnv() {
     return env;
-  }
-
-  /**
-   * Returns the default input, i.e., the source for the {@link SLReadlnBuiltin}.
-   * To allow unit testing, we do not use {@link System#in} directly.
-   */
-  public BufferedReader getInput() {
-    return input;
-  }
-
-  /**
-   * The default default, i.e., the output for the {@link SLPrintlnBuiltin}. To
-   * allow unit testing, we do not use {@link System#out} directly.
-   */
-  public PrintWriter getOutput() {
-    return output;
   }
 
   /**

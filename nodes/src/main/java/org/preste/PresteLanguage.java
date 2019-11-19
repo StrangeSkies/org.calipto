@@ -13,7 +13,6 @@ import org.preste.reader.ReadingContext;
 import org.preste.source.PresteFileDetector;
 import org.preste.source.SourceScanner;
 import org.preste.type.DataLibrary;
-import org.preste.type.ValueLibrary;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -32,7 +31,13 @@ import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
 
-@TruffleLanguage.Registration(id = PresteLanguage.ID, name = "Preste", defaultMimeType = PresteFileDetector.MIME_TYPE, characterMimeTypes = PresteFileDetector.MIME_TYPE, contextPolicy = ContextPolicy.SHARED, fileTypeDetectors = PresteFileDetector.class)
+@TruffleLanguage.Registration(
+    id = PresteLanguage.ID,
+    name = "Preste",
+    defaultMimeType = PresteFileDetector.MIME_TYPE,
+    characterMimeTypes = PresteFileDetector.MIME_TYPE,
+    contextPolicy = ContextPolicy.SHARED,
+    fileTypeDetectors = PresteFileDetector.class)
 @ProvidedTags({
     StandardTags.CallTag.class,
     StandardTags.StatementTag.class,
