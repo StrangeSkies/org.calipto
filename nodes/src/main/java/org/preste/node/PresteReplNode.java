@@ -44,6 +44,7 @@ import java.util.Map;
 
 import org.preste.PresteContext;
 import org.preste.PresteLanguage;
+import org.preste.reader.PresteReader;
 import org.preste.type.symbol.Nil;
 
 import com.oracle.truffle.api.CompilerDirectives;
@@ -74,10 +75,7 @@ public final class PresteReplNode extends RootNode {
   @Child
   private DirectCallNode mainCallNode;
 
-  public PresteReplNode(
-      PresteLanguage language,
-      RootCallTarget rootFunction,
-      Map<String, RootCallTarget> functions) {
+  public PresteReplNode(PresteLanguage language, PresteReader reader) {
     super(null); // internal frame
     this.functions = functions;
     this.mainCallNode = rootFunction != null ? DirectCallNode.create(rootFunction) : null;

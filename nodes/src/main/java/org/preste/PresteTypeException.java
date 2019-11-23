@@ -28,7 +28,7 @@ public class PresteTypeException extends PresteException implements TruffleExcep
     result.append(" not defined for ");
 
     if (value != null && !InteropLibrary.getFactory().getUncached().isNull(value)) {
-      result.append(PresteLanguage.getMetaObject(value)).append(" ");
+      result.append(PresteLanguage.toString(value)).append(" ");
     }
     result.append(PresteLanguage.toString(value));
 

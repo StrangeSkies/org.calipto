@@ -26,8 +26,8 @@ import com.oracle.truffle.api.nodes.RootNode;
 public final class PresteLexicalScope {
 
   private final Node current;
-  private final SLBlockNode block;
-  private final SLBlockNode parentBlock;
+  private final PresteBlockNode block;
+  private final PresteBlockNode parentBlock;
   private final RootNode root;
   private PresteLexicalScope parent;
   private Map<String, FrameSlot> varSlots;

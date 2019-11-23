@@ -1,14 +1,9 @@
 package org.preste;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.interop.TruffleObject;
-import com.oracle.truffle.api.source.Source;
 
 public class PresteDefinitionRegistry {
   private final PresteLanguage language;

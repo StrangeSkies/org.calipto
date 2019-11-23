@@ -27,6 +27,7 @@ import com.oracle.truffle.api.instrumentation.ProvidedTags;
 import com.oracle.truffle.api.instrumentation.StandardTags;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
+import com.oracle.truffle.api.nodes.ExecutableNode;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
@@ -75,7 +76,7 @@ public class PresteLanguage extends TruffleLanguage<PresteContext> {
     Source source = request.getSource();
     PresteReader reader = new PresteReader(getReadingContext(), new SourceScanner(source));
 
-    var evalMain = new PresteReplNode(this, null, functions);
+    var evalMain = new PresteReplNode(this, reader);
 
     return Truffle.getRuntime().createCallTarget(evalMain);
   }

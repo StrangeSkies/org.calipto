@@ -2,8 +2,6 @@ package org.preste.node.intrinsic;
 
 import java.util.function.IntPredicate;
 
-import org.preste.node.PresteNode;
-import org.preste.node.intrinsic.EvalNodeFactory.EvalNodeGen;
 import org.preste.reader.PresteData;
 import org.preste.reader.PresteReader;
 import org.preste.reader.ReaderMacro;
@@ -11,7 +9,6 @@ import org.preste.reader.ReadingContext;
 import org.preste.scanner.Cursor;
 import org.preste.scanner.Scanner;
 import org.preste.type.DataLibrary;
-import org.preste.type.cons.ConsLibrary;
 
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotTypeException;
@@ -46,11 +43,11 @@ public abstract class ReadNode extends IntrinsicNode {
   protected Object execute(VirtualFrame frame) {
     try {
       Object dynamicScope = frame.getObject(dynamicScopeSlot);
-      ConsLibrary dynamicScopeLibrary = ConsLibrary.getFactory().create(dynamicScope);
+      DataLibrary dynamicScopeLibrary = DataLibrary.getFactory().create(dynamicScope);
       dynamicScopeLibrary.adoptChildren();
 
       Object readTable = frame.getObject(readTableSlot);
-      ConsLibrary readTableLibrary = ConsLibrary.getFactory().create(readTable);
+      DataLibrary readTableLibrary = DataLibrary.getFactory().create(readTable);
       readTableLibrary.adoptChildren();
 
       new PresteReader(new ReadingContext() {
