@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Preste Nodes - The text API
+    Calipto Nodes - The text API
 
     Copyright © 2018 Strange Skies (elias@vasylenko.uk)
         __   _______  ____           _       __     _      __       __
@@ -39,23 +39,23 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.preste</groupId>
-		<artifactId>preste</artifactId>
+		<groupId>org.calipto</groupId>
+		<artifactId>calipto</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>nodes</artifactId>
 
-	<name>Preste Nodes</name>
+	<name>Calipto Nodes</name>
 	<description>The text API</description>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.preste</groupId>
+			<groupId>org.calipto</groupId>
 			<artifactId>reader</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.preste</groupId>
+			<groupId>org.calipto</groupId>
 			<artifactId>types</artifactId>
 		</dependency>
 		<dependency>
