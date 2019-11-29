@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Preste Types - The Preste types
+    Calipto Types - The Calipto types
 
     Copyright © 2018 Strange Skies (elias@vasylenko.uk)
         __   _______  ____           _       __     _      __       __
@@ -39,15 +39,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.preste</groupId>
-		<artifactId>preste</artifactId>
+		<groupId>org.calipto</groupId>
+		<artifactId>calipto</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>types</artifactId>
 
-	<name>Preste Types</name>
-	<description>The Preste types</description>
+	<name>Calipto Types</name>
+	<description>The Calipto types</description>
 
 	<dependencies>
 		<dependency>
