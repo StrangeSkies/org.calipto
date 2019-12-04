@@ -55,16 +55,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.RootNode;
 
-/**
- * A Calipto source file cannot be read in one go and then separately parsed.
- * Instead, each expression in the root of the source file must be read and
- * evaluated before reading the next expression. In other words, the semantics
- * for evaluating a source file are essentially aligned with the semantics of
- * the interactive REPL.
- * <p>
- * 
- */
-public final class CaliptoReplNode extends RootNode {
+public final class CaliptoRootEvalNode extends RootNode {
   @CompilationFinal
   private boolean registered;
 
@@ -73,7 +64,7 @@ public final class CaliptoReplNode extends RootNode {
   @Child
   private DirectCallNode mainCallNode;
 
-  public CaliptoReplNode(CaliptoLanguage language, CaliptoReader reader) {
+  public CaliptoRootEvalNode(CaliptoLanguage language, CaliptoReader reader) {
     super(null); // internal frame
     this.mainCallNode = rootFunction != null ? DirectCallNode.create(rootFunction) : null;
     this.reference = language.getContextReference();
@@ -86,7 +77,7 @@ public final class CaliptoReplNode extends RootNode {
 
   @Override
   public String getName() {
-    return "repl";
+    return "root";
   }
 
   @Override

@@ -12,21 +12,19 @@ import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.interop.UnsupportedTypeException;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.Node.Child;
-import com.oracle.truffle.api.nodes.Node.Children;
 
 /**
  * Yield control from the current continuation to an enclosing scope to perform
  * some side effect.
  */
 @GenerateNodeFactory
-public abstract class YieldNode extends CaliptoNode {
+public abstract class PerformNode extends CaliptoNode {
   @Children
   private final CaliptoNode[] argumentNodes;
   @Child
   private InteropLibrary library;
 
-  public YieldNode(CaliptoNode[] argumentNodes) {
+  public PerformNode(CaliptoNode[] argumentNodes) {
     this.argumentNodes = argumentNodes;
     this.library = InteropLibrary.getFactory().createDispatched(3);
   }
@@ -41,27 +39,19 @@ public abstract class YieldNode extends CaliptoNode {
       argumentValues[i] = argumentNodes[i].executeGeneric(frame);
     }
 
-    var handlers = frame.getObject(frame.getFrameDescriptor().findFrameSlot("(handlers)"));
+    var handlers = HandleNode.HANDLERS.get();
 
-    /*
-     * TODO
-     * 
-     * var handlerCandidates = handlers.findCandidates(staticTypes(argumentNodes)); // TODO cached!
-     * var handler = handlerCandidates.getFirst(argumentValues);
-     * 
-     */
-    
     var handler = handlers.find(argumentValues);
-    
+
     /*-
     var function = handler.getInlineableEffect();
     if (function != null) {
-      var result = library.execute(function, argumentValues);
-      if (!continue(result)) {
-        throw new TerminateContinuationException(); // control flow exception
-      }
+    var result = library.execute(function, argumentValues);
+    if (!continue(result)) {
+      throw new TerminateContinuationException(); // control flow exception
+    }
     } else {
-      handler.awaitResult(argumentValues); // also may throw control flow exception
+    handler.awaitResult(argumentValues); // also may throw control flow exception
     }
     */
 
