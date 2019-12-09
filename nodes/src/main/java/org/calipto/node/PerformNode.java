@@ -53,6 +53,14 @@ public abstract class PerformNode extends CaliptoNode {
     } else {
     handler.awaitResult(argumentValues); // also may throw control flow exception
     }
+    
+    
+    TODO we can specialise for a handler per thread. Currently a new handler
+    context is run in a new thread so this works fine. If we use continuations
+    in the future we will need to invalidate these assumptions wherever the
+    handler is shadowed.  
+    
+    
     */
 
     try {

@@ -38,12 +38,43 @@ public abstract class HandleNode extends CaliptoNode {
 
     var handlers = HANDLERS.get();
 
-    var handlerThread = Thread.currentThread();
-    var performerThread = new Thread(() -> {
-      HANDLERS.set(handlers.withHandlerThread(handlerThread));
-    });
+    var mediator = new EffectMediator();
 
-    performerThread.start();
+    var effectHandlers = new Thread(() -> {
+      HANDLERS.set(handlers.withHandlerMediator(mediator));
+
+      // We might want an extra rule here that non-purely-functional side-effects are
+      // not allowed. Thing is, we still want to be able to get variables and stuff,
+      // which would be a side effect.
+
+      // run our effect-handling code
+    });
+    effectHandlers.start();
+
+    try {
+      HANDLERS.set(handlers.withPerformerMediator(mediator));
+
+      // run our effect-performing code
+
+      return null; // result
+    } finally {
+      HANDLERS.set(handlers);
+
+      /*
+       * whatever, we're done with it.
+       * 
+       * TODO Do we also want to invalidate the side-effect mediator passed to the
+       * handler thread? Surely it shouldn't continue to have side-effects at this
+       * point...
+       */
+      effectHandlers.interrupt();
+      try {
+        effectHandlers.join();
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
