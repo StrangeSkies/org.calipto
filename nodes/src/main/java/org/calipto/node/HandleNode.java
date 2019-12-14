@@ -1,7 +1,14 @@
 package org.calipto.node;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Objects;
+
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.GenerateNodeFactory;
+import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.frame.FrameSlot;
+import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.StandardTags;
 import com.oracle.truffle.api.instrumentation.Tag;
@@ -25,17 +32,46 @@ public abstract class HandleNode extends CaliptoNode {
   private CaliptoNode handlerNode;
   @Children
   private final CaliptoNode[] performerNodes;
+  private final FrameSlot[] performerResults;
   @Child
   private InteropLibrary library;
 
-  public HandleNode(CaliptoNode handlerNode, CaliptoNode[] performerNodes) {
-    this.handlerNode = handlerNode;
-    this.performerNodes = performerNodes;
+  public HandleNode(
+      CaliptoNode handlerNode,
+      CaliptoNode[] performerNodes,
+      FrameDescriptor frameDescriptor) {
+    this.handlerNode = requireNonNull(handlerNode);
+    this.performerNodes = requireNonNull(performerNodes);
     this.library = InteropLibrary.getFactory().createDispatched(3);
 
-    /*
-     * TODO create array of frame slots
-     */
+    requireNonNull(frameDescriptor);
+    this.performerResults = new FrameSlot[performerNodes.length];
+    for (int i = 0; i < performerNodes.length; i++) {
+      performerResults[i] = createAssignment(frameDescriptor, nameNode, valueNode, i);
+    }
+  }
+
+  public static CaliptoNode createAssignment(
+      FrameDescriptor frameDescriptor,
+      String name,
+      CaliptoNode valueNode,
+      int argumentIndex) {
+    requireNonNull(name);
+    requireNonNull(valueNode);
+
+    FrameSlot frameSlot = frameDescriptor
+        .findOrAddFrameSlot(name, argumentIndex, FrameSlotKind.Illegal);
+    lexicalScope.locals.put(name, frameSlot);
+    final CaliptoNode result = SLWriteLocalVariableNodeGen.create(valueNode, frameSlot);
+
+    if (valueNode.hasSource()) {
+      final int start = nameNode.getSourceCharIndex();
+      final int length = valueNode.getSourceEndIndex() - start;
+      result.setSourceSection(start, length);
+    }
+    result.addExpressionTag();
+
+    return result;
   }
 
   @ExplodeLoop
@@ -68,21 +104,6 @@ public abstract class HandleNode extends CaliptoNode {
       return handlerNode.executeGeneric(frame);
     } finally {
       HANDLERS.set(handlers);
-
-      /*
-       * whatever, we're done with all our parameters now
-       * 
-       * TODO Do we also want to invalidate the side-effect mediator passed to the
-       * handler thread? Surely it shouldn't continue to have side-effects at this
-       * point...
-       */
-      effectPerformers.interrupt();
-      try {
-        effectPerformers.join();
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
     }
   }
 
