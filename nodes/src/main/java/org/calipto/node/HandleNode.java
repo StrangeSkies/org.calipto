@@ -21,55 +21,64 @@ public abstract class HandleNode extends CaliptoNode {
     }
   };
 
+  @Child
+  private CaliptoNode handlerNode;
   @Children
-  private final CaliptoNode[] argumentNodes;
+  private final CaliptoNode[] performerNodes;
   @Child
   private InteropLibrary library;
 
-  public HandleNode(CaliptoNode[] argumentNodes) {
-    this.argumentNodes = argumentNodes;
+  public HandleNode(CaliptoNode handlerNode, CaliptoNode[] performerNodes) {
+    this.handlerNode = handlerNode;
+    this.performerNodes = performerNodes;
     this.library = InteropLibrary.getFactory().createDispatched(3);
+
+    /*
+     * TODO create array of frame slots
+     */
   }
 
   @ExplodeLoop
   @Override
   public Object executeGeneric(VirtualFrame frame) {
-    CompilerAsserts.compilationConstant(argumentNodes.length);
+    CompilerAsserts.compilationConstant(performerNodes.length);
 
     var handlers = HANDLERS.get();
 
     var mediator = new EffectMediator();
 
-    var effectHandlers = new Thread(() -> {
-      HANDLERS.set(handlers.withHandlerMediator(mediator));
+    for (var performerNode : performerNodes) {
+      var effectPerformers = new Thread(() -> {
+        HANDLERS.set(handlers.withPerformerMediator(mediator));
 
-      // We might want an extra rule here that non-purely-functional side-effects are
-      // not allowed. Thing is, we still want to be able to get variables and stuff,
-      // which would be a side effect.
+        // run our effect-performing code
 
-      // run our effect-handling code
-    });
-    effectHandlers.start();
+        var result = performerNode.executeGeneric(frame);
+
+        // TODO assign result to frame slot
+      });
+      effectPerformers.start();
+    }
 
     try {
-      HANDLERS.set(handlers.withPerformerMediator(mediator));
+      HANDLERS.set(handlers.withHandlerMediator(mediator));
 
-      // run our effect-performing code
+      // run our effect-handling code
 
-      return null; // result
+      return handlerNode.executeGeneric(frame);
     } finally {
       HANDLERS.set(handlers);
 
       /*
-       * whatever, we're done with it.
+       * whatever, we're done with all our parameters now
        * 
        * TODO Do we also want to invalidate the side-effect mediator passed to the
        * handler thread? Surely it shouldn't continue to have side-effects at this
        * point...
        */
-      effectHandlers.interrupt();
+      effectPerformers.interrupt();
       try {
-        effectHandlers.join();
+        effectPerformers.join();
       } catch (InterruptedException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
