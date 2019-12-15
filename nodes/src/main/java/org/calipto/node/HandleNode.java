@@ -4,6 +4,9 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
 
+import org.calipto.CaliptoLexicalScope;
+import org.calipto.reader.LexicalScope;
+
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.GenerateNodeFactory;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -36,13 +39,12 @@ public abstract class HandleNode extends CaliptoNode {
   @Child
   private InteropLibrary library;
 
-  public HandleNode(
-      CaliptoNode handlerNode,
-      CaliptoNode[] performerNodes,
-      FrameDescriptor frameDescriptor) {
+  public HandleNode(CaliptoNode handlerNode, CaliptoNode[] performerNodes) {
     this.handlerNode = requireNonNull(handlerNode);
     this.performerNodes = requireNonNull(performerNodes);
     this.library = InteropLibrary.getFactory().createDispatched(3);
+
+    var frameDescriptor = new FrameDescriptor();
 
     requireNonNull(frameDescriptor);
     this.performerResults = new FrameSlot[performerNodes.length];

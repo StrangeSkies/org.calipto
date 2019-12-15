@@ -16,16 +16,12 @@ public class CaliptoReader {
   private final ReadingContext context;
   private final Scanner scanner;
 
-  private LexicalScope scope;
-
   private final CaliptoData keywordSymbol;
   private final CaliptoData quoteSymbol;
 
   public CaliptoReader(ReadingContext context, Scanner scanner) {
     this.context = context;
     this.scanner = scanner;
-
-    this.scope = new LexicalScope();
 
     this.keywordSymbol = context.makeSymbol(CORE_NAMESPACE, KEYWORD);
     this.quoteSymbol = context.makeSymbol(CORE_NAMESPACE, QUOTE);
@@ -66,8 +62,8 @@ public class CaliptoReader {
         data = scanQuote();
 
       } else {
-        var macro = scope
-            .findMacro(codePoint)
+        var macro = context
+            .findCharacterMacro(codePoint)
             .orElseThrow(
                 () -> new UnsupportedOperationException(
                     "Custom reader macros are not yet supported. Unexpected character: "
