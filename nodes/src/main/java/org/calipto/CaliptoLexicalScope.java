@@ -35,9 +35,12 @@ public final class CaliptoLexicalScope {
   /**
    * Create a new block SL lexical scope.
    *
-   * @param current     the current node
-   * @param block       a nearest block enclosing the current node
-   * @param parentBlock a next parent block
+   * @param current
+   *          the current node
+   * @param block
+   *          a nearest block enclosing the current node
+   * @param parentBlock
+   *          a next parent block
    */
   private CaliptoLexicalScope(Node current, SLBlockNode block, SLBlockNode parentBlock) {
     this.current = current;
@@ -49,10 +52,13 @@ public final class CaliptoLexicalScope {
   /**
    * Create a new functional SL lexical scope.
    *
-   * @param current the current node, or <code>null</code> when it would be above
-   *                the block
-   * @param block   a nearest block enclosing the current node
-   * @param root    a functional root node for top-most block
+   * @param current
+   *          the current node, or <code>null</code> when it would be above the
+   *          block
+   * @param block
+   *          a nearest block enclosing the current node
+   * @param root
+   *          a functional root node for top-most block
    */
   private CaliptoLexicalScope(Node current, SLBlockNode block, RootNode root) {
     this.current = current;
@@ -300,8 +306,7 @@ public final class CaliptoLexicalScope {
     @ExportMessage
     @TruffleBoundary
     void writeMember(String member, Object value)
-        throws UnsupportedMessageException,
-        UnknownIdentifierException {
+        throws UnsupportedMessageException, UnknownIdentifierException {
       if (frame == null) {
         throw UnsupportedMessageException.create();
       }

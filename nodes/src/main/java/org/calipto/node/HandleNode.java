@@ -79,6 +79,10 @@ public abstract class HandleNode extends CaliptoNode {
   @ExplodeLoop
   @Override
   public Object executeGeneric(VirtualFrame frame) {
+    /*
+     * TODO think about how to specialise param assignments 
+     */
+
     CompilerAsserts.compilationConstant(performerNodes.length);
 
     var handlers = HANDLERS.get();
