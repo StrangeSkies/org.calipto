@@ -1,13 +1,19 @@
 package org.calipto;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.calipto.node.CaliptoNode;
+
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.Frame;
+import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
+import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.InvalidArrayIndexException;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -35,9 +41,12 @@ public final class CaliptoLexicalScope {
   /**
    * Create a new block SL lexical scope.
    *
-   * @param current     the current node
-   * @param block       a nearest block enclosing the current node
-   * @param parentBlock a next parent block
+   * @param current
+   *          the current node
+   * @param block
+   *          a nearest block enclosing the current node
+   * @param parentBlock
+   *          a next parent block
    */
   private CaliptoLexicalScope(Node current, SLBlockNode block, SLBlockNode parentBlock) {
     this.current = current;
@@ -49,10 +58,13 @@ public final class CaliptoLexicalScope {
   /**
    * Create a new functional SL lexical scope.
    *
-   * @param current the current node, or <code>null</code> when it would be above
-   *                the block
-   * @param block   a nearest block enclosing the current node
-   * @param root    a functional root node for top-most block
+   * @param current
+   *          the current node, or <code>null</code> when it would be above the
+   *          block
+   * @param block
+   *          a nearest block enclosing the current node
+   * @param root
+   *          a functional root node for top-most block
    */
   private CaliptoLexicalScope(Node current, SLBlockNode block, RootNode root) {
     this.current = current;
@@ -61,26 +73,27 @@ public final class CaliptoLexicalScope {
     this.root = root;
   }
 
-  @SuppressWarnings("all") // The parameter node should not be assigned
-  public static CaliptoLexicalScope createScope(Node node) {
-    SLBlockNode block = getParentBlock(node);
-    if (block == null) {
-      // We're in the root.
-      block = findChildrenBlock(node);
-      if (block == null) {
-        // Corrupted SL AST, no block was found
-        assert node.getRootNode() instanceof SLEvalRootNode : "Corrupted SL AST under " + node;
-        return new CaliptoLexicalScope(null, null, (SLBlockNode) null);
-      }
-      node = null; // node is above the block
+  protected CaliptoNode createAssignment(
+      FrameDescriptor frameDescriptor,
+      String name,
+      CaliptoNode valueNode,
+      int argumentIndex) {
+    requireNonNull(name);
+    requireNonNull(valueNode);
+
+    FrameSlot frameSlot = frameDescriptor
+        .findOrAddFrameSlot(name, argumentIndex, FrameSlotKind.Illegal);
+    locals.put(name, frameSlot);
+    final CaliptoNode result = SLWriteLocalVariableNodeGen.create(valueNode, frameSlot);
+
+    if (valueNode.hasSource()) {
+      final int start = nameNode.getSourceCharIndex();
+      final int length = valueNode.getSourceEndIndex() - start;
+      result.setSourceSection(start, length);
     }
-    // Test if there is a parent block. If not, we're in the root scope.
-    SLBlockNode parentBlock = getParentBlock(block);
-    if (parentBlock == null) {
-      return new CaliptoLexicalScope(node, block, block.getRootNode());
-    } else {
-      return new CaliptoLexicalScope(node, block, parentBlock);
-    }
+    result.addExpressionTag();
+
+    return result;
   }
 
   private static SLBlockNode getParentBlock(Node node) {
@@ -300,8 +313,7 @@ public final class CaliptoLexicalScope {
     @ExportMessage
     @TruffleBoundary
     void writeMember(String member, Object value)
-        throws UnsupportedMessageException,
-        UnknownIdentifierException {
+        throws UnsupportedMessageException, UnknownIdentifierException {
       if (frame == null) {
         throw UnsupportedMessageException.create();
       }

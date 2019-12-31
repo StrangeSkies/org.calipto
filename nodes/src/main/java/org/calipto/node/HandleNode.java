@@ -2,11 +2,6 @@ package org.calipto.node;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Objects;
-
-import org.calipto.CaliptoLexicalScope;
-import org.calipto.reader.LexicalScope;
-
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.dsl.GenerateNodeFactory;
 import com.oracle.truffle.api.frame.FrameDescriptor;
@@ -35,7 +30,7 @@ public abstract class HandleNode extends CaliptoNode {
   private CaliptoNode handlerNode;
   @Children
   private final CaliptoNode[] performerNodes;
-  private final FrameSlot[] performerResults;
+  private final FrameDescriptor frameDescriptor;
   @Child
   private InteropLibrary library;
 
@@ -44,12 +39,9 @@ public abstract class HandleNode extends CaliptoNode {
     this.performerNodes = requireNonNull(performerNodes);
     this.library = InteropLibrary.getFactory().createDispatched(3);
 
-    var frameDescriptor = new FrameDescriptor();
-
-    requireNonNull(frameDescriptor);
-    this.performerResults = new FrameSlot[performerNodes.length];
+    frameDescriptor = new FrameDescriptor();
     for (int i = 0; i < performerNodes.length; i++) {
-      performerResults[i] = createAssignment(frameDescriptor, nameNode, valueNode, i);
+      createAssignment(frameDescriptor, "", performerNodes[i], i);
     }
   }
 
@@ -63,11 +55,10 @@ public abstract class HandleNode extends CaliptoNode {
 
     FrameSlot frameSlot = frameDescriptor
         .findOrAddFrameSlot(name, argumentIndex, FrameSlotKind.Illegal);
-    lexicalScope.locals.put(name, frameSlot);
-    final CaliptoNode result = SLWriteLocalVariableNodeGen.create(valueNode, frameSlot);
+    final CaliptoNode result = CaliptoWriteLocalVariableNodeGen.create(valueNode, frameSlot);
 
     if (valueNode.hasSource()) {
-      final int start = nameNode.getSourceCharIndex();
+      final int start = valueNode.getSourceCharIndex();
       final int length = valueNode.getSourceEndIndex() - start;
       result.setSourceSection(start, length);
     }
@@ -79,6 +70,10 @@ public abstract class HandleNode extends CaliptoNode {
   @ExplodeLoop
   @Override
   public Object executeGeneric(VirtualFrame frame) {
+    /*
+     * TODO think about how to specialise param assignments
+     */
+
     CompilerAsserts.compilationConstant(performerNodes.length);
 
     var handlers = HANDLERS.get();
