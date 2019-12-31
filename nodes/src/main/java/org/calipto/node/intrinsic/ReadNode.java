@@ -1,5 +1,6 @@
 package org.calipto.node.intrinsic;
 
+import java.util.Optional;
 import java.util.function.IntPredicate;
 
 import org.calipto.reader.CaliptoData;
@@ -64,6 +65,12 @@ public abstract class ReadNode extends IntrinsicNode {
         @Override
         public ReaderMacro resolveReaderMacro(CaliptoData symbol) {
           return readTableLibrary.get(readTable, symbol);
+        }
+
+        @Override
+        public Optional<ReaderMacro> findCharacterMacro(int codePoint) {
+          // TODO Auto-generated method stub
+          return null;
         }
       }, new Scanner() {
         @Override
