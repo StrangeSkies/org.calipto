@@ -27,21 +27,21 @@ public abstract class HandleNode extends CaliptoNode {
   };
 
   @Child
-  private CaliptoNode handlerNode;
+  private CaliptoNode targetNode;
   @Children
-  private final CaliptoNode[] performerNodes;
+  private final CaliptoNode[] argumentNodes;
   private final FrameDescriptor frameDescriptor;
   @Child
   private InteropLibrary library;
 
-  public HandleNode(CaliptoNode handlerNode, CaliptoNode[] performerNodes) {
-    this.handlerNode = requireNonNull(handlerNode);
-    this.performerNodes = requireNonNull(performerNodes);
+  public HandleNode(CaliptoNode handlerNode, CaliptoNode[] argumentNodes) {
+    this.targetNode = requireNonNull(handlerNode);
+    this.argumentNodes = requireNonNull(argumentNodes);
     this.library = InteropLibrary.getFactory().createDispatched(3);
 
     frameDescriptor = new FrameDescriptor();
-    for (int i = 0; i < performerNodes.length; i++) {
-      createAssignment(frameDescriptor, "", performerNodes[i], i);
+    for (int i = 0; i < argumentNodes.length; i++) {
+      createAssignment(frameDescriptor, "", argumentNodes[i], i);
     }
   }
 
