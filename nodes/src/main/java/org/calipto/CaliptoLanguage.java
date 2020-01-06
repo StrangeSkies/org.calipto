@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.calipto.node.CaliptoRootEvalNode;
+import org.calipto.node.RootEvalNode;
 import org.calipto.node.builtin.BuiltinNode;
 import org.calipto.node.intrinsic.IntrinsicNode;
 import org.calipto.reader.CaliptoReader;
@@ -75,7 +75,7 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
     Source source = request.getSource();
     CaliptoReader reader = new CaliptoReader(getReadingContext(), new SourceScanner(source));
 
-    var evalMain = new CaliptoRootEvalNode(this, reader);
+    var evalMain = new RootEvalNode(this, reader);
 
     return Truffle.getRuntime().createCallTarget(evalMain);
   }

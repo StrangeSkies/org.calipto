@@ -1,4 +1,36 @@
-package org.calipto;
+/*
+ * Calipto Nodes - The text API
+ *
+ * Copyright © 2018 Strange Skies (elias@vasylenko.uk)
+ *     __   _______  ____           _       __     _      __       __
+ *   ,`_ `,|__   __||  _ `.        / \     |  \   | |  ,-`__`¬  ,-`__`¬
+ *  ( (_`-'   | |   | | ) |       / . \    | . \  | | / .`  `' / .`  `'
+ *   `._ `.   | |   | |-. L      / / \ \   | |\ \ | || |    _ | '-~.
+ *  _   `. \  | |   | |  `.`.   / /   \ \  | | \ \| || |   | || +~-'
+ * \ \__.' /  | |   | |    \ \ / /     \ \ | |  \ ` | \ `._' | \ `.__,.
+ *  `.__.-`   |_|   |_|    |_|/_/       \_\|_|   \__|  `-.__.J  `-.__.J
+ *                  __    _         _      __      __
+ *                ,`_ `, | |  _    | |  ,-`__`¬  ,`_ `,
+ *               ( (_`-' | | ) |   | | / .`  `' ( (_`-'
+ *                `._ `. | L-' L   | || '-~.     `._ `.
+ *               _   `. \| ,.-^.`. | || +~-'    _   `. \
+ *              \ \__.' /| |    \ \| | \ `.__,.\ \__.' /
+ *               `.__.-` |_|    |_||_|  `-.__.J `.__.-`
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.calipto.node;
 
 import static java.util.Objects.requireNonNull;
 
@@ -7,7 +39,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.calipto.node.CaliptoNode;
+import org.calipto.CaliptoBlockNode;
+import org.calipto.CaliptoLexicalScope;
+import org.calipto.SLBlockNode;
+import org.calipto.type.symbol.Nil;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.Frame;
@@ -26,85 +61,40 @@ import com.oracle.truffle.api.nodes.NodeUtil;
 import com.oracle.truffle.api.nodes.NodeVisitor;
 import com.oracle.truffle.api.nodes.RootNode;
 
-/**
- * Simple language lexical scope. There can be a block scope, or function scope.
- */
-public final class CaliptoLexicalScope {
-
-  private final Node current;
-  private final CaliptoBlockNode block;
-  private final CaliptoBlockNode parentBlock;
+public abstract class ScopingNode extends CaliptoNode {
   private final RootNode root;
-  private CaliptoLexicalScope parent;
   private Map<String, FrameSlot> varSlots;
 
-  /**
-   * Create a new block SL lexical scope.
-   *
-   * @param current
-   *          the current node
-   * @param block
-   *          a nearest block enclosing the current node
-   * @param parentBlock
-   *          a next parent block
-   */
-  private CaliptoLexicalScope(Node current, SLBlockNode block, SLBlockNode parentBlock) {
-    this.current = current;
-    this.block = block;
-    this.parentBlock = parentBlock;
-    this.root = null;
-  }
-
-  /**
-   * Create a new functional SL lexical scope.
-   *
-   * @param current
-   *          the current node, or <code>null</code> when it would be above the
-   *          block
-   * @param block
-   *          a nearest block enclosing the current node
-   * @param root
-   *          a functional root node for top-most block
-   */
-  private CaliptoLexicalScope(Node current, SLBlockNode block, RootNode root) {
-    this.current = current;
-    this.block = block;
-    this.parentBlock = null;
-    this.root = root;
-  }
-
-  protected CaliptoNode createAssignment(
-      FrameDescriptor frameDescriptor,
-      String name,
-      CaliptoNode valueNode,
-      int argumentIndex) {
-    requireNonNull(name);
-    requireNonNull(valueNode);
-
-    FrameSlot frameSlot = frameDescriptor
-        .findOrAddFrameSlot(name, argumentIndex, FrameSlotKind.Illegal);
-    locals.put(name, frameSlot);
-    final CaliptoNode result = SLWriteLocalVariableNodeGen.create(valueNode, frameSlot);
-
-    if (valueNode.hasSource()) {
-      final int start = nameNode.getSourceCharIndex();
-      final int length = valueNode.getSourceEndIndex() - start;
-      result.setSourceSection(start, length);
+  private ScopingNode() {
+    BlockNode block = getParentBlock(this);
+    if (block == null) {
+      // We're in the root.
+      block = findChildrenBlock(node);
+      if (block == null) {
+        // Corrupted SL AST, no block was found
+        assert node.getRootNode() instanceof SLEvalRootNode : "Corrupted SL AST under " + node;
+        return new SLLexicalScope(null, null, (SLBlockNode) null);
+      }
+      node = null; // node is above the block
     }
-    result.addExpressionTag();
-
-    return result;
+    // Test if there is a parent block. If not, we're in the root scope.
+    SLBlockNode parentBlock = getParentBlock(block);
+    if (parentBlock == null) {
+      return new SLLexicalScope(node, block, block.getRootNode());
+    } else {
+      return new SLLexicalScope(node, block, parentBlock);
+    }
   }
 
-  private static SLBlockNode getParentBlock(Node node) {
-    SLBlockNode block;
+  private static ScopingNode getParentScope(Node node) {
+    ScopingNode block;
     Node parent = node.getParent();
     // Find a nearest block node.
-    while (parent != null && !(parent instanceof SLBlockNode)) {
+    while (parent != null && !(parent instanceof ScopingNode)) {
       parent = parent.getParent();
     }
     if (parent != null) {
-      block = (SLBlockNode) parent;
+      block = (ScopingNode) parent;
     } else {
       block = null;
     }
@@ -154,18 +144,6 @@ public final class CaliptoLexicalScope {
       return root.getName();
     } else {
       return "block";
-    }
-  }
-
-  /**
-   * @return the node representing the scope, the block node for block scopes and
-   *         the {@link RootNode} for functional scope.
-   */
-  public Node getNode() {
-    if (root != null) {
-      return root;
-    } else {
-      return block;
     }
   }
 
@@ -230,7 +208,7 @@ public final class CaliptoLexicalScope {
           return false;
         }
         // Do not enter any nested blocks.
-        if (!(node instanceof SLBlockNode)) {
+        if (!(node instanceof BlockNode)) {
           boolean all = NodeUtil.forEachChild(node, this);
           if (!all) {
             return false;
@@ -238,8 +216,8 @@ public final class CaliptoLexicalScope {
         }
         // Write to a variable is a declaration unless it exists already in a parent
         // scope.
-        if (node instanceof SLWriteLocalVariableNode) {
-          SLWriteLocalVariableNode wn = (SLWriteLocalVariableNode) node;
+        if (node instanceof WriteLocalVariableNode) {
+          WriteLocalVariableNode wn = (WriteLocalVariableNode) node;
           String name = Objects.toString(wn.getSlot().getIdentifier());
           if (!hasParentVar(name)) {
             slots.put(name, wn.getSlot());
@@ -258,23 +236,23 @@ public final class CaliptoLexicalScope {
     Map<String, FrameSlot> args = new LinkedHashMap<>(4);
     NodeUtil.forEachChild(block, new NodeVisitor() {
 
-      private SLWriteLocalVariableNode wn; // The current write node containing a slot
+      private WriteLocalVariableNode wn; // The current write node containing a slot
 
       @Override
       public boolean visit(Node node) {
         // When there is a write node, search for SLReadArgumentNode among its children:
-        if (node instanceof SLWriteLocalVariableNode) {
-          wn = (SLWriteLocalVariableNode) node;
+        if (node instanceof WriteLocalVariableNode) {
+          wn = (WriteLocalVariableNode) node;
           boolean all = NodeUtil.forEachChild(node, this);
           wn = null;
           return all;
-        } else if (wn != null && (node instanceof SLReadArgumentNode)) {
+        } else if (wn != null && (node instanceof ReadArgumentNode)) {
           FrameSlot slot = wn.getSlot();
           String name = Objects.toString(slot.getIdentifier());
           assert !args.containsKey(name) : name + " argument exists already.";
           args.put(name, slot);
           return true;
-        } else if (wn == null && (node instanceof SLStatementNode)) {
+        } else if (wn == null && (node instanceof CaliptoNode)) {
           // A different SL node - we're done.
           return false;
         } else {
@@ -287,7 +265,6 @@ public final class CaliptoLexicalScope {
 
   @ExportLibrary(InteropLibrary.class)
   static final class VariablesMapObject implements TruffleObject {
-
     final Map<String, ? extends FrameSlot> slots;
     final Object[] args;
     final Frame frame;
@@ -334,7 +311,7 @@ public final class CaliptoLexicalScope {
     @TruffleBoundary
     Object readMember(String member) throws UnknownIdentifierException {
       if (frame == null) {
-        return SLNull.SINGLETON;
+        return Nil.NIL;
       }
       FrameSlot slot = slots.get(member);
       if (slot == null) {
@@ -368,12 +345,10 @@ public final class CaliptoLexicalScope {
     boolean isMemberReadable(String member) {
       return frame == null || slots.containsKey(member);
     }
-
   }
 
   @ExportLibrary(InteropLibrary.class)
   static final class KeysArray implements TruffleObject {
-
     private final String[] keys;
 
     KeysArray(String[] keys) {
@@ -403,7 +378,5 @@ public final class CaliptoLexicalScope {
       }
       return keys[(int) index];
     }
-
   }
-
 }

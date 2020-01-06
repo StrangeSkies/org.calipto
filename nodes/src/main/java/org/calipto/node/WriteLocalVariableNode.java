@@ -15,7 +15,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
  */
 @NodeChild("valueNode")
 @NodeField(name = "slot", type = FrameSlot.class)
-public abstract class CaliptoWriteLocalVariableNode extends CaliptoNode {
+public abstract class WriteLocalVariableNode extends CaliptoNode {
 
   /**
    * Returns the descriptor of the accessed local variable. The implementation of
