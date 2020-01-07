@@ -18,7 +18,7 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
  * some side effect.
  */
 @GenerateNodeFactory
-public abstract class HandleNode extends CaliptoNode {
+public abstract class HandleNode extends ScopingNode {
   static final ThreadLocal<Handlers> HANDLERS = new ThreadLocal<>() {
     @Override
     protected Handlers initialValue() {

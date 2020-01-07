@@ -65,27 +65,6 @@ public abstract class ScopingNode extends CaliptoNode {
   private final RootNode root;
   private Map<String, FrameSlot> varSlots;
 
-  private ScopingNode() {
-    BlockNode block = getParentBlock(this);
-    if (block == null) {
-      // We're in the root.
-      block = findChildrenBlock(node);
-      if (block == null) {
-        // Corrupted SL AST, no block was found
-        assert node.getRootNode() instanceof SLEvalRootNode : "Corrupted SL AST under " + node;
-        return new SLLexicalScope(null, null, (SLBlockNode) null);
-      }
-      node = null; // node is above the block
-    }
-    // Test if there is a parent block. If not, we're in the root scope.
-    SLBlockNode parentBlock = getParentBlock(block);
-    if (parentBlock == null) {
-      return new SLLexicalScope(node, block, block.getRootNode());
-    } else {
-      return new SLLexicalScope(node, block, parentBlock);
-    }
-  }
-
   private static ScopingNode getParentScope(Node node) {
     ScopingNode block;
     Node parent = node.getParent();
@@ -101,23 +80,7 @@ public abstract class ScopingNode extends CaliptoNode {
     return block;
   }
 
-  private static SLBlockNode findChildrenBlock(Node node) {
-    SLBlockNode[] blockPtr = new SLBlockNode[1];
-    node.accept(new NodeVisitor() {
-      @Override
-      public boolean visit(Node n) {
-        if (n instanceof SLBlockNode) {
-          blockPtr[0] = (SLBlockNode) n;
-          return false;
-        } else {
-          return true;
-        }
-      }
-    });
-    return blockPtr[0];
-  }
-
-  public CaliptoLexicalScope findParent() {
+  public ScopingNode findParent() {
     if (parentBlock == null) {
       // This was a root scope.
       return null;
@@ -139,13 +102,7 @@ public abstract class ScopingNode extends CaliptoNode {
   /**
    * @return the function name for function scope, "block" otherwise.
    */
-  public String getName() {
-    if (root != null) {
-      return root.getName();
-    } else {
-      return "block";
-    }
-  }
+  public abstract String getName();
 
   public Object getVariables(Frame frame) {
     Map<String, FrameSlot> vars = getVars();
@@ -185,9 +142,9 @@ public abstract class ScopingNode extends CaliptoNode {
   }
 
   private boolean hasParentVar(String name) {
-    CaliptoLexicalScope p = this;
-    while ((p = p.findParent()) != null) {
-      if (p.getVars().containsKey(name)) {
+    ScopingNode scope = this;
+    while ((scope = scope.findParent()) != null) {
+      if (scope.getVars().containsKey(name)) {
         return true;
       }
     }

@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import org.calipto.node.CaliptoNode;
-import org.calipto.node.RootNode;
+import org.calipto.node.CallTargetNode;
 import org.calipto.node.ReadArgumentNode;
 import org.calipto.node.builtin.BuiltinNode;
 import org.calipto.node.intrinsic.CarNodeFactory;
@@ -120,7 +120,7 @@ public class CaliptoContext {
      * Wrap the builtin in a RootNode. Truffle requires all AST to start with a
      * RootNode.
      */
-    RootNode rootNode = new RootNode(
+    CallTargetNode rootNode = new CallTargetNode(
         name,
         language,
         new FrameDescriptor(),

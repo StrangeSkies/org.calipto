@@ -44,7 +44,7 @@ import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeInfo(language = "Calipto", description = "The root of all execution trees")
-public class RootNode extends RootNode {
+public class CallTargetNode extends RootNode {
   @Children
   private CaliptoNode[] bodyNodes;
 
@@ -55,7 +55,7 @@ public class RootNode extends RootNode {
 
   private final SourceSection sourceSection;
 
-  public RootNode(
+  public CallTargetNode(
       String name,
       CaliptoLanguage language,
       FrameDescriptor frameDescriptor,

@@ -55,7 +55,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.RootNode;
 
-public final class RootEvalNode extends RootNode {
+public final class ModuleNode extends RootNode {
   @CompilationFinal
   private boolean registered;
 
@@ -64,7 +64,7 @@ public final class RootEvalNode extends RootNode {
   @Child
   private DirectCallNode mainCallNode;
 
-  public RootEvalNode(CaliptoLanguage language, CaliptoReader reader) {
+  public ModuleNode(CaliptoLanguage language, CaliptoReader reader) {
     super(null); // internal frame
     this.mainCallNode = rootFunction != null ? DirectCallNode.create(rootFunction) : null;
     this.reference = language.getContextReference();
