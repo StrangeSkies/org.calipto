@@ -62,9 +62,6 @@ import com.oracle.truffle.api.nodes.NodeVisitor;
 import com.oracle.truffle.api.nodes.RootNode;
 
 public abstract class ScopingNode extends CaliptoNode {
-  private final RootNode root;
-  private Map<String, FrameSlot> varSlots;
-
   private static ScopingNode getParentScope(Node node) {
     ScopingNode block;
     Node parent = node.getParent();
@@ -80,52 +77,12 @@ public abstract class ScopingNode extends CaliptoNode {
     return block;
   }
 
-  public ScopingNode findParent() {
-    if (parentBlock == null) {
-      // This was a root scope.
-      return null;
-    }
-    if (parent == null) {
-      Node node = block;
-      SLBlockNode newBlock = parentBlock;
-      // Test if there is a next parent block. If not, we're in the root scope.
-      SLBlockNode newParentBlock = getParentBlock(newBlock);
-      if (newParentBlock == null) {
-        parent = new CaliptoLexicalScope(node, newBlock, newBlock.getRootNode());
-      } else {
-        parent = new CaliptoLexicalScope(node, newBlock, newParentBlock);
-      }
-    }
-    return parent;
-  }
-
   /**
    * @return the function name for function scope, "block" otherwise.
    */
   public abstract String getName();
 
-  public Object getVariables(Frame frame) {
-    Map<String, FrameSlot> vars = getVars();
-    Object[] args = null;
-    // Use arguments when the current node is above the block
-    if (current == null) {
-      args = (frame != null) ? frame.getArguments() : null;
-    }
-    return new VariablesMapObject(vars, args, frame);
-  }
-
-  public Object getArguments(Frame frame) {
-    if (root == null) {
-      // No arguments for block scope
-      return null;
-    }
-    // The slots give us names of the arguments:
-    Map<String, FrameSlot> argSlots = collectArgs(block);
-    // The frame's arguments array give us the argument values:
-    Object[] args = (frame != null) ? frame.getArguments() : null;
-    // Create a TruffleObject having the arguments as properties:
-    return new VariablesMapObject(argSlots, args, frame);
-  }
+  public abstract Object getVariables(Frame frame);
 
   private Map<String, FrameSlot> getVars() {
     if (varSlots == null) {
@@ -141,17 +98,6 @@ public abstract class ScopingNode extends CaliptoNode {
     return varSlots;
   }
 
-  private boolean hasParentVar(String name) {
-    ScopingNode scope = this;
-    while ((scope = scope.findParent()) != null) {
-      if (scope.getVars().containsKey(name)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private Map<String, FrameSlot> collectVars(Node varsBlock, Node currentNode) {
     // Variables are slot-based.
     // To collect declared variables, traverse the block's AST and find slots
     // associated
@@ -184,40 +130,6 @@ public abstract class ScopingNode extends CaliptoNode {
       }
     });
     return slots;
-  }
-
-  private static Map<String, FrameSlot> collectArgs(Node block) {
-    // Arguments are pushed to frame slots at the beginning of the function block.
-    // To collect argument slots, search for SLReadArgumentNode inside of
-    // SLWriteLocalVariableNode.
-    Map<String, FrameSlot> args = new LinkedHashMap<>(4);
-    NodeUtil.forEachChild(block, new NodeVisitor() {
-
-      private WriteLocalVariableNode wn; // The current write node containing a slot
-
-      @Override
-      public boolean visit(Node node) {
-        // When there is a write node, search for SLReadArgumentNode among its children:
-        if (node instanceof WriteLocalVariableNode) {
-          wn = (WriteLocalVariableNode) node;
-          boolean all = NodeUtil.forEachChild(node, this);
-          wn = null;
-          return all;
-        } else if (wn != null && (node instanceof ReadArgumentNode)) {
-          FrameSlot slot = wn.getSlot();
-          String name = Objects.toString(slot.getIdentifier());
-          assert !args.containsKey(name) : name + " argument exists already.";
-          args.put(name, slot);
-          return true;
-        } else if (wn == null && (node instanceof CaliptoNode)) {
-          // A different SL node - we're done.
-          return false;
-        } else {
-          return NodeUtil.forEachChild(node, this);
-        }
-      }
-    });
-    return args;
   }
 
   @ExportLibrary(InteropLibrary.class)

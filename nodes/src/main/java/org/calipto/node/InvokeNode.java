@@ -1,8 +1,13 @@
 package org.calipto.node;
 
+import java.util.Map;
+
 import org.calipto.CaliptoTypeException;
+import org.calipto.node.ScopingNode.VariablesMapObject;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.frame.Frame;
+import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.StandardTags;
 import com.oracle.truffle.api.instrumentation.Tag;
@@ -12,7 +17,7 @@ import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.interop.UnsupportedTypeException;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 
-public abstract class InvokeNode extends CaliptoNode {
+public abstract class InvokeNode extends ScopingNode {
   @Child
   private CaliptoNode targetNode;
   @Children
@@ -51,5 +56,19 @@ public abstract class InvokeNode extends CaliptoNode {
       return true;
     }
     return super.hasTag(tag);
+  }
+
+  @Override
+  public Object getVariables(Frame frame) {
+    if (root == null) {
+      // No arguments for block scope
+      return null;
+    }
+    // The slots give us names of the arguments:
+    Map<String, FrameSlot> argSlots = collectArgs(block);
+    // The frame's arguments array give us the argument values:
+    Object[] args = (frame != null) ? frame.getArguments() : null;
+    // Create a TruffleObject having the arguments as properties:
+    return new VariablesMapObject(argSlots, args, frame);
   }
 }
