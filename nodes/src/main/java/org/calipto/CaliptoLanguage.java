@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.calipto.node.ModuleNode;
+import org.calipto.node.ScopingNode;
 import org.calipto.node.builtin.BuiltinNode;
 import org.calipto.node.intrinsic.IntrinsicNode;
 import org.calipto.reader.CaliptoReader;
@@ -120,7 +121,8 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
         return "null";
       } else if (interop.isExecutable(value)) {
         if (value instanceof CaliptoFunction) {
-          return ((CaliptoFunction) value).getNamespace() + "/" + ((CaliptoFunction) value).getName();
+          return ((CaliptoFunction) value).getNamespace() + "/"
+              + ((CaliptoFunction) value).getName();
         } else {
           return "Function";
         }
@@ -145,18 +147,18 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
 
   @Override
   public Iterable<Scope> findLocalScopes(CaliptoContext context, Node node, Frame frame) {
-    final CaliptoLexicalScope scope = CaliptoLexicalScope.createScope(node);
+    final ScopingNode scope = ScopingNode.findEnclosingScope(node);
     return new Iterable<Scope>() {
       @Override
       public Iterator<Scope> iterator() {
         return new Iterator<Scope>() {
-          private CaliptoLexicalScope previousScope;
-          private CaliptoLexicalScope nextScope = scope;
+          private ScopingNode previousScope;
+          private ScopingNode nextScope = scope;
 
           @Override
           public boolean hasNext() {
             if (nextScope == null) {
-              nextScope = previousScope.findParent();
+              nextScope = ScopingNode.findEnclosingScope(previousScope);
             }
             return nextScope != null;
           }
@@ -168,7 +170,7 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
             }
             Scope vscope = Scope
                 .newBuilder(nextScope.getName(), nextScope.getVariables(frame))
-                .node(nextScope.getNode())
+                .node(nextScope)
                 .arguments(nextScope.getArguments(frame))
                 .build();
             previousScope = nextScope;

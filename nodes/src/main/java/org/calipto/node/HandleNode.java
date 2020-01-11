@@ -2,7 +2,12 @@ package org.calipto.node;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.GenerateNodeFactory;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
@@ -11,6 +16,10 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.StandardTags;
 import com.oracle.truffle.api.instrumentation.Tag;
 import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.interop.UnknownIdentifierException;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 
 /**
@@ -74,19 +83,19 @@ public abstract class HandleNode extends ScopingNode {
      * TODO think about how to specialise param assignments
      */
 
-    CompilerAsserts.compilationConstant(performerNodes.length);
+    CompilerAsserts.compilationConstant(argumentNodes.length);
 
     var handlers = HANDLERS.get();
 
     var mediator = new EffectMediator();
 
-    for (var performerNode : performerNodes) {
+    for (var argumentNode : argumentNodes) {
       var effectPerformers = new Thread(() -> {
         HANDLERS.set(handlers.withPerformerMediator(mediator));
 
         // run our effect-performing code
 
-        var result = performerNode.executeGeneric(frame);
+        var result = argumentNode.executeGeneric(frame);
 
         // TODO assign result to frame slot
       });
@@ -98,7 +107,7 @@ public abstract class HandleNode extends ScopingNode {
 
       // run our effect-handling code
 
-      return handlerNode.executeGeneric(frame);
+      return targetNode.executeGeneric(frame);
     } finally {
       HANDLERS.set(handlers);
     }
@@ -111,4 +120,5 @@ public abstract class HandleNode extends ScopingNode {
     }
     return super.hasTag(tag);
   }
+
 }
