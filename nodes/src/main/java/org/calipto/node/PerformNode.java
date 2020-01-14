@@ -39,7 +39,7 @@ public abstract class PerformNode extends CaliptoNode {
       argumentValues[i] = argumentNodes[i].executeGeneric(frame);
     }
 
-    var handlers = HandleNode.HANDLERS.get();
+    var handlers = InvokeHandlerNode.HANDLERS.get();
 
     var handler = handlers.find(argumentValues);
 

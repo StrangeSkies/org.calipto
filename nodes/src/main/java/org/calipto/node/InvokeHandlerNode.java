@@ -18,7 +18,7 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
  * some side effect.
  */
 @GenerateNodeFactory
-public abstract class HandleNode extends ScopingNode {
+public abstract class InvokeHandlerNode extends ScopingNode {
   static final ThreadLocal<Handlers> HANDLERS = new ThreadLocal<>() {
     @Override
     protected Handlers initialValue() {
@@ -27,15 +27,15 @@ public abstract class HandleNode extends ScopingNode {
   };
 
   @Child
-  private CaliptoNode targetNode;
+  private CaliptoNode handlerNode;
   @Children
   private final CaliptoNode[] argumentNodes;
   private final FrameDescriptor frameDescriptor;
   @Child
   private InteropLibrary library;
 
-  public HandleNode(CaliptoNode handlerNode, CaliptoNode[] argumentNodes) {
-    this.targetNode = requireNonNull(handlerNode);
+  public InvokeHandlerNode(CaliptoNode handlerNode, CaliptoNode[] argumentNodes) {
+    this.handlerNode = requireNonNull(handlerNode);
     this.argumentNodes = requireNonNull(argumentNodes);
     this.library = InteropLibrary.getFactory().createDispatched(3);
 
@@ -74,29 +74,39 @@ public abstract class HandleNode extends ScopingNode {
      * TODO think about how to specialise param assignments
      */
 
-    CompilerAsserts.compilationConstant(performerNodes.length);
+    CompilerAsserts.compilationConstant(argumentNodes.length);
 
     var handlers = HANDLERS.get();
 
     var mediator = new EffectMediator();
 
-    for (var performerNode : performerNodes) {
-      var effectPerformers = new Thread(() -> {
-        HANDLERS.set(handlers.withPerformerMediator(mediator));
-
-        // run our effect-performing code
-
-        var result = performerNode.executeGeneric(frame);
-
-        // TODO assign result to frame slot
-      });
-      effectPerformers.start();
-    }
-
+    /*
+     * Resolve handler, register which effects we're looking for.
+     */
     try {
       HANDLERS.set(handlers.withHandlerMediator(mediator));
 
-      // run our effect-handling code
+      var argumentsContinuation = new Thread(() -> {
+        for (var argumentNode : argumentNodes) {
+          HANDLERS.set(handlers.withPerformerMediator(mediator));
+
+          // run our effect-performing code
+
+          var result = argumentNode.executeGeneric(frame);
+
+          /*
+           * collect arguments into array IFF one is handled directly by handler
+           */
+        }
+      });
+      // TODO assign result to frame slot if
+      argumentsContinuation.start();
+
+      // block to wait for handled effect
+
+      // if arguments thread ends, check if we're handling arguments explicitly
+      
+      // if not collecting arguments, return last argument as result
 
       return handlerNode.executeGeneric(frame);
     } finally {
