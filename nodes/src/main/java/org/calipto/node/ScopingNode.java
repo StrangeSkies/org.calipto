@@ -32,23 +32,15 @@
  */
 package org.calipto.node;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Map.Entry;
 
-import org.calipto.CaliptoBlockNode;
-import org.calipto.CaliptoLexicalScope;
-import org.calipto.SLBlockNode;
 import org.calipto.type.symbol.Nil;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.Frame;
-import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
-import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.InvalidArrayIndexException;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -57,24 +49,15 @@ import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 import com.oracle.truffle.api.nodes.Node;
-import com.oracle.truffle.api.nodes.NodeUtil;
-import com.oracle.truffle.api.nodes.NodeVisitor;
-import com.oracle.truffle.api.nodes.RootNode;
 
 public abstract class ScopingNode extends CaliptoNode {
-  private static ScopingNode getParentScope(Node node) {
-    ScopingNode block;
+  public static ScopingNode findEnclosingScope(Node node) {
     Node parent = node.getParent();
     // Find a nearest block node.
     while (parent != null && !(parent instanceof ScopingNode)) {
       parent = parent.getParent();
     }
-    if (parent != null) {
-      block = (ScopingNode) parent;
-    } else {
-      block = null;
-    }
-    return block;
+    return (ScopingNode) parent;
   }
 
   /**
@@ -84,64 +67,24 @@ public abstract class ScopingNode extends CaliptoNode {
 
   public abstract Object getVariables(Frame frame);
 
-  private Map<String, FrameSlot> getVars() {
-    if (varSlots == null) {
-      if (current != null) {
-        varSlots = collectVars(block, current);
-      } else if (block != null) {
-        // Provide the arguments only when the current node is above the block
-        varSlots = collectArgs(block);
-      } else {
-        varSlots = Collections.emptyMap();
-      }
-    }
-    return varSlots;
-  }
-
-    // Variables are slot-based.
-    // To collect declared variables, traverse the block's AST and find slots
-    // associated
-    // with SLWriteLocalVariableNode. The traversal stops when we hit the current
-    // node.
-    Map<String, FrameSlot> slots = new LinkedHashMap<>(4);
-    NodeUtil.forEachChild(varsBlock, new NodeVisitor() {
-      @Override
-      public boolean visit(Node node) {
-        if (node == currentNode) {
-          return false;
-        }
-        // Do not enter any nested blocks.
-        if (!(node instanceof BlockNode)) {
-          boolean all = NodeUtil.forEachChild(node, this);
-          if (!all) {
-            return false;
-          }
-        }
-        // Write to a variable is a declaration unless it exists already in a parent
-        // scope.
-        if (node instanceof WriteLocalVariableNode) {
-          WriteLocalVariableNode wn = (WriteLocalVariableNode) node;
-          String name = Objects.toString(wn.getSlot().getIdentifier());
-          if (!hasParentVar(name)) {
-            slots.put(name, wn.getSlot());
-          }
-        }
-        return true;
-      }
-    });
-    return slots;
-  }
+  public abstract Object getArguments(Frame frame);
 
   @ExportLibrary(InteropLibrary.class)
-  static final class VariablesMapObject implements TruffleObject {
-    final Map<String, ? extends FrameSlot> slots;
-    final Object[] args;
-    final Frame frame;
+  protected static final class ArrayVariablesMapObject implements TruffleObject {
+    final String[] parameters;
+    final Object[] arguments;
+    final Map<String, Integer> slots;
 
-    private VariablesMapObject(Map<String, ? extends FrameSlot> slots, Object[] args, Frame frame) {
-      this.slots = slots;
-      this.args = args;
-      this.frame = frame;
+    private ArrayVariablesMapObject(String[] parameters, Object[] arguments) {
+      this.parameters = parameters;
+      this.arguments = arguments;
+
+      @SuppressWarnings("unchecked")
+      Entry<String, Integer>[] entries = new Entry[parameters.length];
+      for (int i = 0; i < parameters.length; i++) {
+        entries[i] = new SimpleEntry<>(parameters[i], i);
+      }
+      this.slots = Map.ofEntries(entries);
     }
 
     @SuppressWarnings("static-method")
@@ -156,6 +99,75 @@ public abstract class ScopingNode extends CaliptoNode {
       return new KeysArray(slots.keySet().toArray(new String[0]));
     }
 
+    int getArgumentSlot(String member) throws UnknownIdentifierException {
+      int argumentSlot = slots.getOrDefault(member, -1);
+      if (argumentSlot == -1) {
+        throw UnknownIdentifierException.create(member);
+      }
+      return argumentSlot;
+    }
+
+    @ExportMessage
+    @TruffleBoundary
+    void writeMember(String member, Object value) throws UnknownIdentifierException {
+      arguments[getArgumentSlot(member)] = value;
+    }
+
+    @ExportMessage
+    @TruffleBoundary
+    Object readMember(String member) throws UnknownIdentifierException {
+      return arguments[getArgumentSlot(member)];
+    }
+
+    @SuppressWarnings("static-method")
+    @ExportMessage
+    boolean isMemberInsertable(@SuppressWarnings("unused") String member) {
+      return false;
+    }
+
+    @ExportMessage
+    @TruffleBoundary
+    boolean isMemberModifiable(String member) {
+      return slots.containsKey(member);
+    }
+
+    @ExportMessage
+    @TruffleBoundary
+    boolean isMemberReadable(String member) {
+      return slots.containsKey(member);
+    }
+  }
+
+  @ExportLibrary(InteropLibrary.class)
+  protected static final class FrameVariablesMapObject implements TruffleObject {
+    final Frame frame;
+    final Map<String, ? extends FrameSlot> slots;
+
+    private FrameVariablesMapObject(Frame frame, Map<String, ? extends FrameSlot> slots) {
+      this.frame = frame;
+      this.slots = slots;
+    }
+
+    @SuppressWarnings("static-method")
+    @ExportMessage
+    boolean hasMembers() {
+      return true;
+    }
+
+    @ExportMessage
+    @TruffleBoundary
+    Object getMembers(@SuppressWarnings("unused") boolean includeInternal) {
+      return new KeysArray(slots.keySet().toArray(new String[0]));
+    }
+
+    FrameSlot getArgumentSlot(String member) throws UnknownIdentifierException {
+      FrameSlot argumentSlot = slots.get(member);
+      if (argumentSlot == null) {
+        throw UnknownIdentifierException.create(member);
+      }
+      return argumentSlot;
+    }
+
     @ExportMessage
     @TruffleBoundary
     void writeMember(String member, Object value)
@@ -163,17 +175,7 @@ public abstract class ScopingNode extends CaliptoNode {
       if (frame == null) {
         throw UnsupportedMessageException.create();
       }
-      FrameSlot slot = slots.get(member);
-      if (slot == null) {
-        throw UnknownIdentifierException.create(member);
-      } else {
-        Object info = slot.getInfo();
-        if (args != null && info != null) {
-          args[(Integer) info] = value;
-        } else {
-          frame.setObject(slot, value);
-        }
-      }
+      frame.setObject(getArgumentSlot(member), value);
     }
 
     @ExportMessage
@@ -182,19 +184,7 @@ public abstract class ScopingNode extends CaliptoNode {
       if (frame == null) {
         return Nil.NIL;
       }
-      FrameSlot slot = slots.get(member);
-      if (slot == null) {
-        throw UnknownIdentifierException.create(member);
-      } else {
-        Object value;
-        Object info = slot.getInfo();
-        if (args != null && info != null) {
-          value = args[(Integer) info];
-        } else {
-          value = frame.getValue(slot);
-        }
-        return value;
-      }
+      return frame.getValue(getArgumentSlot(member));
     }
 
     @SuppressWarnings("static-method")
@@ -217,7 +207,7 @@ public abstract class ScopingNode extends CaliptoNode {
   }
 
   @ExportLibrary(InteropLibrary.class)
-  static final class KeysArray implements TruffleObject {
+  protected static final class KeysArray implements TruffleObject {
     private final String[] keys;
 
     KeysArray(String[] keys) {
