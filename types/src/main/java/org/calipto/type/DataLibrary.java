@@ -68,16 +68,32 @@ public abstract class DataLibrary extends Library {
   public abstract boolean equals(Object first, Object second);
 
   /**
-   * Cons the given value onto the receiver.
+   * Cons the receiver onto the given value. This should always be called in
+   * preference to {@link #consWith(Object, Object)} on the value.
    * 
-   * @param receiver the receiver, which will be the new cdr in the resulting cons
-   *                 cell
-   * @param value    the value to be the new car in the resulting cons cell
+   * @param receiver
+   *          the receiver, which will be the new car in the resulting cons cell
+   * @param value
+   *          the value to be the new cdr in the resulting cons cell
+   * @return the cons of the receiver onto the value
+   */
+  public Object consOnto(Object receiver, Object value) {
+    var library = getFactory().getUncached();
+    return library.consWith(value, receiver);
+  }
+
+  /**
+   * Cons the given value onto the receiver. This should only be called in the
+   * case that there is no appropriate specialization of
+   * {@link #consOnto(Object, Object)} on the value.
+   * 
+   * @param receiver
+   *          the receiver, which will be the new cdr in the resulting cons cell
+   * @param value
+   *          the value to be the new car in the resulting cons cell
    * @return the cons of the value onto the receiver
    */
   public abstract Object consWith(Object receiver, Object value);
-
-  public abstract Object consOntoNil(Object receiver);
 
   public DataIterator iterator(Object receiver) {
     return new DataIterator() {

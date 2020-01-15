@@ -27,7 +27,7 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
  * some side effect.
  */
 @GenerateNodeFactory
-public abstract class InvokeHandlerNode extends ScopingNode {
+public abstract class InvokeHandlerNode extends CaliptoNode {
   static final ThreadLocal<Handlers> HANDLERS = new ThreadLocal<>() {
     @Override
     protected Handlers initialValue() {
@@ -39,7 +39,6 @@ public abstract class InvokeHandlerNode extends ScopingNode {
   private CaliptoNode handlerNode;
   @Children
   private final CaliptoNode[] argumentNodes;
-  private final FrameDescriptor frameDescriptor;
   @Child
   private InteropLibrary library;
 
@@ -47,33 +46,6 @@ public abstract class InvokeHandlerNode extends ScopingNode {
     this.handlerNode = requireNonNull(handlerNode);
     this.argumentNodes = requireNonNull(argumentNodes);
     this.library = InteropLibrary.getFactory().createDispatched(3);
-
-    frameDescriptor = new FrameDescriptor();
-    for (int i = 0; i < argumentNodes.length; i++) {
-      createAssignment(frameDescriptor, "", argumentNodes[i], i);
-    }
-  }
-
-  public static CaliptoNode createAssignment(
-      FrameDescriptor frameDescriptor,
-      String name,
-      CaliptoNode valueNode,
-      int argumentIndex) {
-    requireNonNull(name);
-    requireNonNull(valueNode);
-
-    FrameSlot frameSlot = frameDescriptor
-        .findOrAddFrameSlot(name, argumentIndex, FrameSlotKind.Illegal);
-    final CaliptoNode result = CaliptoWriteLocalVariableNodeGen.create(valueNode, frameSlot);
-
-    if (valueNode.hasSource()) {
-      final int start = valueNode.getSourceCharIndex();
-      final int length = valueNode.getSourceEndIndex() - start;
-      result.setSourceSection(start, length);
-    }
-    result.addExpressionTag();
-
-    return result;
   }
 
   @ExplodeLoop
@@ -85,13 +57,14 @@ public abstract class InvokeHandlerNode extends ScopingNode {
 
     CompilerAsserts.compilationConstant(argumentNodes.length);
 
-    var handlers = HANDLERS.get();
-
-    var mediator = new EffectMediator();
-
     /*
      * Resolve handler, register which effects we're looking for.
      */
+    var handler = (Handler) handlerNode.executeGeneric(frame);
+
+    var handlers = HANDLERS.get();
+    var mediator = new EffectMediator();
+
     try {
       HANDLERS.set(handlers.withHandlerMediator(mediator));
 
@@ -114,10 +87,11 @@ public abstract class InvokeHandlerNode extends ScopingNode {
       // block to wait for handled effect
 
       // if arguments thread ends, check if we're handling arguments explicitly
-      
+
       // if not collecting arguments, return last argument as result
 
-      return targetNode.executeGeneric(frame);
+      String effect = null;
+      return library.execute(handler.getEffect(effect), arguments);
     } finally {
       HANDLERS.set(handlers);
     }
