@@ -36,7 +36,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.calipto.type.symbol.Nil;
+import org.calipto.type.symbol.NilSymbol;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.frame.Frame;
@@ -182,7 +182,7 @@ public abstract class ScopingNode extends CaliptoNode {
     @TruffleBoundary
     Object readMember(String member) throws UnknownIdentifierException {
       if (frame == null) {
-        return Nil.NIL;
+        return NilSymbol.NIL;
       }
       return frame.getValue(getArgumentSlot(member));
     }

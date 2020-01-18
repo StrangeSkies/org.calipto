@@ -77,8 +77,11 @@ final class Symbol implements TruffleObject {
   }
 
   @ExportMessage
-  Object consOntoNil() {
-    return new Singleton(this);
+  Object consOnto(Object cdr) {
+    if (cdr == SymbolIndex.NIL) {
+      return new Singleton(this);
+    }
+    return null;
   }
 
   @ExportMessage

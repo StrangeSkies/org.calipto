@@ -33,7 +33,7 @@
 package org.calipto.type.cons;
 
 import org.calipto.type.DataLibrary;
-import org.calipto.type.symbol.Nil;
+import org.calipto.type.symbol.NilSymbol;
 
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
@@ -58,7 +58,7 @@ public final class Singleton implements TruffleObject {
 
   @ExportMessage
   Object cdr() {
-    return Nil.NIL;
+    return NilSymbol.NIL;
   }
 
   @ExportMessage
@@ -97,7 +97,7 @@ public final class Singleton implements TruffleObject {
         Object other,
         @CachedLibrary(limit = "3") DataLibrary otherData) {
       return otherData.equals(receiver.car(), otherData.car(other))
-          && otherData.cdr(other) == Nil.NIL;
+          && otherData.cdr(other) == NilSymbol.NIL;
     }
   }
 }

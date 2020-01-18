@@ -14,7 +14,7 @@ import org.calipto.node.intrinsic.CarNodeFactory;
 import org.calipto.node.intrinsic.CdrNodeFactory;
 import org.calipto.node.intrinsic.IntrinsicNode;
 import org.calipto.type.DataLibrary;
-import org.calipto.type.symbol.Nil;
+import org.calipto.type.symbol.NilSymbol;
 import org.calipto.type.symbol.SymbolIndex;
 
 import com.oracle.truffle.api.CallTarget;
@@ -181,7 +181,7 @@ public class CaliptoContext {
     } else if (a instanceof CaliptoContext) {
       return a;
     } else if (a == null) {
-      return Nil.NIL;
+      return NilSymbol.NIL;
     }
     CompilerDirectives.transferToInterpreter();
     throw new IllegalStateException(a + " is not a Truffle value");

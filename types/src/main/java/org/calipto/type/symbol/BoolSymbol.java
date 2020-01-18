@@ -45,7 +45,7 @@ import com.oracle.truffle.api.library.ExportMessage;
  * value type implementation without an explicit receiverType.
  */
 @ExportLibrary(value = DataLibrary.class, receiverType = Boolean.class)
-public final class Bool implements TruffleObject {
+public final class BoolSymbol implements TruffleObject {
   @ExportMessage
   public static boolean isData(Boolean value) {
     return true;
@@ -68,7 +68,7 @@ public final class Bool implements TruffleObject {
 
   @ExportMessage
   public static boolean equals(Boolean receiver, Object obj) {
-    if (!(obj instanceof Bool)) {
+    if (!(obj instanceof BoolSymbol)) {
       return false;
     }
     Boolean that = (Boolean) obj;
@@ -76,8 +76,11 @@ public final class Bool implements TruffleObject {
   }
 
   @ExportMessage
-  static IntTo8 consOntoNil(Boolean receiver) {
-    return new IntTo8(receiver ? (byte) -1 : (byte) 0, (byte) 1);
+  static IntTo8 consOnto(Boolean receiver, Object cdr) {
+    if (cdr == SymbolIndex.NIL) {
+      return new IntTo8(receiver ? (byte) -1 : (byte) 0, (byte) 1);
+    }
+    return null;
   }
 
   @ExportMessage

@@ -36,8 +36,8 @@ import org.calipto.type.cons.Int16;
 import org.calipto.type.cons.Int32;
 import org.calipto.type.cons.Int64;
 import org.calipto.type.cons.Int8;
-import org.calipto.type.symbol.Bool;
-import org.calipto.type.symbol.Nil;
+import org.calipto.type.symbol.BoolSymbol;
+import org.calipto.type.symbol.NilSymbol;
 
 import com.oracle.truffle.api.library.GenerateLibrary;
 import com.oracle.truffle.api.library.GenerateLibrary.Abstract;
@@ -45,7 +45,7 @@ import com.oracle.truffle.api.library.GenerateLibrary.DefaultExport;
 import com.oracle.truffle.api.library.Library;
 import com.oracle.truffle.api.library.LibraryFactory;
 
-@DefaultExport(Bool.class)
+@DefaultExport(BoolSymbol.class)
 @DefaultExport(Int8.class)
 @DefaultExport(Int16.class)
 @DefaultExport(Int32.class)
@@ -75,11 +75,11 @@ public abstract class DataLibrary extends Library {
    *          the receiver, which will be the new car in the resulting cons cell
    * @param value
    *          the value to be the new cdr in the resulting cons cell
-   * @return the cons of the receiver onto the value
+   * @return the cons of the receiver onto the value, or null to delegate to
+   *         {@link #consWith(Object, Object)}
    */
   public Object consOnto(Object receiver, Object value) {
-    var library = getFactory().getUncached();
-    return library.consWith(value, receiver);
+    return null;
   }
 
   /**
@@ -139,7 +139,7 @@ public abstract class DataLibrary extends Library {
         if (hasNext()) {
           throw new IllegalStateException();
         }
-        return tail == Nil.NIL;
+        return tail == NilSymbol.NIL;
       }
     };
   }

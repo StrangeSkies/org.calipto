@@ -41,7 +41,7 @@ public class Effect {
    */
   private final CyclicAssumption callTargetStable;
 
-  protected Effect(String name) {
+  protected Effect(Object body) {
     this.name = name;
     this.callTarget = Truffle
         .getRuntime()

@@ -45,7 +45,7 @@ import java.util.Map;
 import org.calipto.CaliptoContext;
 import org.calipto.CaliptoLanguage;
 import org.calipto.reader.CaliptoReader;
-import org.calipto.type.symbol.Nil;
+import org.calipto.type.symbol.NilSymbol;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
@@ -97,7 +97,7 @@ public final class ModuleNode extends RootNode {
 
     if (mainCallNode == null) {
       /* The source code did not have a "main" function, so nothing to execute. */
-      return Nil.NIL;
+      return NilSymbol.NIL;
     } else {
       /* Conversion of arguments to types understood by SL. */
       Object[] arguments = frame.getArguments();

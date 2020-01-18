@@ -33,7 +33,7 @@
 package org.calipto.type.cons;
 
 import org.calipto.type.DataLibrary;
-import org.calipto.type.symbol.Nil;
+import org.calipto.type.symbol.NilSymbol;
 
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
@@ -92,7 +92,7 @@ public final class IntTo32 implements TruffleObject {
           return false;
         }
       }
-      if (otherIterator.hasNext() || otherIterator.terminal() != Nil.NIL) {
+      if (otherIterator.hasNext() || otherIterator.terminal() != NilSymbol.NIL) {
         return false;
       }
       return true;

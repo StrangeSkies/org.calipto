@@ -34,6 +34,7 @@ package org.calipto.type.symbol;
 
 import org.calipto.type.DataLibrary;
 import org.calipto.type.cons.ConsPair;
+import org.calipto.type.cons.Effect;
 import org.calipto.type.cons.Singleton;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
@@ -66,12 +67,12 @@ public final class EffectSymbol implements TruffleObject {
 
   @ExportMessage
   public String name() {
-    return "nil";
+    return "effect";
   }
 
   @ExportMessage
-  Object consOntoNil() {
-    return new Singleton(this);
+  Object consOnto(Object cdr) {
+    return new Effect(cdr);
   }
 
   @ExportMessage

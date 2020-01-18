@@ -32,7 +32,7 @@
  */
 package org.calipto.type;
 
-import org.calipto.type.symbol.Nil;
+import org.calipto.type.symbol.NilSymbol;
 
 import com.oracle.truffle.api.dsl.TypeCast;
 import com.oracle.truffle.api.dsl.TypeCheck;
@@ -60,14 +60,14 @@ import com.oracle.truffle.api.dsl.TypeSystem;
 @TypeSystem({ boolean.class, int.class })
 public class CaliptoTypes {
 
-  @TypeCheck(Nil.class)
+  @TypeCheck(NilSymbol.class)
   public static boolean isNil(Object value) {
-    return value == Nil.NIL;
+    return value == NilSymbol.NIL;
   }
 
-  @TypeCast(Nil.class)
-  public static Nil asNil(Object value) {
+  @TypeCast(NilSymbol.class)
+  public static NilSymbol asNil(Object value) {
     assert isNil(value);
-    return Nil.NIL;
+    return NilSymbol.NIL;
   }
 }
