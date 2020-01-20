@@ -34,8 +34,7 @@ package org.calipto.type.symbol;
 
 import org.calipto.type.DataLibrary;
 import org.calipto.type.cons.ConsPair;
-import org.calipto.type.cons.Effect;
-import org.calipto.type.cons.Singleton;
+import org.calipto.type.cons.Handler;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -45,10 +44,10 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-public final class EffectSymbol implements TruffleObject {
-  public static final EffectSymbol NIL = new EffectSymbol();
+public final class HandlerSymbol implements TruffleObject {
+  public static final HandlerSymbol HANDLER = new HandlerSymbol();
 
-  private EffectSymbol() {}
+  private HandlerSymbol() {}
 
   @ExportMessage
   public boolean isData() {
@@ -67,12 +66,12 @@ public final class EffectSymbol implements TruffleObject {
 
   @ExportMessage
   public String name() {
-    return "effect";
+    return "handler";
   }
 
   @ExportMessage
   Object consOnto(Object cdr) {
-    return new Effect(cdr);
+    return new Handler(cdr);
   }
 
   @ExportMessage

@@ -32,6 +32,8 @@
  */
 package org.calipto.type.symbol;
 
+import static org.calipto.type.symbol.NilSymbol.NIL;
+
 import org.calipto.type.DataLibrary;
 import org.calipto.type.cons.ConsPair;
 import org.calipto.type.cons.IntTo8;
@@ -77,7 +79,7 @@ public final class BoolSymbol implements TruffleObject {
 
   @ExportMessage
   static IntTo8 consOnto(Boolean receiver, Object cdr) {
-    if (cdr == SymbolIndex.NIL) {
+    if (cdr == NIL) {
       return new IntTo8(receiver ? (byte) -1 : (byte) 0, (byte) 1);
     }
     return null;

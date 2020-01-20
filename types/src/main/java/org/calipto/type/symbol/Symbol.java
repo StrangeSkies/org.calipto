@@ -32,6 +32,8 @@
  */
 package org.calipto.type.symbol;
 
+import static org.calipto.type.symbol.NilSymbol.NIL;
+
 import org.calipto.type.DataLibrary;
 import org.calipto.type.cons.ConsPair;
 import org.calipto.type.cons.Singleton;
@@ -78,7 +80,7 @@ final class Symbol implements TruffleObject {
 
   @ExportMessage
   Object consOnto(Object cdr) {
-    if (cdr == SymbolIndex.NIL) {
+    if (cdr == NIL) {
       return new Singleton(this);
     }
     return null;

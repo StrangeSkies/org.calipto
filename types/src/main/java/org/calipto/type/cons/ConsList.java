@@ -121,8 +121,11 @@ public final class ConsList implements TruffleObject {
   }
 
   @ExportMessage
-  Object consOntoNil() {
-    return new Singleton(this);
+  Object consOnto(Object cdr) {
+    if (cdr == NilSymbol.NIL) {
+      return new Singleton(this);
+    }
+    return null;
   }
 
   @ExportMessage

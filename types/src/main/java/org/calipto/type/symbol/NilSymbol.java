@@ -44,8 +44,10 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class NilSymbol implements TruffleObject {
-  NilSymbol() {}
+public final class NilSymbol implements TruffleObject {
+  public static final NilSymbol NIL = new NilSymbol();
+
+  private NilSymbol() {}
 
   @ExportMessage
   public boolean isData() {

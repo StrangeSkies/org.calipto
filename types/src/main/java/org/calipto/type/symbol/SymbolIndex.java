@@ -38,8 +38,6 @@ import java.util.Map;
 import org.calipto.type.DataLibrary;
 
 public class SymbolIndex {
-  public static final NilSymbol NIL = new NilSymbol();
-
   private final DataLibrary symbolLibrary = DataLibrary.getFactory().createDispatched(5);
   private final Map<String, Symbol> symbols = new IdentityHashMap<>();
 

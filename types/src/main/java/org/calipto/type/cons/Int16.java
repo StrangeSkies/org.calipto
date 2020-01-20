@@ -32,6 +32,8 @@
  */
 package org.calipto.type.cons;
 
+import static org.calipto.type.symbol.NilSymbol.NIL;
+
 import org.calipto.type.DataLibrary;
 
 import com.oracle.truffle.api.dsl.Fallback;
@@ -89,8 +91,11 @@ public final class Int16 implements TruffleObject {
   }
 
   @ExportMessage
-  static Object consOntoNil(Short receiver) {
-    return new Singleton(receiver);
+  static Object consOnto(Short receiver, Object cdr) {
+    if (cdr == NIL) {
+      return new Singleton(receiver);
+    }
+    return null;
   }
 
   @ExportMessage

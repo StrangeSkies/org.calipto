@@ -1,5 +1,7 @@
 package org.calipto.type.cons;
 
+import static org.calipto.type.symbol.NilSymbol.NIL;
+
 import java.util.logging.Level;
 
 import org.calipto.type.DataLibrary;
@@ -7,12 +9,12 @@ import org.calipto.type.DataLibrary;
 import com.oracle.truffle.api.Assumption;
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.RootCallTarget;
-import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.TruffleLogger;
 import com.oracle.truffle.api.dsl.Cached;
 import com.oracle.truffle.api.dsl.Fallback;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
@@ -23,13 +25,16 @@ import com.oracle.truffle.api.utilities.CyclicAssumption;
 
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-public class Effect {
+public class Effect implements TruffleObject {
   public static final int INLINE_CACHE_SIZE = 2;
 
-  private static final TruffleLogger LOG = TruffleLogger.getLogger(SLLanguage.ID, SLFunction.class);
+  private static final TruffleLogger LOG = TruffleLogger.getLogger("", Effect.class);
 
   /** The name of the function. */
   private final Object name;
+
+  /** The body of the function. */
+  private final Object body;
 
   /** The current implementation of this function. */
   private RootCallTarget callTarget;
@@ -41,15 +46,14 @@ public class Effect {
    */
   private final CyclicAssumption callTargetStable;
 
-  protected Effect(Object body) {
+  public Effect(Object name, Object body) {
     this.name = name;
-    this.callTarget = Truffle
-        .getRuntime()
-        .createCallTarget(new SLUndefinedFunctionRootNode(language, name));
-    this.callTargetStable = new CyclicAssumption(name);
+    this.body = body;
+    this.callTarget = null;
+    this.callTargetStable = new CyclicAssumption(name.toString());
   }
 
-  public String getName() {
+  public Object getName() {
     return name;
   }
 
@@ -61,7 +65,7 @@ public class Effect {
         Effect other,
         @CachedLibrary(limit = "3") DataLibrary carData,
         @CachedLibrary(limit = "3") DataLibrary cdrData) {
-      return carData.equals(receiver.car, other.car) && cdrData.equals(receiver.cdr, other.cdr);
+      return carData.equals(receiver.name, other.name) && cdrData.equals(receiver.body, other.body);
     }
 
     @Specialization(guards = "otherData.isCons(other)", limit = "3", replaces = "doPair")
@@ -76,7 +80,7 @@ public class Effect {
     }
 
     @Fallback
-    static boolean doFallback(ConsPair receiver, Object other) {
+    static boolean doFallback(Effect receiver, Object other) {
       return false;
     }
   }
@@ -87,18 +91,21 @@ public class Effect {
   }
 
   @ExportMessage
-  Object consOntoNil() {
-    return new Singleton(this);
+  Object consOnto(Object cdr) {
+    if (cdr == NIL) {
+      return new Singleton(this);
+    }
+    return null;
   }
 
   @ExportMessage
   Object car() {
-    return car;
+    return name;
   }
 
   @ExportMessage
   Object cdr() {
-    return cdr;
+    return body;
   }
 
   @ExportMessage
@@ -135,7 +142,7 @@ public class Effect {
    */
   @Override
   public String toString() {
-    return name;
+    return name.toString();
   }
 
   /**
@@ -241,5 +248,4 @@ public class Effect {
       return callNode.call(function.getCallTarget(), arguments);
     }
   }
-
 }

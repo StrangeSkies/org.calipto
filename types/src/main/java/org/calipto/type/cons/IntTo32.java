@@ -32,6 +32,8 @@
  */
 package org.calipto.type.cons;
 
+import static org.calipto.type.symbol.NilSymbol.NIL;
+
 import org.calipto.type.DataLibrary;
 import org.calipto.type.symbol.NilSymbol;
 
@@ -100,8 +102,11 @@ public final class IntTo32 implements TruffleObject {
   }
 
   @ExportMessage
-  Object consOntoNil() {
-    return new Singleton(this);
+  static Object consOnto(IntTo32 receiver, Object cdr) {
+    if (cdr == NIL) {
+      return new Singleton(receiver);
+    }
+    return null;
   }
 
   @ExportMessage
