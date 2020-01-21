@@ -1,7 +1,5 @@
 package org.calipto.type.cons;
 
-import static org.calipto.type.symbol.NilSymbol.NIL;
-
 import java.util.logging.Level;
 
 import org.calipto.type.DataLibrary;
@@ -83,19 +81,6 @@ public class Effect implements TruffleObject {
     static boolean doFallback(Effect receiver, Object other) {
       return false;
     }
-  }
-
-  @ExportMessage
-  Object consWith(Object car) {
-    return new ConsPair(car, this);
-  }
-
-  @ExportMessage
-  Object consOnto(Object cdr) {
-    if (cdr == NIL) {
-      return new Singleton(this);
-    }
-    return null;
   }
 
   @ExportMessage

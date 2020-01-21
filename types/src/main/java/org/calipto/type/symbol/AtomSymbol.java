@@ -30,10 +30,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.calipto.type.cons;
+package org.calipto.type.symbol;
 
 import org.calipto.type.DataLibrary;
-import org.calipto.type.symbol.NilSymbol;
 
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.interop.InteropLibrary;
@@ -42,70 +41,55 @@ import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-@ExportLibrary(value = DataLibrary.class)
-@ExportLibrary(value = InteropLibrary.class)
-public final class IntTo32 implements TruffleObject {
-  private final int value;
-  private final int bits;
+// TODO value type
+@ExportLibrary(DataLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+final class AtomSymbol implements TruffleObject {
+  static final AtomSymbol ATOM = new AtomSymbol();
 
-  public IntTo32(int value, int bits) {
-    this.value = value;
-    this.bits = bits;
-  }
+  private AtomSymbol() {}
 
   @ExportMessage
-  boolean car() {
-    return value >> (bits - 1) > 0;
-  }
-
-  @ExportMessage
-  Object cdr() {
-    return new IntTo32(value, bits - 1);
-  }
-
-  @ExportMessage
-  static class Equals {
-    @Specialization
-    public static boolean doSingleton(
-        IntTo32 receiver,
-        IntTo32 other,
-        @CachedLibrary(limit = "3") DataLibrary carData) {
-      return receiver.value == other.value;
-    }
-
-    @Specialization(replaces = "doSingleton")
-    public static boolean doFallback(
-        IntTo32 receiver,
-        Object other,
-        @CachedLibrary(limit = "3") DataLibrary otherData) {
-      var otherIterator = otherData.iterator(other);
-      for (int i = 0; i < receiver.bits; i++) {
-        if (!otherIterator.hasNext()) {
-          return false;
-        }
-        var next = otherIterator.next();
-        if (!(next instanceof Boolean)) {
-          return false;
-        }
-        boolean nextBoolean = ((boolean) next);
-        if (!((receiver.value >> i & 1) > 0) != nextBoolean) {
-          return false;
-        }
-      }
-      if (otherIterator.hasNext() || otherIterator.terminal() != NilSymbol.NIL) {
-        return false;
-      }
-      return true;
-    }
-  }
-
-  @ExportMessage
-  boolean isCons() {
+  public boolean isData() {
     return true;
   }
 
   @ExportMessage
-  boolean isData() {
+  public boolean isSymbol() {
     return true;
+  }
+
+  @ExportMessage
+  public String namespace() {
+    return "";
+  }
+
+  @ExportMessage
+  public String name() {
+    return "atom";
+  }
+
+  @ExportMessage
+  public boolean isExecutable() {
+    return true;
+  }
+
+  @ExportMessage
+  abstract static class Execute {
+    @Specialization(guards = "arguments.length == 1")
+    protected static boolean doDirect(
+        AtomSymbol atom,
+        Object arguments[],
+        @CachedLibrary(limit = "3") DataLibrary library) {
+      return library.isSymbol(arguments[0]);
+    }
+
+    @Specialization(replaces = "doDirect")
+    protected static Object doIndirect(
+        AtomSymbol atom,
+        Object[] arguments,
+        @CachedLibrary(limit = "3") DataLibrary library) {
+      return library.isSymbol(arguments[0]);
+    }
   }
 }

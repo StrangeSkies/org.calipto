@@ -33,7 +33,6 @@
 package org.calipto.type.symbol;
 
 import org.calipto.type.DataLibrary;
-import org.calipto.type.cons.ConsPair;
 import org.calipto.type.cons.Singleton;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
@@ -70,19 +69,8 @@ public final class NilSymbol implements TruffleObject {
   }
 
   @ExportMessage
-  Object consOnto(Object cdr) {
-    return new Singleton(this);
-  }
-
-  @ExportMessage
   Object consWith(Object car) {
-    return new ConsPair(car, this);
-  }
-
-  @Override
-  @ExportMessage
-  public boolean equals(Object obj) {
-    return obj == this;
+    return new Singleton(car);
   }
 
   @ExportMessage

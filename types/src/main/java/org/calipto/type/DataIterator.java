@@ -32,7 +32,8 @@ public interface DataIterator extends Iterator<Object> {
    * terminated by the nil symbol.
    * 
    * @return true if the cons list is terminated with nil
-   * @throws IllegalStateException if {@link #isTerminalKnown()} would return true
+   * @throws IllegalStateException
+   *           if {@link #isTerminalKnown()} would return true
    */
   boolean isProper();
 
@@ -41,7 +42,8 @@ public interface DataIterator extends Iterator<Object> {
    * itself.
    * 
    * @return the data in the terminal position of the cons list
-   * @throws IllegalStateException if {@link #isTerminalKnown()} would return true
+   * @throws IllegalStateException
+   *           if {@link #isTerminalKnown()} would return true
    */
   Object terminal();
 }

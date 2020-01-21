@@ -32,11 +32,7 @@
  */
 package org.calipto.type.symbol;
 
-import static org.calipto.type.symbol.NilSymbol.NIL;
-
 import org.calipto.type.DataLibrary;
-import org.calipto.type.cons.ConsPair;
-import org.calipto.type.cons.IntTo8;
 
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
@@ -65,28 +61,6 @@ public final class BoolSymbol implements TruffleObject {
 
   @ExportMessage
   public static String name(Boolean receiver) {
-    return Boolean.toString(receiver);
-  }
-
-  @ExportMessage
-  public static boolean equals(Boolean receiver, Object obj) {
-    if (!(obj instanceof BoolSymbol)) {
-      return false;
-    }
-    Boolean that = (Boolean) obj;
-    return receiver == that;
-  }
-
-  @ExportMessage
-  static IntTo8 consOnto(Boolean receiver, Object cdr) {
-    if (cdr == NIL) {
-      return new IntTo8(receiver ? (byte) -1 : (byte) 0, (byte) 1);
-    }
-    return null;
-  }
-
-  @ExportMessage
-  static Object consWith(Boolean receiver, Object car) {
-    return new ConsPair(car, receiver);
+    return receiver.toString();
   }
 }
