@@ -26,21 +26,21 @@ public class CaliptoCompiler {
     this.builtins = Map
         .of(
             ATOM,
-            null,
+            this::atom,
             CAR,
-            null,
+            this::car,
             CDR,
-            null,
+            this::cdr,
             CONS,
-            null,
+            this::cons,
             EQ,
-            null,
+            this::eq,
             HANDLER,
-            null,
+            this::handler,
             NIL,
-            null,
+            this::nil,
             QUOTE,
-            null);
+            this::quote);
     this.intrinsics = Map.of();
   }
 
@@ -62,6 +62,46 @@ public class CaliptoCompiler {
   }
 
   private CaliptoNode invalidSyntax(Object input) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private CaliptoNode atom(Object input) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private CaliptoNode car(Object input) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private CaliptoNode cdr(Object input) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private CaliptoNode cons(Object input) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private CaliptoNode eq(Object input) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private CaliptoNode handler(Object input) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private CaliptoNode nil(Object input) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private CaliptoNode quote(Object input) {
     // TODO Auto-generated method stub
     return null;
   }
