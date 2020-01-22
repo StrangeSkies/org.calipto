@@ -42,8 +42,8 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class ConsSymbol implements TruffleObject {
-  static final ConsSymbol CONS = new ConsSymbol();
+public final class ConsSymbol implements TruffleObject {
+  public static final ConsSymbol CONS = new ConsSymbol();
 
   private ConsSymbol() {}
 

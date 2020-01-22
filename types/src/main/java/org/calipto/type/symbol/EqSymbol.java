@@ -42,8 +42,8 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class EqSymbol implements TruffleObject {
-  static final EqSymbol EQ = new EqSymbol();
+public final class EqSymbol implements TruffleObject {
+  public static final EqSymbol EQ = new EqSymbol();
 
   private EqSymbol() {}
 

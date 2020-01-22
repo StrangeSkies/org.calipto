@@ -42,8 +42,8 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class CdrSymbol implements TruffleObject {
-  static final CdrSymbol CDR = new CdrSymbol();
+public final class CdrSymbol implements TruffleObject {
+  public static final CdrSymbol CDR = new CdrSymbol();
 
   private CdrSymbol() {}
 

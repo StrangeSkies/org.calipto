@@ -42,8 +42,8 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class QuoteSymbol implements TruffleObject {
-  static final QuoteSymbol QUOTE = new QuoteSymbol();
+public final class QuoteSymbol implements TruffleObject {
+  public static final QuoteSymbol QUOTE = new QuoteSymbol();
 
   private QuoteSymbol() {}
 

@@ -42,8 +42,8 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class CarSymbol implements TruffleObject {
-  static final CarSymbol CAR = new CarSymbol();
+public final class CarSymbol implements TruffleObject {
+  public static final CarSymbol CAR = new CarSymbol();
 
   private CarSymbol() {}
 

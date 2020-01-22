@@ -44,8 +44,8 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class AtomSymbol implements TruffleObject {
-  static final AtomSymbol ATOM = new AtomSymbol();
+public final class AtomSymbol implements TruffleObject {
+  public static final AtomSymbol ATOM = new AtomSymbol();
 
   private AtomSymbol() {}
 

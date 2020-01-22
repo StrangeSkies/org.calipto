@@ -3,13 +3,16 @@ package org.calipto;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 
 import org.calipto.node.ModuleNode;
 import org.calipto.node.ScopingNode;
 import org.calipto.node.builtin.BuiltinNode;
 import org.calipto.node.intrinsic.IntrinsicNode;
+import org.calipto.reader.CaliptoData;
 import org.calipto.reader.CaliptoReader;
+import org.calipto.reader.ReaderMacro;
 import org.calipto.reader.ReadingContext;
 import org.calipto.source.CaliptoFileDetector;
 import org.calipto.source.SourceScanner;
@@ -82,8 +85,31 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   }
 
   private ReadingContext getReadingContext() {
-    // TODO Auto-generated method stub
-    return null;
+    return new ReadingContext() {
+      @Override
+      public ReaderMacro resolveReaderMacro(CaliptoData symbol) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public CaliptoData makeSymbol(String namespace, String name) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public CaliptoData makeCons(Object car, Object cdr) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public Optional<ReaderMacro> findCharacterMacro(int codePoint) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+    };
   }
 
   @Override
@@ -148,10 +174,10 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   @Override
   public Iterable<Scope> findLocalScopes(CaliptoContext context, Node node, Frame frame) {
     final ScopingNode scope = ScopingNode.findEnclosingScope(node);
-    return new Iterable<Scope>() {
+    return new Iterable<>() {
       @Override
       public Iterator<Scope> iterator() {
-        return new Iterator<Scope>() {
+        return new Iterator<>() {
           private ScopingNode previousScope;
           private ScopingNode nextScope = scope;
 
