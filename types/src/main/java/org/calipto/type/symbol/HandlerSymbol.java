@@ -33,8 +33,6 @@
 package org.calipto.type.symbol;
 
 import org.calipto.type.DataLibrary;
-import org.calipto.type.cons.ConsPair;
-import org.calipto.type.cons.Handler;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -67,26 +65,5 @@ public final class HandlerSymbol implements TruffleObject {
   @ExportMessage
   public String name() {
     return "handler";
-  }
-
-  @ExportMessage
-  Object consOnto(Object cdr) {
-    return new Handler(cdr);
-  }
-
-  @ExportMessage
-  Object consWith(Object car) {
-    return new ConsPair(car, this);
-  }
-
-  @Override
-  @ExportMessage
-  public boolean equals(Object obj) {
-    return obj == this;
-  }
-
-  @ExportMessage
-  boolean isNull() {
-    return true;
   }
 }

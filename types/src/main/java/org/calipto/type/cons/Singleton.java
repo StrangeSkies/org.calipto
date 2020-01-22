@@ -73,14 +73,6 @@ public final class Singleton implements TruffleObject {
   }
 
   @ExportMessage
-  Object consOnto(Object cdr) {
-    if (cdr == NIL) {
-      return new Singleton(this);
-    }
-    return null;
-  }
-
-  @ExportMessage
   Object consWith(Object car) {
     return new ConsPair(car, this);
   }

@@ -32,8 +32,6 @@
  */
 package org.calipto.type.cons;
 
-import static org.calipto.type.symbol.NilSymbol.NIL;
-
 import org.calipto.type.DataLibrary;
 import org.calipto.type.symbol.NilSymbol;
 
@@ -99,19 +97,6 @@ public final class IntTo64 implements TruffleObject {
       }
       return true;
     }
-  }
-
-  @ExportMessage
-  static Object consOnto(IntTo64 receiver, Object cdr) {
-    if (cdr == NIL) {
-      return new Singleton(receiver);
-    }
-    return null;
-  }
-
-  @ExportMessage
-  Object consWith(Object car) {
-    return new ConsPair(car, this);
   }
 
   @ExportMessage

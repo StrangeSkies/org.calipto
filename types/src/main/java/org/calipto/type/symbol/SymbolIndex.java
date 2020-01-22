@@ -32,6 +32,15 @@
  */
 package org.calipto.type.symbol;
 
+import static org.calipto.type.symbol.AtomSymbol.ATOM;
+import static org.calipto.type.symbol.CarSymbol.CAR;
+import static org.calipto.type.symbol.CdrSymbol.CDR;
+import static org.calipto.type.symbol.ConsSymbol.CONS;
+import static org.calipto.type.symbol.EqSymbol.EQ;
+import static org.calipto.type.symbol.HandlerSymbol.HANDLER;
+import static org.calipto.type.symbol.NilSymbol.NIL;
+import static org.calipto.type.symbol.QuoteSymbol.QUOTE;
+
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -39,7 +48,20 @@ import org.calipto.type.DataLibrary;
 
 public class SymbolIndex {
   private final DataLibrary symbolLibrary = DataLibrary.getFactory().createDispatched(5);
-  private final Map<String, Symbol> symbols = new IdentityHashMap<>();
+  private final Map<String, Object> symbols = new IdentityHashMap<>();
+
+  public SymbolIndex() {
+    internSymbol(ATOM);
+    internSymbol(true);
+    internSymbol(false);
+    internSymbol(CAR);
+    internSymbol(CDR);
+    internSymbol(CONS);
+    internSymbol(EQ);
+    internSymbol(HANDLER);
+    internSymbol(NIL);
+    internSymbol(QUOTE);
+  }
 
   public Object internSymbol(String string) {
     string = string.intern();

@@ -32,12 +32,14 @@
  */
 package org.calipto.type;
 
+import static org.calipto.type.symbol.NilSymbol.NIL;
+
+import org.calipto.type.cons.ConsPair;
 import org.calipto.type.cons.Int16;
 import org.calipto.type.cons.Int32;
 import org.calipto.type.cons.Int64;
 import org.calipto.type.cons.Int8;
 import org.calipto.type.symbol.BoolSymbol;
-import org.calipto.type.symbol.NilSymbol;
 
 import com.oracle.truffle.api.library.GenerateLibrary;
 import com.oracle.truffle.api.library.GenerateLibrary.Abstract;
@@ -65,7 +67,10 @@ public abstract class DataLibrary extends Library {
     return false;
   }
 
-  public abstract boolean equals(Object first, Object second);
+  @Abstract(ifExported = { "isCons" })
+  public boolean equals(Object first, Object second) {
+    return first == second;
+  }
 
   /**
    * Cons the receiver onto the given value. This should always be called in
@@ -78,7 +83,7 @@ public abstract class DataLibrary extends Library {
    * @return the cons of the receiver onto the value, or null to delegate to
    *         {@link #consWith(Object, Object)}
    */
-  public Object consOnto(Object receiver, Object value) {
+  public Object consOnto(Object car, Object cdr) {
     return null;
   }
 
@@ -93,7 +98,9 @@ public abstract class DataLibrary extends Library {
    *          the value to be the new car in the resulting cons cell
    * @return the cons of the value onto the receiver
    */
-  public abstract Object consWith(Object receiver, Object value);
+  public Object consWith(Object cdr, Object car) {
+    return new ConsPair(car, cdr);
+  }
 
   public DataIterator iterator(Object receiver) {
     return new DataIterator() {
@@ -139,7 +146,7 @@ public abstract class DataLibrary extends Library {
         if (hasNext()) {
           throw new IllegalStateException();
         }
-        return tail == NilSymbol.NIL;
+        return tail == NIL;
       }
     };
   }
