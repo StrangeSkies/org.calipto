@@ -7,11 +7,11 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.library.CachedLibrary;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
-@NodeInfo(shortName = "cdr")
-@NodeChild("cons")
-public abstract class CdrNode extends CaliptoNode {
+@NodeInfo(shortName = "atom")
+@NodeChild("data")
+public abstract class AtomNode extends CaliptoNode {
   @Specialization(limit = "3")
-  Object doDefault(Object cons, @CachedLibrary("cons") DataLibrary conses) {
-    return conses.cdr(cons);
+  Object doDefault(Object item, @CachedLibrary("item") DataLibrary data) {
+    return data.isSymbol(item);
   }
 }

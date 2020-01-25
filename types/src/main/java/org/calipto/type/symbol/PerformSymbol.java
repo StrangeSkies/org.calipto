@@ -32,47 +32,38 @@
  */
 package org.calipto.type.symbol;
 
-import static org.calipto.type.symbol.AtomSymbol.ATOM;
-import static org.calipto.type.symbol.CarSymbol.CAR;
-import static org.calipto.type.symbol.CdrSymbol.CDR;
-import static org.calipto.type.symbol.ConsSymbol.CONS;
-import static org.calipto.type.symbol.EqSymbol.EQ;
-import static org.calipto.type.symbol.HandleSymbol.HANDLE;
-import static org.calipto.type.symbol.NilSymbol.NIL;
-import static org.calipto.type.symbol.QuoteSymbol.QUOTE;
-
-import java.util.IdentityHashMap;
-import java.util.Map;
-
 import org.calipto.type.DataLibrary;
 
-public class SymbolIndex {
-  private final DataLibrary symbolLibrary = DataLibrary.getFactory().createDispatched(5);
-  private final Map<String, Object> symbols = new IdentityHashMap<>();
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
 
-  public SymbolIndex() {
-    internSymbol(ATOM);
-    internSymbol(true);
-    internSymbol(false);
-    internSymbol(CAR);
-    internSymbol(CDR);
-    internSymbol(CONS);
-    internSymbol(EQ);
-    internSymbol(HANDLE);
-    internSymbol(NIL);
-    internSymbol(QUOTE);
+// TODO value type
+@ExportLibrary(DataLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+public final class PerformSymbol implements TruffleObject {
+  public static final PerformSymbol PERFORM = new PerformSymbol();
+
+  private PerformSymbol() {}
+
+  @ExportMessage
+  public boolean isData() {
+    return true;
   }
 
-  public Object internSymbol(String string) {
-    string = string.intern();
-    return symbols.computeIfAbsent(string, Symbol::new);
+  @ExportMessage
+  public boolean isSymbol() {
+    return true;
   }
 
-  public Object internSymbol(Object symbol) {
-    return internSymbol(symbolLibrary.qualifiedName(symbol));
+  @ExportMessage
+  public String namespace() {
+    return "";
   }
 
-  public boolean isSymbol(Object symbol) {
-    return symbolLibrary.isSymbol(symbol);
+  @ExportMessage
+  public String name() {
+    return "perform";
   }
 }

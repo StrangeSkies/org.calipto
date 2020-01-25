@@ -10,7 +10,7 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 @NodeInfo(shortName = "car")
 @NodeChild("cons")
 public abstract class CarNode extends CaliptoNode {
-  @Specialization(guards = "conses.isCons(cons)", limit = "3")
+  @Specialization(limit = "3")
   Object doDefault(Object cons, @CachedLibrary("cons") DataLibrary conses) {
     return conses.car(cons);
   }

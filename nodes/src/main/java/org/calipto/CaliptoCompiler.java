@@ -5,13 +5,14 @@ import static org.calipto.type.symbol.CarSymbol.CAR;
 import static org.calipto.type.symbol.CdrSymbol.CDR;
 import static org.calipto.type.symbol.ConsSymbol.CONS;
 import static org.calipto.type.symbol.EqSymbol.EQ;
-import static org.calipto.type.symbol.HandlerSymbol.HANDLER;
+import static org.calipto.type.symbol.HandleSymbol.HANDLE;
 import static org.calipto.type.symbol.NilSymbol.NIL;
 import static org.calipto.type.symbol.QuoteSymbol.QUOTE;
 
 import java.util.Map;
 import java.util.function.Function;
 
+import org.calipto.node.AtomNodeGen;
 import org.calipto.node.CaliptoNode;
 import org.calipto.node.CarNodeGen;
 import org.calipto.node.CdrNodeGen;
@@ -40,7 +41,7 @@ public class CaliptoCompiler {
             this::cons,
             EQ,
             this::eq,
-            HANDLER,
+            HANDLE,
             this::handler,
             NIL,
             this::nil,
@@ -72,8 +73,7 @@ public class CaliptoCompiler {
   }
 
   private CaliptoNode atom(Object input) {
-    // TODO Auto-generated method stub
-    return null;
+    return AtomNodeGen.create(compile(data.car(input)));
   }
 
   private CaliptoNode car(Object input) {
