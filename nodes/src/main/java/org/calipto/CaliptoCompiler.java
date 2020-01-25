@@ -13,6 +13,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.calipto.node.CaliptoNode;
+import org.calipto.node.CarNodeGen;
+import org.calipto.node.CdrNodeGen;
+import org.calipto.node.ConsNodeGen;
+import org.calipto.node.EqNodeGen;
+import org.calipto.node.QuoteNode;
 import org.calipto.type.DataLibrary;
 
 public class CaliptoCompiler {
@@ -72,23 +77,19 @@ public class CaliptoCompiler {
   }
 
   private CaliptoNode car(Object input) {
-    // TODO Auto-generated method stub
-    return null;
+    return CarNodeGen.create(compile(data.car(input)));
   }
 
   private CaliptoNode cdr(Object input) {
-    // TODO Auto-generated method stub
-    return null;
+    return CdrNodeGen.create(compile(data.car(input)));
   }
 
   private CaliptoNode cons(Object input) {
-    // TODO Auto-generated method stub
-    return null;
+    return ConsNodeGen.create(compile(data.car(input)), compile(data.car(data.cdr(input))));
   }
 
   private CaliptoNode eq(Object input) {
-    // TODO Auto-generated method stub
-    return null;
+    return EqNodeGen.create(compile(data.car(input)), compile(data.car(data.cdr(input))));
   }
 
   private CaliptoNode handler(Object input) {
@@ -102,7 +103,6 @@ public class CaliptoCompiler {
   }
 
   private CaliptoNode quote(Object input) {
-    // TODO Auto-generated method stub
-    return null;
+    return new QuoteNode(input);
   }
 }
