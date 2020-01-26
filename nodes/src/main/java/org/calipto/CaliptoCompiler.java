@@ -10,7 +10,9 @@ import static org.calipto.type.symbol.NilSymbol.NIL;
 import static org.calipto.type.symbol.QuoteSymbol.QUOTE;
 
 import java.util.Map;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.calipto.node.AtomNodeGen;
 import org.calipto.node.CaliptoNode;
@@ -52,44 +54,59 @@ public class CaliptoCompiler {
 
   public CaliptoNode compile(Object input) {
     if (!data.isCons(input)) {
-      return invalidSyntax(input);
+      return invalidSyntax(input, "Unexpected symbol");
     }
 
     var car = data.car(input);
     var cdr = data.cdr(input);
 
-    if (data.isSymbol(car)) {
-      builtins.getOrDefault(car, this::invalidSyntax).apply(cdr);
-
-    } else {
-      compile(car);
-
+    if (!data.isSymbol(car)) {
+      return invalidSyntax(input, "Unrecognised syntax form");
     }
+
+    return builtins
+        .getOrDefault(car, builtin -> invalidSyntax(builtin, "Unrecognised syntax form"))
+        .apply(cdr);
   }
 
-  private CaliptoNode invalidSyntax(Object input) {
+  private CaliptoNode invalidSyntax(Object input, String message) {
     // TODO Auto-generated method stub
     return null;
   }
 
+  private CaliptoNode unaryNode(Object input, UnaryOperator<CaliptoNode> factory) {
+    var arg1 = data.car(input);
+    var tail = data.cdr(input);
+    if (!data.equals(tail, NIL)) {
+      return invalidSyntax(input, "Argument list improperly terminates");
+    }
+    return factory.apply(compile(arg1));
+  }
+
+  private CaliptoNode binaryNode(Object input, BinaryOperator<CaliptoNode> factory) {
+    var arg1 = data.car(input);
+    var tail = data.cdr(input);
+    return unaryNode(tail, arg2 -> factory.apply(compile(arg1), arg2));
+  }
+
   private CaliptoNode atom(Object input) {
-    return AtomNodeGen.create(compile(data.car(input)));
+    return unaryNode(input, AtomNodeGen::create);
   }
 
   private CaliptoNode car(Object input) {
-    return CarNodeGen.create(compile(data.car(input)));
+    return unaryNode(input, CarNodeGen::create);
   }
 
   private CaliptoNode cdr(Object input) {
-    return CdrNodeGen.create(compile(data.car(input)));
+    return unaryNode(input, CdrNodeGen::create);
   }
 
   private CaliptoNode cons(Object input) {
-    return ConsNodeGen.create(compile(data.car(input)), compile(data.car(data.cdr(input))));
+    return binaryNode(input, ConsNodeGen::create);
   }
 
   private CaliptoNode eq(Object input) {
-    return EqNodeGen.create(compile(data.car(input)), compile(data.car(data.cdr(input))));
+    return binaryNode(input, EqNodeGen::create);
   }
 
   private CaliptoNode handler(Object input) {
@@ -103,6 +120,6 @@ public class CaliptoCompiler {
   }
 
   private CaliptoNode quote(Object input) {
-    return new QuoteNode(input);
+    return unaryNode(input, QuoteNode::new);
   }
 }
