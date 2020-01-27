@@ -32,7 +32,7 @@
  */
 package org.calipto.type;
 
-import static org.calipto.type.symbol.NilSymbol.NIL;
+import static org.calipto.type.symbol.Symbols.NIL;
 
 import org.calipto.type.cons.ConsPair;
 import org.calipto.type.cons.Int16;

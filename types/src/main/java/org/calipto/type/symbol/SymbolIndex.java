@@ -32,14 +32,14 @@
  */
 package org.calipto.type.symbol;
 
-import static org.calipto.type.symbol.AtomSymbol.ATOM;
-import static org.calipto.type.symbol.CarSymbol.CAR;
-import static org.calipto.type.symbol.CdrSymbol.CDR;
-import static org.calipto.type.symbol.ConsSymbol.CONS;
-import static org.calipto.type.symbol.EqSymbol.EQ;
-import static org.calipto.type.symbol.HandleSymbol.HANDLE;
-import static org.calipto.type.symbol.NilSymbol.NIL;
-import static org.calipto.type.symbol.QuoteSymbol.QUOTE;
+import static org.calipto.type.symbol.Symbols.ATOM;
+import static org.calipto.type.symbol.Symbols.CAR;
+import static org.calipto.type.symbol.Symbols.CDR;
+import static org.calipto.type.symbol.Symbols.CONS;
+import static org.calipto.type.symbol.Symbols.EQ;
+import static org.calipto.type.symbol.Symbols.HANDLE;
+import static org.calipto.type.symbol.Symbols.NIL;
+import static org.calipto.type.symbol.Symbols.QUOTE;
 
 import java.util.IdentityHashMap;
 import java.util.Map;

@@ -32,6 +32,8 @@
  */
 package org.calipto.type.symbol;
 
+import static org.calipto.type.symbol.Symbols.SYSTEM_NAMESPACE;
+
 import org.calipto.type.DataLibrary;
 import org.calipto.type.cons.Singleton;
 
@@ -44,9 +46,7 @@ import com.oracle.truffle.api.library.ExportMessage;
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
 public final class NilSymbol implements TruffleObject {
-  public static final NilSymbol NIL = new NilSymbol();
-
-  private NilSymbol() {}
+  NilSymbol() {}
 
   @ExportMessage
   public boolean isData() {
@@ -60,7 +60,7 @@ public final class NilSymbol implements TruffleObject {
 
   @ExportMessage
   public String namespace() {
-    return "";
+    return SYSTEM_NAMESPACE;
   }
 
   @ExportMessage

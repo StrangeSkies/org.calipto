@@ -32,8 +32,6 @@
  */
 package org.calipto.type.symbol;
 
-import static org.calipto.type.symbol.Symbols.SYSTEM_NAMESPACE;
-
 import org.calipto.type.DataLibrary;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
@@ -44,8 +42,8 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class PerformSymbol implements TruffleObject {
-  PerformSymbol() {}
+final class CallSymbol implements TruffleObject {
+  CallSymbol() {}
 
   @ExportMessage
   public boolean isData() {
@@ -59,11 +57,11 @@ final class PerformSymbol implements TruffleObject {
 
   @ExportMessage
   public String namespace() {
-    return SYSTEM_NAMESPACE;
+    return "";
   }
 
   @ExportMessage
   public String name() {
-    return "perform";
+    return "call";
   }
 }

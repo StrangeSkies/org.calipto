@@ -32,16 +32,18 @@
  */
 package org.calipto.type;
 
-import org.calipto.type.symbol.NilSymbol;
+import static org.calipto.type.symbol.Symbols.NIL;
 
-import com.oracle.truffle.api.dsl.TypeCast;
+import org.calipto.type.symbol.NilSymbol;
+import org.calipto.type.symbol.Symbols;
+
 import com.oracle.truffle.api.dsl.TypeCheck;
 import com.oracle.truffle.api.dsl.TypeSystem;
 
 /**
- * The only <em>primitive</em> types in Calipto are cons cells and symbols, which
- * don't provide a very rich basis for specialising our representations for
- * efficient storage and access.
+ * The only <em>primitive</em> types in Calipto are cons cells and symbols,
+ * which don't provide a very rich basis for specialising our representations
+ * for efficient storage and access.
  * <p>
  * On the other hand, any given value in Calipto belongs to a
  * potentially-infinite number of type predicates, so can't use those as a basis
@@ -59,15 +61,13 @@ import com.oracle.truffle.api.dsl.TypeSystem;
  */
 @TypeSystem({ boolean.class, int.class })
 public class CaliptoTypes {
-
   @TypeCheck(NilSymbol.class)
   public static boolean isNil(Object value) {
-    return value == NilSymbol.NIL;
+    return value == NIL;
   }
 
-  @TypeCast(NilSymbol.class)
-  public static NilSymbol asNil(Object value) {
+  public static Object asNil(Object value) {
     assert isNil(value);
-    return NilSymbol.NIL;
+    return Symbols.NIL;
   }
 }

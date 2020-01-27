@@ -3,7 +3,6 @@ package org.calipto.node;
 import org.calipto.CaliptoTypeException;
 
 import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.dsl.GenerateNodeFactory;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.StandardTags;
 import com.oracle.truffle.api.instrumentation.Tag;
@@ -12,12 +11,13 @@ import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.interop.UnsupportedTypeException;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.NodeInfo;
 
 /**
  * Yield control from the current continuation to an enclosing scope to perform
  * some side effect.
  */
-@GenerateNodeFactory
+@NodeInfo(shortName = "perform")
 public abstract class PerformNode extends CaliptoNode {
   @Children
   private final CaliptoNode[] argumentNodes;

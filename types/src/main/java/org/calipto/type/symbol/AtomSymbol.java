@@ -32,6 +32,8 @@
  */
 package org.calipto.type.symbol;
 
+import static org.calipto.type.symbol.Symbols.SYSTEM_NAMESPACE;
+
 import org.calipto.type.DataLibrary;
 
 import com.oracle.truffle.api.dsl.Specialization;
@@ -44,10 +46,8 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-public final class AtomSymbol implements TruffleObject {
-  public static final AtomSymbol ATOM = new AtomSymbol();
-
-  private AtomSymbol() {}
+final class AtomSymbol implements TruffleObject {
+  AtomSymbol() {}
 
   @ExportMessage
   public boolean isData() {
@@ -61,7 +61,7 @@ public final class AtomSymbol implements TruffleObject {
 
   @ExportMessage
   public String namespace() {
-    return "";
+    return SYSTEM_NAMESPACE;
   }
 
   @ExportMessage

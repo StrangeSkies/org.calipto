@@ -2,6 +2,7 @@ package org.calipto;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Stream.concat;
+import static org.calipto.type.symbol.Symbols.NIL;
 
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -16,6 +17,7 @@ import org.calipto.node.intrinsic.IntrinsicNode;
 import org.calipto.type.DataLibrary;
 import org.calipto.type.symbol.NilSymbol;
 import org.calipto.type.symbol.SymbolIndex;
+import org.calipto.type.symbol.Symbols;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -85,7 +87,7 @@ public class CaliptoContext {
    * functionality does need to be transparently lifted into intrinsics.
    */
   private Stream<NodeFactory<? extends IntrinsicNode>> getIntrinsics() {
-    return Stream.of(CarNodeFactory.getInstance(), CdrNodeFactory.getInstance());
+    return Stream.of();
   }
 
   public void installIntrinsic(NodeFactory<? extends IntrinsicNode> factory) {
@@ -124,7 +126,7 @@ public class CaliptoContext {
         name,
         language,
         new FrameDescriptor(),
-        new CaliptoNode[] { builtinBodyNode },
+        builtinBodyNode,
         BUILTIN_SOURCE.createUnavailableSection());
 
     /* Register the builtin function in our function registry. */
@@ -181,7 +183,7 @@ public class CaliptoContext {
     } else if (a instanceof CaliptoContext) {
       return a;
     } else if (a == null) {
-      return NilSymbol.NIL;
+      return NIL;
     }
     CompilerDirectives.transferToInterpreter();
     throw new IllegalStateException(a + " is not a Truffle value");
