@@ -11,7 +11,7 @@ import org.calipto.node.ScopingNode;
 import org.calipto.node.builtin.BuiltinNode;
 import org.calipto.node.intrinsic.IntrinsicNode;
 import org.calipto.reader.CaliptoData;
-import org.calipto.reader.CaliptoReader;
+import org.calipto.reader.Reader;
 import org.calipto.reader.ReaderMacro;
 import org.calipto.reader.ReadingContext;
 import org.calipto.source.CaliptoFileDetector;
@@ -77,7 +77,7 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   @Override
   protected CallTarget parse(ParsingRequest request) throws Exception {
     Source source = request.getSource();
-    CaliptoReader reader = new CaliptoReader(getReadingContext(), new SourceScanner(source));
+    Reader reader = new Reader(getReadingContext(), new SourceScanner(source));
 
     var evalMain = new ModuleNode(this, reader);
 

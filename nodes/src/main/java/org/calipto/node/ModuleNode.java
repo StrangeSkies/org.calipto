@@ -44,7 +44,7 @@ import java.util.Map;
 
 import org.calipto.CaliptoContext;
 import org.calipto.CaliptoLanguage;
-import org.calipto.reader.CaliptoReader;
+import org.calipto.reader.Reader;
 import org.calipto.type.symbol.NilSymbol;
 
 import com.oracle.truffle.api.CompilerDirectives;
@@ -64,7 +64,7 @@ public final class ModuleNode extends RootNode {
   @Child
   private DirectCallNode mainCallNode;
 
-  public ModuleNode(CaliptoLanguage language, CaliptoReader reader) {
+  public ModuleNode(CaliptoLanguage language, Reader reader) {
     super(null); // internal frame
     this.mainCallNode = rootFunction != null ? DirectCallNode.create(rootFunction) : null;
     this.reference = language.getContextReference();

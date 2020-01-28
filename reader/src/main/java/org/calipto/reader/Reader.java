@@ -5,8 +5,9 @@ import static java.lang.Character.codePointOf;
 import java.util.Optional;
 
 import org.calipto.scanner.Scanner;
+import org.calipto.walker.Walker;
 
-public class CaliptoReader {
+public class Reader implements Walker {
   private static final String CORE_NAMESPACE = "calipto";
 
   private static final String KEYWORD = "keyword";
@@ -16,10 +17,18 @@ public class CaliptoReader {
   private final ReadingContext context;
   private final Scanner scanner;
 
+  /*
+   * TODO Do we need a stack of scanners, sub-scanners, and reader-macro states
+   * so that we can transition to streaming from reader macros? Perhaps all
+   * reader macros have to open a list, and may then append items to that list
+   * as a side-effect. This is not too limiting as this can punt to more
+   * flexible macros. The reader part can and should be simple.
+   */
+
   private final CaliptoData keywordSymbol;
   private final CaliptoData quoteSymbol;
 
-  public CaliptoReader(ReadingContext context, Scanner scanner) {
+  public Reader(ReadingContext context, Scanner scanner) {
     this.context = context;
     this.scanner = scanner;
 
@@ -56,14 +65,6 @@ public class CaliptoReader {
     recordSourceLocation(startPosition, scanner.inputPosition());
 
     return data;
-  }
-
-  private void recordSyntheticExpression() {
-    // TODO implement as a side effect
-  }
-
-  private void recordSourceLocation(long startPosition, long inputPosition) {
-    // TODO implement as a side effect
   }
 
   private Optional<CaliptoData> scanSymbol() {
@@ -157,5 +158,45 @@ public class CaliptoReader {
 
       return macro.call();
     });
+  }
+
+  public long inputPosition() {
+    return scanner.inputPosition();
+  }
+
+  @Override
+  public long cursorPosition(long inputDepth) {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public long cursorDepth() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public Optional<Object> stepOver() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Optional<Object> stepOverSymbol() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public boolean stepIntoList() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public Optional<Object> stepOutOfList() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
