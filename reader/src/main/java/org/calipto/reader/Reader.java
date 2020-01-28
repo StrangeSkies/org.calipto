@@ -1,47 +1,47 @@
 package org.calipto.reader;
 
 import static java.lang.Character.codePointOf;
+import static org.calipto.type.symbol.Symbols.SYSTEM_NAMESPACE;
 
 import java.util.Optional;
 
 import org.calipto.scanner.Scanner;
+import org.calipto.type.DataLibrary;
+import org.calipto.type.symbol.SymbolIndex;
+import org.calipto.type.symbol.Symbols;
 import org.calipto.walker.Walker;
 
 public class Reader implements Walker {
-  private static final String CORE_NAMESPACE = "calipto";
-
   private static final String KEYWORD = "keyword";
-  private static final String QUOTE = "quote";
-  private static final String NIL = "nil";
 
-  private final ReadingContext context;
+  private final DataLibrary data;
+  private final SymbolIndex symbols;
   private final Scanner scanner;
 
   /*
-   * TODO Do we need a stack of scanners, sub-scanners, and reader-macro states
-   * so that we can transition to streaming from reader macros? Perhaps all
-   * reader macros have to open a list, and may then append items to that list
-   * as a side-effect. This is not too limiting as this can punt to more
-   * flexible macros. The reader part can and should be simple.
+   * TODO Do we need a stack of scanners, sub-scanners, and reader-macro states so
+   * that we can transition to streaming from reader macros? Perhaps all reader
+   * macros have to open a list, and may then append items to that list as a
+   * side-effect. This is not too limiting as this can punt to more flexible
+   * macros. The reader part can and should be simple.
    */
 
-  private final CaliptoData keywordSymbol;
-  private final CaliptoData quoteSymbol;
+  private final Object keywordSymbol;
 
-  public Reader(ReadingContext context, Scanner scanner) {
-    this.context = context;
+  public Reader(SymbolIndex symbols, Scanner scanner) {
+    this.data = DataLibrary.getFactory().getUncached();
+    this.symbols = symbols;
     this.scanner = scanner;
 
-    this.keywordSymbol = context.makeSymbol(CORE_NAMESPACE, KEYWORD);
-    this.quoteSymbol = context.makeSymbol(CORE_NAMESPACE, QUOTE);
+    this.keywordSymbol = symbols.internSymbol(SYSTEM_NAMESPACE, KEYWORD);
   }
 
-  /*
-   * Read the next item following the current source position
-   */
-  public Optional<CaliptoData> read() {
-    skipWhitespace();
-    return scan();
+  private Object cons(Object car, Object cdr) {
+    var cons = data.consOnto(car, cdr);
+    if (cons == null) {
+      cons = data.consWith(cdr, car);
+    }
+    return cons;
   }
 
   private void skipWhitespace() {
@@ -49,11 +49,11 @@ public class Reader implements Walker {
     scanner.discardBuffer();
   }
 
-  private CaliptoData scanNext() {
+  private Object scanNext() {
     return scan().orElseThrow(() -> new CaliptoReaderException("Unexpected end of input"));
   }
 
-  private Optional<CaliptoData> scan() {
+  private Optional<Object> scan() {
     long startPosition = scanner.inputPosition();
 
     var data = scanSymbol()
@@ -67,16 +67,16 @@ public class Reader implements Walker {
     return data;
   }
 
-  private Optional<CaliptoData> scanSymbol() {
+  private Optional<Object> scanSymbol() {
     return scanName().map(firstPart -> {
       if (scanner.advanceInputIf(c -> c == codePointOf("/"))) {
         String secondPart = scanName()
             .orElseThrow(() -> new CaliptoReaderException("Symbol name expected after namespace"));
 
-        return context.makeSymbol(firstPart, secondPart);
+        return symbols.internSymbol(firstPart, secondPart);
       }
 
-      return context.makeSymbol(CORE_NAMESPACE, firstPart);
+      return symbols.internSymbol(SYSTEM_NAMESPACE, firstPart);
     });
   }
 
@@ -89,7 +89,7 @@ public class Reader implements Walker {
     return Optional.empty();
   }
 
-  private Optional<CaliptoData> scanList() {
+  private Optional<Object> scanList() {
     if (scanner.advanceInputIf(c -> c == codePointOf("("))) {
       skipWhitespace();
 
@@ -98,22 +98,22 @@ public class Reader implements Walker {
     return Optional.empty();
   }
 
-  private CaliptoData scanListStart() {
+  private Object scanListStart() {
     if (scanner.advanceInputIf(c -> c == codePointOf(")"))) {
       scanner.discardBuffer();
 
-      return context.makeSymbol(CORE_NAMESPACE, NIL);
+      return Symbols.NIL;
 
     } else {
-      return context.makeCons(scanNext(), scanListTail());
+      return cons(scanNext(), scanListTail());
     }
   }
 
-  private CaliptoData scanListTail() {
+  private Object scanListTail() {
     skipWhitespace();
 
     if (scanner.advanceInputIf(c -> c == codePointOf("."))) {
-      scanner.discardBuffer();
+      skipWhitespace();
       return scanNext();
 
     } else {
@@ -125,29 +125,29 @@ public class Reader implements Walker {
     }
   }
 
-  private Optional<CaliptoData> scanKeyword() {
+  private Optional<Object> scanKeyword() {
     if (scanner.advanceInputIf(c -> c == codePointOf(":"))) {
       scanner.discardBuffer();
 
       recordSyntheticExpression();
 
-      return Optional.of(context.makeCons(keywordSymbol, read().get()));
+      return Optional.of(cons(keywordSymbol, read().get()));
     }
     return Optional.empty();
   }
 
-  private Optional<CaliptoData> scanQuote() {
+  private Optional<Object> scanQuote() {
     if (scanner.advanceInputIf(c -> c == codePointOf("'"))) {
       scanner.discardBuffer();
 
       recordSyntheticExpression();
 
-      return Optional.of(context.makeCons(quoteSymbol, read().get()));
+      return Optional.of(cons(Symbols.QUOTE, read().get()));
     }
     return Optional.empty();
   }
 
-  private Optional<CaliptoData> scanMacro() {
+  private Optional<Object> scanMacro() {
     return scanner.advanceInput(c -> {
       var macro = context
           .findCharacterMacro(c)
@@ -177,25 +177,25 @@ public class Reader implements Walker {
   }
 
   @Override
-  public Optional<Object> stepOver() {
+  public Optional<Object> read() {
+    skipWhitespace();
+    return scan();
+  }
+
+  @Override
+  public Optional<Object> readSymbol() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public Optional<Object> stepOverSymbol() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean stepIntoList() {
+  public boolean readStepIn() {
     // TODO Auto-generated method stub
     return false;
   }
 
   @Override
-  public Optional<Object> stepOutOfList() {
+  public Optional<Object> readStepOut() {
     // TODO Auto-generated method stub
     return null;
   }

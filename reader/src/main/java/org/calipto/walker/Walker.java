@@ -17,7 +17,7 @@ public interface Walker {
    * 
    * @return the item advanced over
    */
-  Optional<Object> stepOver();
+  Optional<Object> read();
 
   /**
    * At the current depth, given that there are more items at the current
@@ -25,23 +25,22 @@ public interface Walker {
    * 
    * @return the symbol advanced over
    */
-  Optional<Object> stepOverSymbol();
+  Optional<Object> readSymbol();
 
   /**
-   * At the current depth, given that the next item is a list, advance the
-   * current depth and set the position to 0 at the next depth, thus entering
-   * the list.
+   * At the current depth, given that the next item is a list, advance the current
+   * depth and set the position to 0 at the next depth, thus entering the list.
    * 
    * @return true if the depth has increased as a result of the call
    */
-  boolean stepIntoList();
+  boolean readStepIn();
 
   /**
-   * Given we are not at depth 0, return to the preceding depth, then advance
-   * the position, thus exiting the list.
+   * Given we are not at depth 0, return to the preceding depth, then advance the
+   * position, thus exiting the list.
    * 
    * @return the tail of the list we just exited, including the item in the
    *         terminal position
    */
-  Optional<Object> stepOutOfList();
+  Optional<Object> readStepOut();
 }

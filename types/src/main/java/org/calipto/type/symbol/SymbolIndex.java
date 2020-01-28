@@ -68,6 +68,11 @@ public class SymbolIndex {
     return symbols.computeIfAbsent(string, Symbol::new);
   }
 
+  public Object internSymbol(String namespace, String name) {
+    var string = (namespace + "/" + name).intern();
+    return symbols.computeIfAbsent(string, Symbol::new);
+  }
+
   public Object internSymbol(Object symbol) {
     return internSymbol(symbolLibrary.qualifiedName(symbol));
   }

@@ -1,7 +1,7 @@
 package org.calipto.type.symbol;
 
 public class Symbols {
-  public static String SYSTEM_NAMESPACE = "";
+  public static final String SYSTEM_NAMESPACE = "";
 
   public static final Object ATOM = new AtomSymbol();
   public static final Object CALL = new CallSymbol();
