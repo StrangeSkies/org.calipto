@@ -1,5 +1,7 @@
 package org.calipto.scanner;
 
+import java.util.Optional;
+import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 
 public interface Scanner {
@@ -20,27 +22,25 @@ public interface Scanner {
     return inputPosition() - bufferPosition();
   }
 
-  Cursor advanceInput();
+  <T> Optional<T> advanceInput(IntFunction<T> mapping);
 
   /**
    * Advance the input position while the character at that position matches the
    * given predicate.
    * 
    * @param condition
-   * @return the cursor at the first input position which doesn't match the
-   *         predicate, which may be the end of input
+   * @return the count by which the input position was advanced
    */
-  Cursor advanceInputWhile(IntPredicate condition);
+  long advanceInputWhile(IntPredicate condition);
 
   /**
    * Advance the input position if the character at that position matches the
    * given predicate.
    * 
    * @param condition
-   * @return the cursor at the first input position which doesn't match the
-   *         predicate, which may be the end of input
+   * @return true if the input position was advanced
    */
-  Cursor advanceInputIf(IntPredicate condition);
+  boolean advanceInputIf(IntPredicate condition);
 
   /**
    * Take everything in the interval from the mark position to the given

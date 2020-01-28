@@ -45,37 +45,17 @@ public class CaliptoReader {
   }
 
   private Optional<CaliptoData> scan() {
-    return scanner.peekInput().mapCodePoint(codePoint -> {
-      long startPosition = scanner.inputPosition();
+    long startPosition = scanner.inputPosition();
 
-      CaliptoData data;
-      if (Character.isAlphabetic(codePoint)) {
-        data = scanSymbol();
+    var data = scanSymbol()
+        .or(() -> scanList())
+        .or(() -> scanKeyword())
+        .or(() -> scanQuote())
+        .or(() -> scanMacro());
 
-      } else if (codePoint == codePointOf("(")) {
-        data = scanList();
+    recordSourceLocation(startPosition, scanner.inputPosition());
 
-      } else if (codePoint == codePointOf(":")) {
-        data = scanKeyword();
-
-      } else if (codePoint == codePointOf("'")) {
-        data = scanQuote();
-
-      } else {
-        var macro = context
-            .findCharacterMacro(codePoint)
-            .orElseThrow(
-                () -> new UnsupportedOperationException(
-                    "Custom reader macros are not yet supported. Unexpected character: "
-                        + Character.toString(codePoint)));
-
-        data = macro.call();
-      }
-
-      recordSourceLocation(startPosition, scanner.inputPosition());
-
-      return data;
-    });
+    return data;
   }
 
   private void recordSyntheticExpression() {
@@ -86,37 +66,39 @@ public class CaliptoReader {
     // TODO implement as a side effect
   }
 
-  private CaliptoData scanSymbol() {
-    String firstPart = scanName();
+  private Optional<CaliptoData> scanSymbol() {
+    return scanName().map(firstPart -> {
+      if (scanner.advanceInputIf(c -> c == codePointOf("/"))) {
+        String secondPart = scanName()
+            .orElseThrow(() -> new CaliptoReaderException("Symbol name expected after namespace"));
 
-    if (scanner.peekInput().codePointMatches(c -> c == codePointOf("/"))) {
-      scanner.advanceInput();
-      scanner.discardBuffer();
-      String secondPart = scanName();
+        return context.makeSymbol(firstPart, secondPart);
+      }
 
-      return context.makeSymbol(firstPart, secondPart);
+      return context.makeSymbol(CORE_NAMESPACE, firstPart);
+    });
+  }
+
+  private Optional<String> scanName() {
+    scanner.discardBuffer();
+    if (scanner.advanceInputIf(c -> Character.isAlphabetic(c))) {
+      scanner.advanceInputWhile(c -> Character.isAlphabetic(c) || c == codePointOf("-"));
+      return Optional.of(scanner.takeBuffer());
     }
-
-    return context.makeSymbol(CORE_NAMESPACE, firstPart);
+    return Optional.empty();
   }
 
-  private String scanName() {
-    scanner
-        .advanceInputWhile(
-            codePoint -> Character.isAlphabetic(codePoint) || codePoint == codePointOf("-"));
-    return scanner.takeBuffer();
-  }
+  private Optional<CaliptoData> scanList() {
+    if (scanner.advanceInputIf(c -> c == codePointOf("("))) {
+      skipWhitespace();
 
-  private CaliptoData scanList() {
-    scanner.advanceInput();
-    skipWhitespace();
-
-    return scanListStart();
+      return Optional.of(scanListStart());
+    }
+    return Optional.empty();
   }
 
   private CaliptoData scanListStart() {
-    if (scanner.peekInput().codePointMatches(c -> c == codePointOf(")"))) {
-      scanner.advanceInput();
+    if (scanner.advanceInputIf(c -> c == codePointOf(")"))) {
       scanner.discardBuffer();
 
       return context.makeSymbol(CORE_NAMESPACE, NIL);
@@ -129,8 +111,7 @@ public class CaliptoReader {
   private CaliptoData scanListTail() {
     skipWhitespace();
 
-    if (scanner.peekInput().codePointMatches(c -> c == codePointOf("."))) {
-      scanner.advanceInput();
+    if (scanner.advanceInputIf(c -> c == codePointOf("."))) {
       scanner.discardBuffer();
       return scanNext();
 
@@ -143,21 +124,38 @@ public class CaliptoReader {
     }
   }
 
-  private CaliptoData scanKeyword() {
-    scanner.advanceInput();
-    scanner.discardBuffer();
+  private Optional<CaliptoData> scanKeyword() {
+    if (scanner.advanceInputIf(c -> c == codePointOf(":"))) {
+      scanner.discardBuffer();
 
-    recordSyntheticExpression();
+      recordSyntheticExpression();
 
-    return context.makeCons(keywordSymbol, read().get());
+      return Optional.of(context.makeCons(keywordSymbol, read().get()));
+    }
+    return Optional.empty();
   }
 
-  private CaliptoData scanQuote() {
-    scanner.advanceInput();
-    scanner.discardBuffer();
+  private Optional<CaliptoData> scanQuote() {
+    if (scanner.advanceInputIf(c -> c == codePointOf("'"))) {
+      scanner.discardBuffer();
 
-    recordSyntheticExpression();
+      recordSyntheticExpression();
 
-    return context.makeCons(quoteSymbol, read().get());
+      return Optional.of(context.makeCons(quoteSymbol, read().get()));
+    }
+    return Optional.empty();
+  }
+
+  private Optional<CaliptoData> scanMacro() {
+    return scanner.advanceInput(c -> {
+      var macro = context
+          .findCharacterMacro(c)
+          .orElseThrow(
+              () -> new UnsupportedOperationException(
+                  "Custom reader macros are not yet supported. Unexpected character: "
+                      + Character.toString(c)));
+
+      return macro.call();
+    });
   }
 }
