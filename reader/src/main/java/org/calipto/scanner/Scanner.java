@@ -1,7 +1,5 @@
 package org.calipto.scanner;
 
-import java.util.Optional;
-import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 
 public interface Scanner {
@@ -21,8 +19,6 @@ public interface Scanner {
   default long bufferSize() {
     return inputPosition() - bufferPosition();
   }
-
-  <T> Optional<T> advanceInput(IntFunction<T> mapping);
 
   /**
    * Advance the input position while the character at that position matches the

@@ -4,9 +4,9 @@ import java.util.Optional;
 import java.util.function.IntPredicate;
 
 import org.calipto.reader.CaliptoData;
-import org.calipto.reader.Reader;
 import org.calipto.reader.ReaderMacro;
 import org.calipto.reader.ReadingContext;
+import org.calipto.reader.scanning.ScanningReader;
 import org.calipto.scanner.Cursor;
 import org.calipto.scanner.Scanner;
 import org.calipto.type.DataLibrary;
@@ -51,7 +51,7 @@ public abstract class ReadNode extends IntrinsicNode {
       DataLibrary readTableLibrary = DataLibrary.getFactory().create(readTable);
       readTableLibrary.adoptChildren();
 
-      new Reader(new ReadingContext() {
+      new ScanningReader(new ReadingContext() {
         @Override
         public CaliptoData makeCons(Object car, Object cdr) {
           return new CaliptoDataWrapper(valueLibrary.consWith(cdr, car));

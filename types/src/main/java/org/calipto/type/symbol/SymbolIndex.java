@@ -41,14 +41,15 @@ import static org.calipto.type.symbol.Symbols.HANDLE;
 import static org.calipto.type.symbol.Symbols.NIL;
 import static org.calipto.type.symbol.Symbols.QUOTE;
 
+import java.lang.ref.WeakReference;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
 import org.calipto.type.DataLibrary;
 
 public class SymbolIndex {
-  private final DataLibrary symbolLibrary = DataLibrary.getFactory().createDispatched(5);
-  private final Map<String, Object> symbols = new IdentityHashMap<>();
+  private final DataLibrary data = DataLibrary.getFactory().createDispatched(5);
+  private final Map<String, WeakReference<Object>> symbols = new IdentityHashMap<>();
 
   public SymbolIndex() {
     internSymbol(ATOM);
@@ -65,19 +66,27 @@ public class SymbolIndex {
 
   public Object internSymbol(String string) {
     string = string.intern();
-    return symbols.computeIfAbsent(string, Symbol::new);
+    var reference = symbols.get(string);
+    if (reference != null) {
+      var symbol = reference.get();
+      if (symbol == null) {
+        return symbol;
+      }
+    }
+    var symbol = new Symbol(string);
+    symbols.put(string, new WeakReference<>(symbol));
+    return symbol;
   }
 
   public Object internSymbol(String namespace, String name) {
-    var string = (namespace + "/" + name).intern();
-    return symbols.computeIfAbsent(string, Symbol::new);
+    return internSymbol(namespace + "/" + name);
   }
 
   public Object internSymbol(Object symbol) {
-    return internSymbol(symbolLibrary.qualifiedName(symbol));
+    return internSymbol(data.qualifiedName(symbol));
   }
 
   public boolean isSymbol(Object symbol) {
-    return symbolLibrary.isSymbol(symbol);
+    return data.isSymbol(symbol);
   }
 }

@@ -3,20 +3,17 @@ package org.calipto;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 
 import org.calipto.node.ModuleNode;
 import org.calipto.node.ScopingNode;
 import org.calipto.node.builtin.BuiltinNode;
 import org.calipto.node.intrinsic.IntrinsicNode;
-import org.calipto.reader.CaliptoData;
-import org.calipto.reader.Reader;
-import org.calipto.reader.ReaderMacro;
-import org.calipto.reader.ReadingContext;
+import org.calipto.reader.scanning.ScanningReader;
 import org.calipto.source.CaliptoFileDetector;
 import org.calipto.source.SourceScanner;
 import org.calipto.type.DataLibrary;
+import org.calipto.type.symbol.SymbolIndex;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -57,6 +54,8 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   private final Set<NodeFactory<? extends IntrinsicNode>> intrinsics;
   private final Set<NodeFactory<? extends BuiltinNode>> builtins;
 
+  private final SymbolIndex symbols = new SymbolIndex();
+
   public CaliptoLanguage() {
     this(Set.of(), Set.of());
   }
@@ -69,6 +68,10 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
     counter++;
   }
 
+  public SymbolIndex getSymbols() {
+    return symbols;
+  }
+
   @Override
   protected CaliptoContext createContext(Env env) {
     return new CaliptoContext(this, env, intrinsics, builtins);
@@ -77,39 +80,13 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   @Override
   protected CallTarget parse(ParsingRequest request) throws Exception {
     Source source = request.getSource();
-    Reader reader = new Reader(getReadingContext(), new SourceScanner(source));
+    ScanningReader reader = new ScanningReader(
+        symbols,
+        new SourceScanner(source));
 
     var evalMain = new ModuleNode(this, reader);
 
     return Truffle.getRuntime().createCallTarget(evalMain);
-  }
-
-  private ReadingContext getReadingContext() {
-    return new ReadingContext() {
-      @Override
-      public ReaderMacro resolveReaderMacro(CaliptoData symbol) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public CaliptoData makeSymbol(String namespace, String name) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public CaliptoData makeCons(Object car, Object cdr) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-
-      @Override
-      public Optional<ReaderMacro> findCharacterMacro(int codePoint) {
-        // TODO Auto-generated method stub
-        return null;
-      }
-    };
   }
 
   @Override
@@ -164,7 +141,9 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   }
 
   @Override
-  protected SourceSection findSourceLocation(CaliptoContext context, Object value) {
+  protected SourceSection findSourceLocation(
+      CaliptoContext context,
+      Object value) {
     if (value instanceof CaliptoFunction) {
       return ((CaliptoFunction) value).getDeclaredLocation();
     }
@@ -172,7 +151,10 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   }
 
   @Override
-  public Iterable<Scope> findLocalScopes(CaliptoContext context, Node node, Frame frame) {
+  public Iterable<Scope> findLocalScopes(
+      CaliptoContext context,
+      Node node,
+      Frame frame) {
     final ScopingNode scope = ScopingNode.findEnclosingScope(node);
     return new Iterable<>() {
       @Override
