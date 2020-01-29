@@ -84,7 +84,7 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
         symbols,
         new SourceScanner(source));
 
-    var evalMain = new ModuleNode(this, reader);
+    var evalMain = new ModuleNode(reader);
 
     return Truffle.getRuntime().createCallTarget(evalMain);
   }

@@ -35,7 +35,8 @@ public class CaliptoCompiler {
   private final Map<Object, Function<Object, CaliptoNode>> builtins;
   private final Map<Object, Function<Object, CaliptoNode>> intrinsics;
 
-  public CaliptoCompiler(Map<Object, Function<Object, CaliptoNode>> intrinsics) {
+  public CaliptoCompiler(
+      Map<Object, Function<Object, CaliptoNode>> intrinsics) {
     this.data = DataLibrary.getFactory().getUncached();
     this.builtins = Map
         .of(
@@ -90,7 +91,9 @@ public class CaliptoCompiler {
     return invalidSyntax(input, "Argument list size incorrect");
   }
 
-  private CaliptoNode unaryNode(Object input, UnaryOperator<CaliptoNode> factory) {
+  private CaliptoNode unaryNode(
+      Object input,
+      UnaryOperator<CaliptoNode> factory) {
     return naryNode(input, args -> {
       if (args.size() != 1) {
         return incorrectArgumentCount(input);
@@ -99,7 +102,9 @@ public class CaliptoCompiler {
     });
   }
 
-  private CaliptoNode binaryNode(Object input, BinaryOperator<CaliptoNode> factory) {
+  private CaliptoNode binaryNode(
+      Object input,
+      BinaryOperator<CaliptoNode> factory) {
     return naryNode(input, args -> {
       if (args.size() != 2) {
         return incorrectArgumentCount(input);
@@ -108,7 +113,9 @@ public class CaliptoCompiler {
     });
   }
 
-  private CaliptoNode naryNode(Object input, Function<List<CaliptoNode>, CaliptoNode> factory) {
+  private CaliptoNode naryNode(
+      Object input,
+      Function<List<CaliptoNode>, CaliptoNode> factory) {
     var args = new ArrayList<CaliptoNode>();
     var tail = input;
     while (data.isCons(tail)) {

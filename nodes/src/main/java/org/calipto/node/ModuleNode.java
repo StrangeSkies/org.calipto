@@ -40,17 +40,14 @@
  */
 package org.calipto.node;
 
-import java.util.Map;
-
 import org.calipto.CaliptoContext;
 import org.calipto.CaliptoLanguage;
 import org.calipto.reader.scanning.ScanningReader;
-import org.calipto.type.symbol.NilSymbol;
+import org.calipto.type.symbol.Symbols;
 
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
-import com.oracle.truffle.api.RootCallTarget;
-import com.oracle.truffle.api.TruffleLanguage.ContextReference;
+import com.oracle.truffle.api.dsl.CachedContext;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.RootNode;
@@ -59,15 +56,14 @@ public final class ModuleNode extends RootNode {
   @CompilationFinal
   private boolean registered;
 
-  private final ContextReference<CaliptoContext> reference;
-
   @Child
   private DirectCallNode mainCallNode;
 
-  public ModuleNode(CaliptoLanguage language, ScanningReader reader) {
+  public ModuleNode(ScanningReader reader) {
     super(null); // internal frame
-    this.mainCallNode = rootFunction != null ? DirectCallNode.create(rootFunction) : null;
-    this.reference = language.getContextReference();
+    this.mainCallNode = rootFunction != null
+        ? DirectCallNode.create(rootFunction)
+        : null;
   }
 
   @Override
@@ -85,24 +81,30 @@ public final class ModuleNode extends RootNode {
     return getName();
   }
 
-  @Override
-  public Object execute(VirtualFrame frame) {
+  public Object executeGeneric(
+      VirtualFrame frame,
+      @CachedContext(CaliptoLanguage.class) CaliptoContext context) {
     /* Lazy registrations of functions on first execution. */
     if (!registered) {
-      /* Function registration is a slow-path operation that must not be compiled. */
+      /*
+       * Function registration is a slow-path operation that must not be
+       * compiled.
+       */
       CompilerDirectives.transferToInterpreterAndInvalidate();
-      reference.get().getFunctionRegistry().register(functions);
+      context.getFunctionRegistry().register(functions);
       registered = true;
     }
 
     if (mainCallNode == null) {
-      /* The source code did not have a "main" function, so nothing to execute. */
-      return NilSymbol.NIL;
+      /*
+       * The source code did not have a "main" function, so nothing to execute.
+       */
+      return Symbols.NIL;
     } else {
       /* Conversion of arguments to types understood by SL. */
       Object[] arguments = frame.getArguments();
       for (int i = 0; i < arguments.length; i++) {
-        arguments[i] = reference.get().fromForeignValue(arguments[i]);
+        arguments[i] = context.fromForeignValue(arguments[i]);
       }
       return mainCallNode.call(arguments);
     }
