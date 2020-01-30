@@ -10,6 +10,7 @@ import static org.calipto.type.symbol.Symbols.HANDLE;
 import static org.calipto.type.symbol.Symbols.NIL;
 import static org.calipto.type.symbol.Symbols.PERFORM;
 import static org.calipto.type.symbol.Symbols.QUOTE;
+import static org.calipto.type.symbol.Symbols.SYSTEM_NAMESPACE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,22 +22,30 @@ import java.util.function.UnaryOperator;
 
 import org.calipto.node.AtomNodeGen;
 import org.calipto.node.CaliptoNode;
-import org.calipto.node.CallNodeGen;
+import org.calipto.node.CallNode;
 import org.calipto.node.CarNodeGen;
 import org.calipto.node.CdrNodeGen;
 import org.calipto.node.ConsNodeGen;
 import org.calipto.node.EqNodeGen;
+import org.calipto.node.HandleNodeGen;
+import org.calipto.node.PerformNodeGen;
 import org.calipto.node.QuoteNode;
 import org.calipto.type.DataLibrary;
+import org.calipto.type.symbol.Symbols;
 
 public class CaliptoCompiler {
+  private static final String TYPE_ERROR = "type-error";
+
+  private final Symbols symbols;
   private final DataLibrary data;
 
   private final Map<Object, Function<Object, CaliptoNode>> builtins;
   private final Map<Object, Function<Object, CaliptoNode>> intrinsics;
 
   public CaliptoCompiler(
+      Symbols symbols,
       Map<Object, Function<Object, CaliptoNode>> intrinsics) {
+    this.symbols = symbols;
     this.data = DataLibrary.getFactory().getUncached();
     this.builtins = Map
         .of(
@@ -54,8 +63,6 @@ public class CaliptoCompiler {
             this::eq,
             HANDLE,
             this::handle,
-            NIL,
-            this::nil,
             PERFORM,
             this::perform,
             QUOTE,
@@ -83,8 +90,10 @@ public class CaliptoCompiler {
   }
 
   private CaliptoNode invalidSyntax(Object input, String message) {
-    // TODO Auto-generated method stub
-    return null;
+    return new CallNode(
+        PerformNodeGen
+            .create(quote(symbols.internSymbol(SYSTEM_NAMESPACE, TYPE_ERROR))),
+        List.of(quote(message), quote(input)));
   }
 
   private CaliptoNode incorrectArgumentCount(Object input) {
@@ -133,7 +142,7 @@ public class CaliptoCompiler {
   }
 
   private CaliptoNode call(Object input) {
-    return unaryNode(input, CallNodeGen::create);
+    return naryNode(input, CallNode::new);
   }
 
   private CaliptoNode car(Object input) {
@@ -153,17 +162,11 @@ public class CaliptoCompiler {
   }
 
   private CaliptoNode handle(Object input) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  private CaliptoNode nil(Object input) {
-    // TODO Auto-generated method stub
-    return null;
+    return unaryNode(input, HandleNodeGen::create);
   }
 
   private CaliptoNode perform(Object input) {
-    return naryNode(input, PerformNodeGen::create);
+    return unaryNode(input, PerformNodeGen::create);
   }
 
   private CaliptoNode quote(Object input) {

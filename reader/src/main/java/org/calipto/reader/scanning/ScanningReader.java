@@ -9,17 +9,16 @@ import java.util.Optional;
 import org.calipto.reader.Reader;
 import org.calipto.scanner.Scanner;
 import org.calipto.type.DataLibrary;
-import org.calipto.type.symbol.SymbolIndex;
 import org.calipto.type.symbol.Symbols;
 
 public class ScanningReader implements Reader {
   private final DataLibrary data;
-  private final SymbolIndex symbols;
+  private final Symbols symbols;
   private final Scanner scanner;
 
   private List<Long> cursor;
 
-  public ScanningReader(SymbolIndex symbols, Scanner scanner) {
+  public ScanningReader(Symbols symbols, Scanner scanner) {
     this.data = DataLibrary.getFactory().getUncached();
     this.symbols = symbols;
     this.scanner = scanner;
@@ -44,10 +43,6 @@ public class ScanningReader implements Reader {
     return scan()
         .orElseThrow(
             () -> new ScanningReaderException("Unexpected end of input"));
-  }
-
-  private Optional<Object> scan() {
-    return scanSymbol().or(() -> scanList());
   }
 
   private Optional<Object> scanSymbol() {
@@ -77,35 +72,12 @@ public class ScanningReader implements Reader {
   }
 
   private Optional<Object> scanList() {
-    if (scanner.advanceInputIf(c -> c == codePointOf("("))) {
+    if (scanStepIn()) {
       skipWhitespace();
 
-      return Optional.of(scanListStart());
+      return Optional.of(scanStepOut());
     }
     return Optional.empty();
-  }
-
-  private Object scanListStart() {
-    if (scanner.advanceInputIf(c -> c == codePointOf(")"))) {
-      scanner.discardBuffer();
-
-      return Symbols.NIL;
-
-    } else {
-      return cons(scanNext(), scanListTail());
-    }
-  }
-
-  private Object scanListTail() {
-    skipWhitespace();
-
-    if (scanner.advanceInputIf(c -> c == codePointOf("."))) {
-      skipWhitespace();
-      return scanNext();
-
-    } else {
-      return scanListStart();
-    }
   }
 
   @Override
@@ -127,6 +99,10 @@ public class ScanningReader implements Reader {
     return scan();
   }
 
+  private Optional<Object> scan() {
+    return scanSymbol().or(() -> scanList());
+  }
+
   @Override
   public Optional<Object> readSymbol() {
     skipWhitespace();
@@ -135,13 +111,43 @@ public class ScanningReader implements Reader {
 
   @Override
   public boolean readStepIn() {
-    // TODO Auto-generated method stub
-    return false;
+    skipWhitespace();
+    return scanStepIn();
+  }
+
+  private boolean scanStepIn() {
+    return scanner.advanceInputIf(c -> c == codePointOf("("));
   }
 
   @Override
   public Optional<Object> readStepOut() {
-    // TODO Auto-generated method stub
-    return null;
+    skipWhitespace();
+    return scanStepOut();
+  }
+
+  private Optional<Object> scanStepOut() {
+    if (cursorDepth() <= 0) {
+      return Optional.empty();
+    }
+
+    if (scanner.advanceInputIf(c -> c == codePointOf(")"))) {
+      scanner.discardBuffer();
+
+      return Optional.of(Symbols.NIL);
+    }
+
+    Object head = scanNext();
+
+    skipWhitespace();
+    Object tail;
+    if (scanner.advanceInputIf(c -> c == codePointOf("."))) {
+      skipWhitespace();
+      tail = scanNext();
+
+    } else {
+      tail = scanStepOut();
+    }
+
+    return Optional.of(cons(head, tail));
   }
 }

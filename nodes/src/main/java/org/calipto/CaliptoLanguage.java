@@ -13,7 +13,7 @@ import org.calipto.reader.scanning.ScanningReader;
 import org.calipto.source.CaliptoFileDetector;
 import org.calipto.source.SourceScanner;
 import org.calipto.type.DataLibrary;
-import org.calipto.type.symbol.SymbolIndex;
+import org.calipto.type.symbol.Symbols;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -54,7 +54,7 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   private final Set<NodeFactory<? extends IntrinsicNode>> intrinsics;
   private final Set<NodeFactory<? extends BuiltinNode>> builtins;
 
-  private final SymbolIndex symbols = new SymbolIndex();
+  private final Symbols symbols = new Symbols();
 
   public CaliptoLanguage() {
     this(Set.of(), Set.of());
@@ -68,7 +68,7 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
     counter++;
   }
 
-  public SymbolIndex getSymbols() {
+  public Symbols getSymbols() {
     return symbols;
   }
 
