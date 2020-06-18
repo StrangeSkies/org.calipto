@@ -32,12 +32,14 @@
  */
 package org.calipto.type;
 
+import static org.calipto.type.symbol.Symbols.NIL;
+
+import org.calipto.type.cons.ConsPair;
 import org.calipto.type.cons.Int16;
 import org.calipto.type.cons.Int32;
 import org.calipto.type.cons.Int64;
 import org.calipto.type.cons.Int8;
-import org.calipto.type.symbol.Bool;
-import org.calipto.type.symbol.Nil;
+import org.calipto.type.symbol.BoolSymbol;
 
 import com.oracle.truffle.api.library.GenerateLibrary;
 import com.oracle.truffle.api.library.GenerateLibrary.Abstract;
@@ -45,7 +47,7 @@ import com.oracle.truffle.api.library.GenerateLibrary.DefaultExport;
 import com.oracle.truffle.api.library.Library;
 import com.oracle.truffle.api.library.LibraryFactory;
 
-@DefaultExport(Bool.class)
+@DefaultExport(BoolSymbol.class)
 @DefaultExport(Int8.class)
 @DefaultExport(Int16.class)
 @DefaultExport(Int32.class)
@@ -65,19 +67,40 @@ public abstract class DataLibrary extends Library {
     return false;
   }
 
-  public abstract boolean equals(Object first, Object second);
+  @Abstract(ifExported = { "isCons" })
+  public boolean equals(Object first, Object second) {
+    return first == second;
+  }
 
   /**
-   * Cons the given value onto the receiver.
+   * Cons the receiver onto the given value. This should always be called in
+   * preference to {@link #consWith(Object, Object)} on the value.
    * 
-   * @param receiver the receiver, which will be the new cdr in the resulting cons
-   *                 cell
-   * @param value    the value to be the new car in the resulting cons cell
+   * @param receiver
+   *          the receiver, which will be the new car in the resulting cons cell
+   * @param value
+   *          the value to be the new cdr in the resulting cons cell
+   * @return the cons of the receiver onto the value, or null to delegate to
+   *         {@link #consWith(Object, Object)}
+   */
+  public Object consOnto(Object car, Object cdr) {
+    return null;
+  }
+
+  /**
+   * Cons the given value onto the receiver. This should only be called in the
+   * case that there is no appropriate specialization of
+   * {@link #consOnto(Object, Object)} on the value.
+   * 
+   * @param receiver
+   *          the receiver, which will be the new cdr in the resulting cons cell
+   * @param value
+   *          the value to be the new car in the resulting cons cell
    * @return the cons of the value onto the receiver
    */
-  public abstract Object consWith(Object receiver, Object value);
-
-  public abstract Object consOntoNil(Object receiver);
+  public Object consWith(Object cdr, Object car) {
+    return new ConsPair(car, cdr);
+  }
 
   public DataIterator iterator(Object receiver) {
     return new DataIterator() {
@@ -123,7 +146,7 @@ public abstract class DataLibrary extends Library {
         if (hasNext()) {
           throw new IllegalStateException();
         }
-        return tail == Nil.NIL;
+        return tail == NIL;
       }
     };
   }

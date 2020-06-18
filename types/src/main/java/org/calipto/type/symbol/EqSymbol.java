@@ -32,56 +32,38 @@
  */
 package org.calipto.type.symbol;
 
-import org.calipto.type.DataLibrary;
-import org.calipto.type.cons.ConsPair;
-import org.calipto.type.cons.IntTo8;
+import static org.calipto.type.symbol.Symbols.SYSTEM_NAMESPACE;
 
+import org.calipto.type.DataLibrary;
+
+import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
 import com.oracle.truffle.api.library.ExportLibrary;
 import com.oracle.truffle.api.library.ExportMessage;
 
-/*
- * TODO when we have value types, this should be a custom bool
- * value type implementation without an explicit receiverType.
- */
-@ExportLibrary(value = DataLibrary.class, receiverType = Boolean.class)
-public final class Bool implements TruffleObject {
+// TODO value type
+@ExportLibrary(DataLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+final class EqSymbol implements TruffleObject {
+  EqSymbol() {}
+
   @ExportMessage
-  public static boolean isData(Boolean value) {
+  public boolean isData() {
     return true;
   }
 
   @ExportMessage
-  public static boolean isSymbol(Boolean value) {
+  public boolean isSymbol() {
     return true;
   }
 
   @ExportMessage
-  public static String namespace(Boolean value) {
-    return "";
+  public String namespace() {
+    return SYSTEM_NAMESPACE;
   }
 
   @ExportMessage
-  public static String name(Boolean receiver) {
-    return Boolean.toString(receiver);
-  }
-
-  @ExportMessage
-  public static boolean equals(Boolean receiver, Object obj) {
-    if (!(obj instanceof Bool)) {
-      return false;
-    }
-    Boolean that = (Boolean) obj;
-    return receiver == that;
-  }
-
-  @ExportMessage
-  static IntTo8 consOntoNil(Boolean receiver) {
-    return new IntTo8(receiver ? (byte) -1 : (byte) 0, (byte) 1);
-  }
-
-  @ExportMessage
-  static Object consWith(Boolean receiver, Object car) {
-    return new ConsPair(car, receiver);
+  public String name() {
+    return "eq";
   }
 }

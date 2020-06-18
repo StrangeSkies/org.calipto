@@ -1,0 +1,175 @@
+package org.calipto;
+
+import static org.calipto.type.symbol.Symbols.ATOM;
+import static org.calipto.type.symbol.Symbols.CALL;
+import static org.calipto.type.symbol.Symbols.CAR;
+import static org.calipto.type.symbol.Symbols.CDR;
+import static org.calipto.type.symbol.Symbols.CONS;
+import static org.calipto.type.symbol.Symbols.EQ;
+import static org.calipto.type.symbol.Symbols.HANDLE;
+import static org.calipto.type.symbol.Symbols.NIL;
+import static org.calipto.type.symbol.Symbols.PERFORM;
+import static org.calipto.type.symbol.Symbols.QUOTE;
+import static org.calipto.type.symbol.Symbols.SYSTEM_NAMESPACE;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+
+import org.calipto.node.AtomNodeGen;
+import org.calipto.node.CaliptoNode;
+import org.calipto.node.CallNode;
+import org.calipto.node.CarNodeGen;
+import org.calipto.node.CdrNodeGen;
+import org.calipto.node.ConsNodeGen;
+import org.calipto.node.EqNodeGen;
+import org.calipto.node.HandleNodeGen;
+import org.calipto.node.PerformNodeGen;
+import org.calipto.node.QuoteNode;
+import org.calipto.type.DataLibrary;
+import org.calipto.type.symbol.Symbols;
+
+public class CaliptoCompiler {
+  private static final String TYPE_ERROR = "type-error";
+
+  private final Symbols symbols;
+  private final DataLibrary data;
+
+  private final Map<Object, Function<Object, CaliptoNode>> builtins;
+  private final Map<Object, Function<Object, CaliptoNode>> intrinsics;
+
+  public CaliptoCompiler(
+      Symbols symbols,
+      Map<Object, Function<Object, CaliptoNode>> intrinsics) {
+    this.symbols = symbols;
+    this.data = DataLibrary.getFactory().getUncached();
+    this.builtins = Map
+        .of(
+            ATOM,
+            this::atom,
+            CALL,
+            this::call,
+            CAR,
+            this::car,
+            CDR,
+            this::cdr,
+            CONS,
+            this::cons,
+            EQ,
+            this::eq,
+            HANDLE,
+            this::handle,
+            PERFORM,
+            this::perform,
+            QUOTE,
+            this::quote);
+    this.intrinsics = Map.copyOf(intrinsics);
+  }
+
+  public CaliptoNode compile(Object input) {
+    if (!data.isCons(input)) {
+      return invalidSyntax(input, "Unexpected symbol");
+    }
+
+    var car = data.car(input);
+    var cdr = data.cdr(input);
+
+    if (!data.isSymbol(car)) {
+      return invalidSyntax(input, "Unrecognised syntax form");
+    }
+
+    return Optional
+        .ofNullable(builtins.get(car))
+        .or(() -> Optional.ofNullable(intrinsics.get(car)))
+        .map(f -> f.apply(cdr))
+        .orElseGet(() -> invalidSyntax(input, "Unrecognised syntax form"));
+  }
+
+  private CaliptoNode invalidSyntax(Object input, String message) {
+    return new CallNode(
+        PerformNodeGen
+            .create(quote(symbols.internSymbol(SYSTEM_NAMESPACE, TYPE_ERROR))),
+        List.of(quote(message), quote(input)));
+  }
+
+  private CaliptoNode incorrectArgumentCount(Object input) {
+    return invalidSyntax(input, "Argument list size incorrect");
+  }
+
+  private CaliptoNode unaryNode(
+      Object input,
+      UnaryOperator<CaliptoNode> factory) {
+    return naryNode(input, args -> {
+      if (args.size() != 1) {
+        return incorrectArgumentCount(input);
+      }
+      return factory.apply(args.get(0));
+    });
+  }
+
+  private CaliptoNode binaryNode(
+      Object input,
+      BinaryOperator<CaliptoNode> factory) {
+    return naryNode(input, args -> {
+      if (args.size() != 2) {
+        return incorrectArgumentCount(input);
+      }
+      return factory.apply(args.get(0), args.get(1));
+    });
+  }
+
+  private CaliptoNode naryNode(
+      Object input,
+      Function<List<CaliptoNode>, CaliptoNode> factory) {
+    var args = new ArrayList<CaliptoNode>();
+    var tail = input;
+    while (data.isCons(tail)) {
+      args.add(compile(data.car(input)));
+      tail = data.cdr(input);
+    }
+    if (!data.equals(tail, NIL)) {
+      return invalidSyntax(input, "Argument list improperly terminates");
+    }
+    return factory.apply(args);
+  }
+
+  private CaliptoNode atom(Object input) {
+    return unaryNode(input, AtomNodeGen::create);
+  }
+
+  private CaliptoNode call(Object input) {
+    return naryNode(input, CallNode::new);
+  }
+
+  private CaliptoNode car(Object input) {
+    return unaryNode(input, CarNodeGen::create);
+  }
+
+  private CaliptoNode cdr(Object input) {
+    return unaryNode(input, CdrNodeGen::create);
+  }
+
+  private CaliptoNode cons(Object input) {
+    return binaryNode(input, ConsNodeGen::create);
+  }
+
+  private CaliptoNode eq(Object input) {
+    return binaryNode(input, EqNodeGen::create);
+  }
+
+  private CaliptoNode handle(Object input) {
+    return unaryNode(input, HandleNodeGen::create);
+  }
+
+  private CaliptoNode perform(Object input) {
+    return unaryNode(input, PerformNodeGen::create);
+  }
+
+  private CaliptoNode quote(Object input) {
+    return unaryNode(input, QuoteNode::new);
+  }
+}

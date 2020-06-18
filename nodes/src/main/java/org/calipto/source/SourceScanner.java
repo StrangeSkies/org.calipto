@@ -4,7 +4,6 @@ import static java.lang.Character.offsetByCodePoints;
 
 import java.util.function.IntPredicate;
 
-import org.calipto.scanner.Cursor;
 import org.calipto.scanner.Scanner;
 
 import com.oracle.truffle.api.source.Source;
@@ -58,26 +57,21 @@ public class SourceScanner implements Scanner {
   }
 
   @Override
-  public Cursor peekInput() {
-    if (inputPosition.chars() < characters.length()) {
-      return new Cursor();
-    } else {
-      return new Cursor(Character.codePointAt(characters, inputPosition.chars()));
-    }
-  }
-
-  @Override
-  public Cursor advanceInput() {
+  public boolean advanceInputIf(IntPredicate condition) {
     if (inputPosition.chars() < characters.length()) {
       int codePoint = Character.codePointAt(characters, inputPosition.chars());
+      if (!condition.test(codePoint)) {
+        return false;
+      }
       inputPosition = inputPosition.getAdvanced(codePoint);
-      return new Cursor(codePoint);
+      return true;
     }
-    return new Cursor();
+    return false;
   }
 
   @Override
-  public Cursor advanceInputWhile(IntPredicate condition) {
+  public long advanceInputWhile(IntPredicate condition) {
+    long start = inputPosition.codePoints();
     while (inputPosition.chars() < characters.length()) {
       int codePoint = Character.codePointAt(characters, inputPosition.chars());
       if (!condition.test(codePoint)) {
@@ -85,7 +79,8 @@ public class SourceScanner implements Scanner {
       }
       inputPosition = inputPosition.getAdvanced(codePoint);
     }
-    return new Cursor();
+    long end = inputPosition.codePoints();
+    return end - start;
   }
 
   @Override
@@ -99,9 +94,15 @@ public class SourceScanner implements Scanner {
   public void discardBufferTo(long position) {
     checkBufferIndex(position);
 
-    var fullBuffer = characters.subSequence(bufferPosition.chars(), inputPosition.chars());
-    var charCount = offsetByCodePoints(fullBuffer, 0, (int) position - bufferPosition.codePoints());
-    bufferPosition = new SourcePosition(bufferPosition.chars() + charCount, (int) position);
+    var fullBuffer = characters
+        .subSequence(bufferPosition.chars(), inputPosition.chars());
+    var charCount = offsetByCodePoints(
+        fullBuffer,
+        0,
+        (int) position - bufferPosition.codePoints());
+    bufferPosition = new SourcePosition(
+        bufferPosition.chars() + charCount,
+        (int) position);
   }
 
   private void checkBufferIndex(long position) {

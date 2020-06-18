@@ -34,7 +34,6 @@ package org.calipto.node;
 
 import org.calipto.CaliptoLanguage;
 
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -44,9 +43,9 @@ import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.source.SourceSection;
 
 @NodeInfo(language = "Calipto", description = "The root of all execution trees")
-public class CaliptoRootNode extends RootNode {
-  @Children
-  private CaliptoNode[] bodyNodes;
+public class CallTargetNode extends RootNode {
+  @Child
+  private CaliptoNode bodyNode;
 
   private final String name;
 
@@ -55,15 +54,15 @@ public class CaliptoRootNode extends RootNode {
 
   private final SourceSection sourceSection;
 
-  public CaliptoRootNode(
+  public CallTargetNode(
       String name,
       CaliptoLanguage language,
       FrameDescriptor frameDescriptor,
-      CaliptoNode[] bodyNodes,
+      CaliptoNode bodyNode,
       SourceSection sourceSection) {
     super(language, frameDescriptor);
 
-    this.bodyNodes = bodyNodes;
+    this.bodyNode = bodyNode;
     this.sourceSection = sourceSection;
     this.name = name;
   }
@@ -77,17 +76,11 @@ public class CaliptoRootNode extends RootNode {
   @ExplodeLoop
   public Object execute(VirtualFrame frame) {
     assert lookupContextReference(CaliptoLanguage.class).get() != null;
-
-    int last = this.bodyNodes.length - 1;
-    CompilerAsserts.compilationConstant(last);
-    for (int i = 0; i < last; i++) {
-      this.bodyNodes[i].executeGeneric(frame);
-    }
-    return this.bodyNodes[last].executeGeneric(frame);
+    return this.bodyNode.executeGeneric(frame);
   }
 
-  public CaliptoNode[] getBodyNodes() {
-    return bodyNodes.clone();
+  public CaliptoNode getBodyNode() {
+    return bodyNode;
   }
 
   @Override

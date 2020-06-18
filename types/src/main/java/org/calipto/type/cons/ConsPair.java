@@ -82,16 +82,6 @@ public final class ConsPair implements TruffleObject {
   }
 
   @ExportMessage
-  Object consWith(Object car) {
-    return new ConsPair(car, this);
-  }
-
-  @ExportMessage
-  Object consOntoNil() {
-    return new Singleton(this);
-  }
-
-  @ExportMessage
   Object car() {
     return car;
   }

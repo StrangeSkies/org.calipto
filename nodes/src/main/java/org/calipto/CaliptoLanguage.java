@@ -5,14 +5,15 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.calipto.node.CaliptoReplNode;
+import org.calipto.node.ModuleNode;
+import org.calipto.node.ScopingNode;
 import org.calipto.node.builtin.BuiltinNode;
 import org.calipto.node.intrinsic.IntrinsicNode;
-import org.calipto.reader.CaliptoReader;
-import org.calipto.reader.ReadingContext;
+import org.calipto.reader.scanning.ScanningReader;
 import org.calipto.source.CaliptoFileDetector;
 import org.calipto.source.SourceScanner;
 import org.calipto.type.DataLibrary;
+import org.calipto.type.symbol.Symbols;
 
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.CompilerDirectives;
@@ -27,7 +28,6 @@ import com.oracle.truffle.api.instrumentation.ProvidedTags;
 import com.oracle.truffle.api.instrumentation.StandardTags;
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
-import com.oracle.truffle.api.nodes.ExecutableNode;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.source.Source;
 import com.oracle.truffle.api.source.SourceSection;
@@ -54,6 +54,8 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   private final Set<NodeFactory<? extends IntrinsicNode>> intrinsics;
   private final Set<NodeFactory<? extends BuiltinNode>> builtins;
 
+  private final Symbols symbols = new Symbols();
+
   public CaliptoLanguage() {
     this(Set.of(), Set.of());
   }
@@ -66,6 +68,10 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
     counter++;
   }
 
+  public Symbols getSymbols() {
+    return symbols;
+  }
+
   @Override
   protected CaliptoContext createContext(Env env) {
     return new CaliptoContext(this, env, intrinsics, builtins);
@@ -74,16 +80,13 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   @Override
   protected CallTarget parse(ParsingRequest request) throws Exception {
     Source source = request.getSource();
-    CaliptoReader reader = new CaliptoReader(getReadingContext(), new SourceScanner(source));
+    ScanningReader reader = new ScanningReader(
+        symbols,
+        new SourceScanner(source));
 
-    var evalMain = new CaliptoReplNode(this, reader);
+    var evalMain = new ModuleNode(reader);
 
     return Truffle.getRuntime().createCallTarget(evalMain);
-  }
-
-  private ReadingContext getReadingContext() {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   @Override
@@ -121,7 +124,8 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
         return "null";
       } else if (interop.isExecutable(value)) {
         if (value instanceof CaliptoFunction) {
-          return ((CaliptoFunction) value).getNamespace() + "/" + ((CaliptoFunction) value).getName();
+          return ((CaliptoFunction) value).getNamespace() + "/"
+              + ((CaliptoFunction) value).getName();
         } else {
           return "Function";
         }
@@ -137,7 +141,9 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   }
 
   @Override
-  protected SourceSection findSourceLocation(CaliptoContext context, Object value) {
+  protected SourceSection findSourceLocation(
+      CaliptoContext context,
+      Object value) {
     if (value instanceof CaliptoFunction) {
       return ((CaliptoFunction) value).getDeclaredLocation();
     }
@@ -145,19 +151,22 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
   }
 
   @Override
-  public Iterable<Scope> findLocalScopes(CaliptoContext context, Node node, Frame frame) {
-    final CaliptoLexicalScope scope = CaliptoLexicalScope.createScope(node);
-    return new Iterable<Scope>() {
+  public Iterable<Scope> findLocalScopes(
+      CaliptoContext context,
+      Node node,
+      Frame frame) {
+    final ScopingNode scope = ScopingNode.findEnclosingScope(node);
+    return new Iterable<>() {
       @Override
       public Iterator<Scope> iterator() {
-        return new Iterator<Scope>() {
-          private CaliptoLexicalScope previousScope;
-          private CaliptoLexicalScope nextScope = scope;
+        return new Iterator<>() {
+          private ScopingNode previousScope;
+          private ScopingNode nextScope = scope;
 
           @Override
           public boolean hasNext() {
             if (nextScope == null) {
-              nextScope = previousScope.findParent();
+              nextScope = ScopingNode.findEnclosingScope(previousScope);
             }
             return nextScope != null;
           }
@@ -169,7 +178,7 @@ public class CaliptoLanguage extends TruffleLanguage<CaliptoContext> {
             }
             Scope vscope = Scope
                 .newBuilder(nextScope.getName(), nextScope.getVariables(frame))
-                .node(nextScope.getNode())
+                .node(nextScope)
                 .arguments(nextScope.getArguments(frame))
                 .build();
             previousScope = nextScope;

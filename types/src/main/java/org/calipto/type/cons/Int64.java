@@ -90,11 +90,6 @@ public final class Int64 implements TruffleObject {
   }
 
   @ExportMessage
-  static Object consOntoNil(Long receiver) {
-    return new Singleton(receiver);
-  }
-
-  @ExportMessage
   static boolean car(Long receiver) {
     return receiver >> 31 > 0;
   }

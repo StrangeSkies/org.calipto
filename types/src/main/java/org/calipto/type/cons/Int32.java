@@ -89,11 +89,6 @@ public final class Int32 implements TruffleObject {
   }
 
   @ExportMessage
-  static Object consOntoNil(Integer receiver) {
-    return new Singleton(receiver);
-  }
-
-  @ExportMessage
   static boolean car(Integer receiver) {
     return receiver >> 31 > 0;
   }

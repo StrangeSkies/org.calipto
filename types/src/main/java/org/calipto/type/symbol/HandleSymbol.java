@@ -32,11 +32,9 @@
  */
 package org.calipto.type.symbol;
 
-import static org.calipto.type.symbol.Symbols.NIL;
+import static org.calipto.type.symbol.Symbols.SYSTEM_NAMESPACE;
 
 import org.calipto.type.DataLibrary;
-import org.calipto.type.cons.ConsPair;
-import org.calipto.type.cons.Singleton;
 
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.TruffleObject;
@@ -46,26 +44,12 @@ import com.oracle.truffle.api.library.ExportMessage;
 // TODO value type
 @ExportLibrary(DataLibrary.class)
 @ExportLibrary(InteropLibrary.class)
-final class Symbol implements TruffleObject {
-  private final String symbol;
-  private final String namespace;
-  private final String name;
-
-  Symbol(String symbol) {
-    int slash = symbol.indexOf('/');
-    this.symbol = symbol;
-    this.namespace = symbol.substring(0, slash);
-    this.name = symbol.substring(slash + 1);
-  }
+final class HandleSymbol implements TruffleObject {
+  HandleSymbol() {}
 
   @ExportMessage
-  public String namespace() {
-    return namespace;
-  }
-
-  @ExportMessage
-  public String name() {
-    return name;
+  public boolean isData() {
+    return true;
   }
 
   @ExportMessage
@@ -74,32 +58,12 @@ final class Symbol implements TruffleObject {
   }
 
   @ExportMessage
-  public boolean isData() {
-    return true;
+  public String namespace() {
+    return SYSTEM_NAMESPACE;
   }
 
   @ExportMessage
-  Object consOnto(Object cdr) {
-    if (cdr == NIL) {
-      return new Singleton(this);
-    }
-    return null;
-  }
-
-  @ExportMessage
-  Object consWith(Object car) {
-    return new ConsPair(car, this);
-  }
-
-  @Override
-  @ExportMessage
-  public boolean equals(Object obj) {
-    if (obj == null || obj.getClass() != getClass()) {
-      return false;
-    }
-
-    Symbol that = (Symbol) obj;
-
-    return this.symbol == that.symbol;
+  public String name() {
+    return "handle";
   }
 }

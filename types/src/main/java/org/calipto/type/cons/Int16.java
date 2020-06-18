@@ -89,11 +89,6 @@ public final class Int16 implements TruffleObject {
   }
 
   @ExportMessage
-  static Object consOntoNil(Short receiver) {
-    return new Singleton(receiver);
-  }
-
-  @ExportMessage
   static boolean car(Short receiver) {
     return receiver >> 15 > 0;
   }

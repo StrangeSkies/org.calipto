@@ -32,25 +32,49 @@
  */
 package org.calipto.type.symbol;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
+import static org.calipto.type.symbol.Symbols.SYSTEM_NAMESPACE;
 
 import org.calipto.type.DataLibrary;
+import org.calipto.type.cons.Singleton;
 
-public class SymbolIndex {
-  private final DataLibrary symbolLibrary = DataLibrary.getFactory().createDispatched(5);
-  private final Map<String, Symbol> symbols = new IdentityHashMap<>();
+import com.oracle.truffle.api.interop.InteropLibrary;
+import com.oracle.truffle.api.interop.TruffleObject;
+import com.oracle.truffle.api.library.ExportLibrary;
+import com.oracle.truffle.api.library.ExportMessage;
 
-  public Object internSymbol(String string) {
-    string = string.intern();
-    return symbols.computeIfAbsent(string, Symbol::new);
+// TODO value type
+@ExportLibrary(DataLibrary.class)
+@ExportLibrary(InteropLibrary.class)
+public final class NilSymbol implements TruffleObject {
+  NilSymbol() {}
+
+  @ExportMessage
+  public boolean isData() {
+    return true;
   }
 
-  public Object internSymbol(Object symbol) {
-    return internSymbol(symbolLibrary.qualifiedName(symbol));
+  @ExportMessage
+  public boolean isSymbol() {
+    return true;
   }
 
-  public boolean isSymbol(Object symbol) {
-    return symbolLibrary.isSymbol(symbol);
+  @ExportMessage
+  public String namespace() {
+    return SYSTEM_NAMESPACE;
+  }
+
+  @ExportMessage
+  public String name() {
+    return "nil";
+  }
+
+  @ExportMessage
+  Object consWith(Object car) {
+    return new Singleton(car);
+  }
+
+  @ExportMessage
+  boolean isNull() {
+    return true;
   }
 }

@@ -20,31 +20,35 @@ public interface Scanner {
     return inputPosition() - bufferPosition();
   }
 
-  Cursor peekInput();
-
-  Cursor advanceInput();
-
   /**
-   * Increase the input position until the character at that position matchs the
-   * given predicate
+   * Advance the input position while the character at that position matches the
+   * given predicate.
    * 
    * @param condition
-   * @return the cursor at the first input position which doesn't match the
-   *         predicate, which may be the end of input
+   * @return the count by which the input position was advanced
    */
-  Cursor advanceInputWhile(IntPredicate condition);
+  long advanceInputWhile(IntPredicate condition);
 
   /**
-   * Take everything in the interval from the mark position to the given position
-   * and reset the mark position to the given position.
+   * Advance the input position if the character at that position matches the
+   * given predicate.
+   * 
+   * @param condition
+   * @return true if the input position was advanced
+   */
+  boolean advanceInputIf(IntPredicate condition);
+
+  /**
+   * Take everything in the interval from the mark position to the given
+   * position and reset the mark position to the given position.
    * 
    * @return a text object containing the taken interval
    */
   String takeBufferTo(long position);
 
   /**
-   * Take everything in the interval from the mark position to the input position
-   * and reset the mark position to the input position.
+   * Take everything in the interval from the mark position to the input
+   * position and reset the mark position to the input position.
    * 
    * @return a text object containing the taken interval
    */
